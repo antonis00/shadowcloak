@@ -1,49 +1,14 @@
 <!-- <form> -->
-    <div class="container" style="height: calc(100% - 150px);">
+    <div class="container">
         <div class="h-75 row">
           <div class="col-sm-6">
-              <textarea class="form-control" id="user-input"></textarea>
+              <textarea class="form-control" id="user-input" placeholder="Write your text here..." #userText></textarea>
           </div>
           <div class="col-sm-6">
             <div class="notepaper">
               <figure class="quote">
                 <blockquote class="curly-quotes">
-                    The same wind blows on us all.
-                    The difference in arrival is not
-                    the blowing of the wind,
-                    but the set of the sail.
-                    The same wind blows on us all.
-                    The difference in arrival is not
-                    the blowing of the wind,
-                    but the set of the sail.
-                    The same wind blows on us all.
-                    The difference in arrival is not
-                    the blowing of the wind,
-                    but the set of the sail.
-                    The same wind blows on us all.
-                    The difference in arrival is not
-                    the blowing of the wind,
-                    but the set of the sail.
-                    The same wind blows on us all.
-                    The difference in arrival is not
-                    the blowing of the wind,
-                    but the set of the sail.
-                    The same wind blows on us all.
-                    The difference in arrival is not
-                    the blowing of the wind,
-                    but the set of the sail.
-                    The same wind blows on us all.
-                    The difference in arrival is not
-                    the blowing of the wind,
-                    but the set of the sail.
-                    The same wind blows on us all.
-                    The difference in arrival is not
-                    the blowing of the wind,
-                    but the set of the sail.
-                    The same wind blows on us all.
-                    The difference in arrival is not
-                    the blowing of the wind,
-                    but the set of the sail.
+                    {{anonymizedText}}
                 </blockquote>
               </figure>
             </div>
@@ -52,8 +17,8 @@
 
         <div class="row">
           <div class="btn-container">
-            <button class="btn btn-info analyze">Anonymize my Text</button>
-            <button class="btn btn-info copy">Copy to Clipboard</button>
+            <button (click)="copyTextToAnonymousTextArea(userText.value)" class="btn btn-info analyze">Anonymize my Text</button>
+            <button (click)="copyAnonymousTextToClipboard()" class="btn btn-info copy">Copy to Clipboard</button>
           </div>
         </div>
       </div>
