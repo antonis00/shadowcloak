@@ -6,22 +6,19 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./stylometry.component.scss']
 })
 export class StylometryComponent implements OnInit {
-  // tslint:disable-next-line:max-line-length
-  anonymizedText = '';
+
 
   ngOnInit(): void {}
 
-  copyTextToAnonymousTextArea(userText: string) {
-    this.anonymizedText = userText;
-  }
+  performStylometryAnalysis(leftText, rightText) {}
 
-  copyAnonymousTextToClipboard() {
+  copyFirstTextToClipboard(leftText) {
     const selBox = document.createElement('textarea');
     selBox.style.position = 'fixed';
     selBox.style.left = '0';
     selBox.style.top = '0';
     selBox.style.opacity = '0';
-    selBox.value = this.anonymizedText;
+    selBox.value = leftText;
     document.body.appendChild(selBox);
     selBox.focus();
     selBox.select();

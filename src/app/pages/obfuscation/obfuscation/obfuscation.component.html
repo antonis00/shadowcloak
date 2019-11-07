@@ -1,0 +1,25 @@
+<!-- <form> -->
+  <div class="container">
+    <div class="h-75 row">
+      <div class="col-sm-6">
+          <textarea class="form-control" rows="14" id="user-input" placeholder="Write your text here..." #userText></textarea>
+      </div>
+      <div class="col-sm-6">
+        <div class="notepaper">
+          <figure class="quote">
+            <blockquote class="curly-quotes">
+                {{anonymizedText}}
+            </blockquote>
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="btn-container">
+        <button (click)="copyTextToAnonymousTextArea(userText.value)" class="btn btn-info anonymize">Anonymize Text</button>
+        <button (click)="copyAnonymousTextToClipboard()" class="btn btn-info copy">Copy Anonymous Text</button>
+      </div>
+    </div>
+  </div>
+<!-- </form> -->

@@ -1,25 +1,20 @@
 <!-- <form> -->
-    <div class="container">
-        <div class="h-75 row">
-          <div class="col-sm-6">
-              <textarea class="form-control" id="user-input" placeholder="Write your text here..." #userText></textarea>
-          </div>
-          <div class="col-sm-6">
-            <div class="notepaper">
-              <figure class="quote">
-                <blockquote class="curly-quotes">
-                    {{anonymizedText}}
-                </blockquote>
-              </figure>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="btn-container">
-            <button (click)="copyTextToAnonymousTextArea(userText.value)" class="btn btn-info analyze">Anonymize my Text</button>
-            <button (click)="copyAnonymousTextToClipboard()" class="btn btn-info copy">Copy to Clipboard</button>
-          </div>
-        </div>
+  <div class="container">
+    <div class="h-75 row">
+      <div class="col-sm-6">
+          <textarea class="form-control" rows="14" id="user-left-input" placeholder="Write text #1 here..." #userTextLeft></textarea>
       </div>
+      <div class="col-sm-6">
+        <textarea class="form-control" rows="14" id="user-right-input" placeholder="Write text #2 here..." #userTextRight></textarea>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="btn-container">
+        <button (click)="copyFirstTextToClipboard(userTextLeft.value)" class="btn btn-info copy">Copy Text #1</button>
+        <button (click)="performStylometryAnalysis(userTextLeft.value, userTextRight.value)" class="btn btn-info analyze">Stylometry Analysis</button>
+        <button (click)="copyFirstTextToClipboard(userTextRight.value)" class="btn btn-info copy">Copy Text #2</button>
+      </div>
+    </div>
+  </div>
 <!-- </form> -->
