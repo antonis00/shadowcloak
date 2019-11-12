@@ -7,10 +7,10 @@ import { ObfuscationComponent } from './pages/obfuscation/obfuscation/obfuscatio
 
 
 const routes: Routes = [
-  { path: '', component: HomepageComponent },
-  { path: 'homepage', component: HomepageComponent },
-  {path: 'stylometry', component: StylometryComponent},
-  {path: 'obfuscation', component: ObfuscationComponent},
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', component: HomepageComponent },
+  { path: 'stylometry', component: StylometryComponent },
+  { path: 'obfuscation', component: ObfuscationComponent },
   { path: '**', component: PageNotFoundComponent }
 ];
 

@@ -1,7 +1,7 @@
 <!-- <form> -->
   <div class="container">
     <div class="h-75 row">
-      <div class="col-sm-6">
+      <div class="col-sm-6 mb-4  mb-sm-0">
           <textarea class="form-control" rows="14" id="user-left-input" placeholder="Write text #1 here..." #userTextLeft></textarea>
       </div>
       <div class="col-sm-6">
@@ -11,9 +11,9 @@
 
     <div class="row">
       <div class="btn-container">
-        <button (click)="copyFirstTextToClipboard(userTextLeft.value)" class="btn btn-info copy">Copy Text #1</button>
-        <button (click)="performStylometryAnalysis(userTextLeft.value, userTextRight.value)" class="btn btn-info analyze">Stylometry Analysis</button>
-        <button (click)="copyFirstTextToClipboard(userTextRight.value)" class="btn btn-info copy">Copy Text #2</button>
+        <button (click)="copyFirstTextToClipboard(userTextLeft.value)" class="btn btn-info copy">Copy #1</button>
+        <button (click)="performStylometryAnalysis(userTextLeft.value, userTextRight.value)" class="btn btn-info analyze">Stylo Analysis</button>
+        <button (click)="copyFirstTextToClipboard(userTextRight.value)" class="btn btn-info copy">Copy #2</button>
       </div>
     </div>
   </div>
