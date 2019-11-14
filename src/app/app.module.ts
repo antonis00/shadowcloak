@@ -8,6 +8,8 @@ import { StylometryComponent } from './pages/stylometry/stylometry/stylometry.co
 import { PageNotFoundComponent } from './pages/not-found/page-not-found/page-not-found.component';
 import { HomepageComponent } from './pages/homepage/homepage/homepage.component';
 import { ObfuscationComponent } from './pages/obfuscation/obfuscation/obfuscation.component';
+import { ApiService } from './services/api.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
    declarations: [
@@ -20,9 +22,12 @@ import { ObfuscationComponent } from './pages/obfuscation/obfuscation/obfuscatio
    ],
    imports: [
       BrowserModule,
-      AppRoutingModule
+      AppRoutingModule,
+      HttpClientModule
    ],
-   providers: [],
+   providers: [
+     ApiService
+   ],
    bootstrap: [
       AppComponent
    ]
