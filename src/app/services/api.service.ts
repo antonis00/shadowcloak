@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { UserTextDTO } from '../dtos/user-text-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -22,8 +23,11 @@ export class ApiService {
     {headers: this.httpHeaders});
   }
 
-  sendText(text: string): Observable<any> {
-    return this.http.post(this.baseUrl + '/userText/', text,
+  sendText(text: string): Observable<string> {
+    const userText: UserTextDTO = {
+      content : text,
+    };
+    return this.http.post<string>(this.baseUrl + '/userText/', userText,
     {headers: this.httpHeaders});
   }
 }

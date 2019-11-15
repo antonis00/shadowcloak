@@ -2,23 +2,17 @@
   <div class="container">
     <div class="h-75 row">
       <div class="col-sm-6 mb-4 mb-sm-0">
-          <textarea class="form-control" rows="14" id="user-input" placeholder="Write your text here..." #userText></textarea>
+          <textarea class="form-control" rows="14" placeholder="Write your text here..." id="user-input" #userTextArea></textarea>
       </div>
       <div class="col-sm-6">
-        <div class="notepaper">
-          <figure class="quote">
-            <blockquote class="curly-quotes">
-                {{anonymizedText}}
-            </blockquote>
-          </figure>
-        </div>
+        <textarea readonly class="form-control" rows="14" id="anonymized-text" #anonymizedTextArea>{{anonymizedText}}</textarea>
       </div>
     </div>
 
     <div class="row">
       <div class="btn-container">
-        <button (click)="sendTextForAnonmyzation(userText.value);copyTextToAnonymousTextArea(userText.value);" class="btn btn-info anonymize">Anonymize Text</button>
-        <button (click)="copyAnonymousTextToClipboard()" class="btn btn-info copy">Copy Anonymous Text</button>
+        <button (click)="copyTextToAnonymousTextArea(userTextArea.value);sendTextForAnonymization(userTextArea.value)" class="btn anonymize">Anonymize Text</button>
+        <button (click)="copyAnonymousTextToClipboard(anonymizedTextArea)" class="btn copy">Copy Anonymous Text</button>
       </div>
     </div>
   </div>

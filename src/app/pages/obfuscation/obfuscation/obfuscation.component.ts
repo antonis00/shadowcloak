@@ -31,7 +31,7 @@ export class ObfuscationComponent implements OnInit {
   getText = (id: number) => {
     this.apiService.getText(id).subscribe(
       data => {
-        this.anonymizedText = data.content;
+        this.texts = data.content;
       },
       error => {
         console.log(error);
@@ -43,10 +43,9 @@ export class ObfuscationComponent implements OnInit {
     this.anonymizedText = userText;
   }
 
-  sendTextForAnonmyzation(userText: string) {
+  sendTextForAnonymization(userText: string) {
     this.apiService.sendText(userText).subscribe(
       data => {
-        this.texts.push(data);
       },
       error => {
         console.log(error);
@@ -54,17 +53,9 @@ export class ObfuscationComponent implements OnInit {
     );
   }
 
-  copyAnonymousTextToClipboard() {
-    const selBox = document.createElement('textarea');
-    selBox.style.position = 'fixed';
-    selBox.style.left = '0';
-    selBox.style.top = '0';
-    selBox.style.opacity = '0';
-    selBox.value = this.anonymizedText;
-    document.body.appendChild(selBox);
-    selBox.focus();
-    selBox.select();
+  copyAnonymousTextToClipboard(anonymizedTextArea) {
+    anonymizedTextArea.select();
     document.execCommand('copy');
-    document.body.removeChild(selBox);
+    anonymizedTextArea.setSelectionRange(0, 0);
   }
 }
