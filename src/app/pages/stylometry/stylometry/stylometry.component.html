@@ -1,19 +1,19 @@
 <!-- <form> -->
   <div class="container">
     <div class="h-75 row">
-      <div class="col-sm-6 mb-4  mb-sm-0">
-          <textarea class="form-control" rows="14" id="user-left-input" placeholder="Write text #1 here..." #userTextLeft></textarea>
+      <div class="col-sm-6 mb-4 mb-sm-0">
+          <textarea class="form-control" rows="14" placeholder="Write your text here..." id="user-input" #userTextArea></textarea>
       </div>
       <div class="col-sm-6">
-        <textarea class="form-control" rows="14" id="user-right-input" placeholder="Write text #2 here..." #userTextRight></textarea>
+        <textarea readonly class="form-control" rows="14" id="anonymized-text" #anonymizedTextArea>{{anonymizedText}}</textarea>
       </div>
     </div>
 
     <div class="row">
       <div class="btn-container">
-        <button (click)="copyFirstTextToClipboard(userTextLeft.value)" class="btn btn-info copy">Copy #1</button>
-        <button (click)="performStylometryAnalysis(userTextLeft.value, userTextRight.value)" class="btn btn-info analyze">Stylo Analysis</button>
-        <button (click)="copyFirstTextToClipboard(userTextRight.value)" class="btn btn-info copy">Copy #2</button>
+        <button class="btn anonymize">Stylometry Analysis</button>
+        <button (click)="copyTextToAnonymousTextArea(userTextArea.value);sendTextForAnonymization(userTextArea.value)" class="btn anonymize">Anonymize Text</button>
+        <button (click)="copyAnonymousTextToClipboard(anonymizedTextArea)" class="btn copy">Copy Anonymous Text</button>
       </div>
     </div>
   </div>

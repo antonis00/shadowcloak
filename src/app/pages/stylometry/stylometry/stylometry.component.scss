@@ -1,8 +1,3 @@
-.container {
-  height: calc(100% - 150px);
-  min-height: 400px;
-}
-
 .row {
   margin: 40px 0;
 }
@@ -15,4 +10,9 @@
     color: white;
     margin: 0 10px 0 0;
   }
+}
+
+.svg {
+  filter: invert(.5) sepia(1) saturate(3) hue-rotate(190deg);
+  cursor: pointer;
 }

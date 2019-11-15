@@ -4,10 +4,9 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './navbar/navbar.component';
-import { StylometryComponent } from './pages/stylometry/stylometry/stylometry.component';
 import { PageNotFoundComponent } from './pages/not-found/page-not-found/page-not-found.component';
 import { HomepageComponent } from './pages/homepage/homepage/homepage.component';
-import { ObfuscationComponent } from './pages/obfuscation/obfuscation/obfuscation.component';
+import { StylometryComponent } from './pages/stylometry/stylometry/stylometry.component';
 import { ApiService } from './services/api.service';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -16,7 +15,6 @@ import { HttpClientModule } from '@angular/common/http';
       AppComponent,
       NavbarComponent,
       StylometryComponent,
-      ObfuscationComponent,
       PageNotFoundComponent,
       HomepageComponent
    ],
