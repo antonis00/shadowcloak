@@ -9,6 +9,8 @@ import { HomepageComponent } from './pages/homepage/homepage/homepage.component'
 import { StylometryComponent } from './pages/stylometry/stylometry/stylometry.component';
 import { ApiService } from './services/api.service';
 import { HttpClientModule } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 
 @NgModule({
    declarations: [
@@ -21,7 +23,8 @@ import { HttpClientModule } from '@angular/common/http';
    imports: [
       BrowserModule,
       AppRoutingModule,
-      HttpClientModule
+      HttpClientModule,
+      BrowserAnimationsModule
    ],
    providers: [
      ApiService

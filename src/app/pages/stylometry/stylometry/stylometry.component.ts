@@ -1,20 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ApiService } from 'src/app/services/api.service';
+import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animations';
+
 
 @Component({
   selector: 'app-stylometry',
   templateUrl: './stylometry.component.html',
-  styleUrls: ['./stylometry.component.scss']
+  styleUrls: ['./stylometry.component.scss'],
+  animations: [
+    fadeInOnEnterAnimation(),
+    fadeOutOnLeaveAnimation({ duration: 500, delay: 100 })
+  ]
 })
 
 export class StylometryComponent implements OnInit {
 
   anonymizedText = '';
   texts;
-  ngOnInit(): void {}
+  isCopyAlertVisible = false;
+  @ViewChild('anonymizedTextArea', { static: false }) textArea: ElementRef;
 
-  constructor(private apiService: ApiService) {
-  }
+  ngOnInit(): void { }
+
+  constructor(private apiService: ApiService) { }
 
   getTexts = () => {
     this.apiService.getAllTexts().subscribe(
@@ -22,7 +30,7 @@ export class StylometryComponent implements OnInit {
         this.texts = data;
       },
       error => {
-          console.log(error);
+        console.log(error);
       }
     );
   }
@@ -40,21 +48,34 @@ export class StylometryComponent implements OnInit {
 
   copyTextToAnonymousTextArea(userText: string) {
     this.anonymizedText = userText;
+    this.textArea.nativeElement.value = userText;
+    this.copyAnonymousTextToClipboard();
+    this.sendTextForAnonymization(this.textArea.nativeElement.value);
+    this.showCopyAlert();
+
   }
 
   sendTextForAnonymization(userText: string) {
-    this.apiService.sendText(userText).subscribe(
-      data => {
-      },
-      error => {
-        console.log(error);
-      }
-    );
+    // this.apiService.sendText(userText).subscribe(
+    //   data => {
+    //   },
+    //   error => {
+    //     console.log(error);
+    //   }
+    // );
   }
 
-  copyAnonymousTextToClipboard(anonymizedTextArea) {
-    anonymizedTextArea.select();
+  copyAnonymousTextToClipboard() {
+    this.textArea.nativeElement.select();
     document.execCommand('copy');
-    anonymizedTextArea.setSelectionRange(0, 0);
+    this.textArea.nativeElement.setSelectionRange(0, 0);
+    this.textArea.nativeElement.selectionStart = 0;
+  }
+
+  showCopyAlert() {
+    this.isCopyAlertVisible = true;
+    setTimeout(() => {
+      this.isCopyAlertVisible = false;
+    }, 1500);
   }
 }

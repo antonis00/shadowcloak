@@ -1,20 +1,31 @@
 <!-- <form> -->
   <div class="container">
-    <div class="h-75 row">
+    <div class="h-75 row first-row">
       <div class="col-sm-6 mb-4 mb-sm-0">
           <textarea class="form-control" rows="14" placeholder="Write your text here..." id="user-input" #userTextArea></textarea>
       </div>
       <div class="col-sm-6">
-        <textarea readonly class="form-control" rows="14" id="anonymized-text" #anonymizedTextArea>{{anonymizedText}}</textarea>
+        <textarea readonly class="form-control" rows="14" id="anonymized-text" [value]="anonymizedText" #anonymizedTextArea>{{anonymizedText}}</textarea>
+        <div class="alert-container">
+            <div class="alert alert-success inside-textarea" role="alert" *ngIf=isCopyAlertVisible [@fadeInOnEnter] [@fadeOutOnLeave]>
+              <div class="alert-text">
+                Copied to clipboard!
+              </div>
+            </div>
+        </div>
       </div>
     </div>
 
     <div class="row">
       <div class="btn-container">
         <button class="btn anonymize">Stylometry Analysis</button>
-        <button (click)="copyTextToAnonymousTextArea(userTextArea.value);sendTextForAnonymization(userTextArea.value)" class="btn anonymize">Anonymize Text</button>
-        <button (click)="copyAnonymousTextToClipboard(anonymizedTextArea)" class="btn copy">Copy Anonymous Text</button>
+        <button
+          (click)="copyTextToAnonymousTextArea(userTextArea.value);"
+          class="btn anonymize">
+          Anonymize Text
+        </button>
       </div>
     </div>
+
   </div>
 <!-- </form> -->
