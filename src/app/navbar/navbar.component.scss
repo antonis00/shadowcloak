@@ -3,6 +3,8 @@
 
   img {
     margin-left: 10px;
+    margin-right: 10px;
+    // user-drag: none;
     user-select: none;
     -moz-user-select: none;
     -webkit-user-drag: none;
@@ -16,5 +18,8 @@
 
   .nav-item {
     margin: 0 auto;
+    @media (min-width: 768px) {
+      margin: 0 20px 0 0;
+    }
   }
 }
