@@ -9,7 +9,7 @@ import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animati
   styleUrls: ['./stylometry.component.scss'],
   animations: [
     fadeInOnEnterAnimation(),
-    fadeOutOnLeaveAnimation({ duration: 500, delay: 100 })
+    fadeOutOnLeaveAnimation({ duration: 1000, delay: 100 })
   ]
 })
 
