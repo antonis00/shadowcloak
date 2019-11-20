@@ -76,6 +76,6 @@ export class StylometryComponent implements OnInit {
     this.isCopyAlertVisible = true;
     setTimeout(() => {
       this.isCopyAlertVisible = false;
-    }, 1500);
+    }, 1800);
   }
 }

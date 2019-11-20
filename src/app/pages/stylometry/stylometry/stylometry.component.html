@@ -1,31 +1,32 @@
 <!-- <form> -->
-  <div class="container">
-    <div class="h-75 row first-row">
-      <div class="col-sm-6 mb-4 mb-sm-0">
-          <textarea class="form-control" rows="14" placeholder="Write your text here..." id="user-input" #userTextArea></textarea>
-      </div>
-      <div class="col-sm-6">
-        <textarea readonly class="form-control" rows="14" id="anonymized-text" [value]="anonymizedText" #anonymizedTextArea>{{anonymizedText}}</textarea>
-        <div class="alert-container">
-            <div class="alert alert-success inside-textarea" role="alert" *ngIf=isCopyAlertVisible [@fadeInOnEnter] [@fadeOutOnLeave]>
-              <div class="alert-text">
-                Copied to clipboard!
-              </div>
-            </div>
+<div class="container">
+  <div class="h-75 row first-row">
+    <div class="col-md-6 mb-4 mb-md-0">
+      <textarea class="form-control" rows="14" placeholder="Write your text here..." id="user-input"
+        #userTextArea></textarea>
+    </div>
+    <div class="col-md-6">
+      <textarea readonly class="form-control" rows="14" id="anonymized-text" [value]="anonymizedText"
+        #anonymizedTextArea>{{anonymizedText}}</textarea>
+      <div class="alert-container">
+        <div class="alert alert-success inside-textarea" role="alert" *ngIf=isCopyAlertVisible [@fadeInOnEnter]
+          [@fadeOutOnLeave]>
+          <div class="alert-text">
+            Copied to clipboard!
+          </div>
         </div>
       </div>
     </div>
-
-    <div class="row">
-      <div class="btn-container">
-        <button class="btn anonymize">Stylometry Analysis</button>
-        <button
-          (click)="copyTextToAnonymousTextArea(userTextArea.value);"
-          class="btn anonymize">
-          Anonymize Text
-        </button>
-      </div>
-    </div>
-
   </div>
+
+  <div class="h-25 row">
+    <div class="btn-container mb-4">
+      <button class="btn anonymize">Stylometry Analysis</button>
+      <button (click)="copyTextToAnonymousTextArea(userTextArea.value);" class="btn anonymize">
+        &nbsp;Anonymize Text&nbsp;
+      </button>
+    </div>
+  </div>
+
+</div>
 <!-- </form> -->
