@@ -1,32 +1,48 @@
-<!-- <form> -->
 <div class="container">
-  <div class="h-75 row first-row">
-    <div class="col-md-6 mb-4 mb-md-0">
-      <textarea class="form-control" rows="14" placeholder="Write the text you want to anonymize here..." id="user-input"
-        #userTextArea></textarea>
-    </div>
-    <div class="col-md-6">
-      <textarea class="form-control" rows="14" id="anonymized-text" [value]="anonymizedText"
-      placeholder="Write a second text if you want to compare with the first..." #anonymizedTextArea>{{anonymizedText}}</textarea>
-      <div class="alert-container">
-        <div class="alert alert-success inside-textarea" role="alert" *ngIf=isCopyAlertVisible [@fadeInOnEnter]
-          [@fadeOutOnLeave]>
-          <div class="alert-text">
-            Copied to clipboard!
+
+  <form [formGroup]="stylometryForm">
+
+    <div class="h-75 row first-row">
+      <div class="col-md-6 mb-5 mb-md-0">
+
+        <textarea class="form-control" rows="14" placeholder="Write the text you want to anonymize here..."
+          id="textarea-left" formControlName="textAreaLeft" (input)="onLeftTextAreaChange($event.target)" #textAreaLeft>
+        </textarea>
+
+        <small *ngIf="!stylometryForm.get('textAreaLeft').valid && stylometryForm.get('textAreaLeft').touched" class="form-text validation-message">* The above text is required</small>
+
+      </div>
+
+      <div class="col-md-6">
+
+        <textarea class="form-control" rows="14" id="textarea-right" [value]="anonymizedText"
+          placeholder="Write a second text if you want to compare with the first..." formControlName="textAreaRight"  #textAreaRight>
+          {{anonymizedText}}
+        </textarea>
+
+        <div class="alert-container">
+          <div class="alert alert-success inside-textarea" role="alert" *ngIf=isCopyAlertVisible [@fadeInOnEnter] [@fadeOutOnLeave]>
+            <div class="alert-text">
+              Copied to clipboard!
+            </div>
           </div>
         </div>
+
       </div>
     </div>
-  </div>
 
-  <div class="h-25 row">
-    <div class="btn-container mb-4">
-      <button (click)="copyTextToAnonymousTextArea(userTextArea.value);" class="btn anonymize">
-        &nbsp;&nbsp;Anonymize Text&nbsp;&nbsp;
-      </button>
-      <button class="btn anonymize">Compare Texts</button>
+    <div class="h-25 row">
+      <div class="btn-container mb-4">
+        <button type="button" (click)="anonymize();" class="btn anonymize"
+          [disabled]="!stylometryForm.get('textAreaLeft').valid">
+          &nbsp;&nbsp;Anonymize Text&nbsp;&nbsp;
+        </button>
+        <button type="button" (click)="compareStylometricStyle();" class="btn anonymize"
+          [disabled]="!stylometryForm.get('textAreaLeft').valid || stylometryForm.get('textAreaRight').value == ''">Compare Texts
+        </button>
+      </div>
     </div>
-  </div>
+
+  </form>
 
 </div>
-<!-- </form> -->

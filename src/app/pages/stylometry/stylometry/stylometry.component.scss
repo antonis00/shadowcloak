@@ -1,11 +1,17 @@
 .container {
-  min-width: 90%;
+  min-width: 80%;
 
   .first-row {
     margin: 40px 0 0 0;
 
     textarea {
-      min-height: 62vh;
+      min-height: 60vh;
+    }
+
+    .validation-message {
+      color: #b94b29;
+      padding-left: 10px;
+      position: absolute;
     }
 
     .alert-container {
