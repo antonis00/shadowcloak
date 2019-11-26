@@ -43,7 +43,7 @@ export class StylometryComponent implements OnInit {
   sendTextForAnonymization(userText: string): void {
     this.apiService.sendText(userText).subscribe(
       data => {
-        this.populateAnonymousText(data.content);
+        this.populateAnonymousText(data.anonymizedText);
       },
       error => {
         console.log(error);

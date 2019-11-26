@@ -15,7 +15,7 @@ export class ApiService {
 
   sendText(text: string): Observable<UserTextDTO> {
     const userText: UserTextDTO = {
-      content : text,
+      anonymizedText : text,
     };
     return this.http.post<UserTextDTO>(this.baseUrl + '/userText/', userText,
     {headers: this.httpHeaders});

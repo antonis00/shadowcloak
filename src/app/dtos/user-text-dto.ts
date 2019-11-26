@@ -1,3 +1,3 @@
 export interface UserTextDTO {
-  content: string;
+  anonymizedText: string;
 }
