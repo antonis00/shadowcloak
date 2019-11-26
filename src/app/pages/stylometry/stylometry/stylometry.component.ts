@@ -20,11 +20,9 @@ export class StylometryComponent implements OnInit {
   @ViewChild('textAreaRight', { static: false }) textAreaRight: ElementRef;
 
   stylometryForm: FormGroup;
-  anonymizedText = '';
-  comparisonResult = '';
   isCopyAlertVisible = false;
+  comparisonResult = '';
   display = 'none';
-  texts;
 
   ngOnInit(): void {
     this.stylometryForm = new FormGroup({
@@ -37,48 +35,30 @@ export class StylometryComponent implements OnInit {
 
   constructor(private apiService: ApiService) { }
 
-  getTexts = (): void => {
-    this.apiService.getAllTexts().subscribe(
-      data => {
-        this.texts = data;
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  }
-
-  getText = (id: number): void => {
-    this.apiService.getText(id).subscribe(
-      data => {
-        this.texts = data.content;
-      },
-      error => {
-        console.log(error);
-      }
-    );
-  }
-
   anonymize(): void {
-    this.anonymizedText = this.stylometryForm.get('textAreaLeft').value;
-    this.stylometryForm.get('textAreaRight').patchValue(this.anonymizedText);
-    this.sendTextForAnonymization(this.anonymizedText);
+    this.sendTextForAnonymization(this.stylometryForm.get('textAreaLeft').value);
     this.showCopyAlert();
-    this.copyAnonymousTextToClipboard();
   }
 
   sendTextForAnonymization(userText: string): void {
-    // this.apiService.sendText(userText).subscribe(
-    //   data => {
-    //   },
-    //   error => {
-    //     console.log(error);
-    //   }
-    // );
+    this.apiService.sendText(userText).subscribe(
+      data => {
+        this.populateAnonymousText(data.content);
+      },
+      error => {
+        console.log(error);
+      }
+    );
+  }
+
+  populateAnonymousText(text: string): void {
+    this.stylometryForm.get('textAreaRight').patchValue(text);
+    this.copyAnonymousTextToClipboard();
   }
 
   copyAnonymousTextToClipboard(): void {
     const rightTextArea: HTMLInputElement = this.textAreaRight.nativeElement;
+    rightTextArea.focus();
     rightTextArea.select();
     document.execCommand('copy');
     rightTextArea.setSelectionRange(0, 0);
@@ -97,16 +77,16 @@ export class StylometryComponent implements OnInit {
     this.openDialog();
   }
 
-  openDialog() {
+  openDialog(): void {
     this.display = 'block';
   }
 
-  closeDialog() {
+  closeDialog(): void {
     this.display = 'none';
   }
 
   enableRightTextArea(htmlElement: HTMLInputElement): void {
     htmlElement.value.trim() === ''
-    ? this.stylometryForm.get('textAreaRight').disable() : this.stylometryForm.get('textAreaRight').enable();
+      ? this.stylometryForm.get('textAreaRight').disable() : this.stylometryForm.get('textAreaRight').enable();
   }
 }

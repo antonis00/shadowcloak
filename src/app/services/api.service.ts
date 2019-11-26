@@ -13,21 +13,11 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  getAllTexts(): Observable<any> {
-    return this.http.get(this.baseUrl + '/texts/',
-    {headers: this.httpHeaders});
-  }
-
-  getText(id: number): Observable<any> {
-    return this.http.get(this.baseUrl + '/texts/' + id + '/',
-    {headers: this.httpHeaders});
-  }
-
-  sendText(text: string): Observable<string> {
+  sendText(text: string): Observable<UserTextDTO> {
     const userText: UserTextDTO = {
       content : text,
     };
-    return this.http.post<string>(this.baseUrl + '/userText/', userText,
+    return this.http.post<UserTextDTO>(this.baseUrl + '/userText/', userText,
     {headers: this.httpHeaders});
   }
 }
