@@ -18,9 +18,12 @@ import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animati
 export class StylometryComponent implements OnInit {
   @ViewChild('textAreaLeft', { static: false }) textAreaLeft: ElementRef;
   @ViewChild('textAreaRight', { static: false }) textAreaRight: ElementRef;
+
   stylometryForm: FormGroup;
-  isCopyAlertVisible = false;
   anonymizedText = '';
+  comparisonResult = '';
+  isCopyAlertVisible = false;
+  display = 'none';
   texts;
 
   ngOnInit(): void {
@@ -76,10 +79,10 @@ export class StylometryComponent implements OnInit {
 
   copyAnonymousTextToClipboard(): void {
     const rightTextArea: HTMLInputElement = this.textAreaRight.nativeElement;
-    rightTextArea.focus();
     rightTextArea.select();
     document.execCommand('copy');
     rightTextArea.setSelectionRange(0, 0);
+    rightTextArea.blur();
   }
 
   showCopyAlert(): void {
@@ -89,19 +92,21 @@ export class StylometryComponent implements OnInit {
     }, 1800);
   }
 
-  compareStylometricStyle(): string {
-    const stylometricAnalysisResult = ' = ';
-    alert(this.stylometryForm.get('textAreaLeft').value
-    + '' + stylometricAnalysisResult + ''
-    + this.stylometryForm.get('textAreaRight').value);
-    return stylometricAnalysisResult;
+  compareStylometricStyle(): void {
+    this.comparisonResult = 'Similarity = 100%';
+    this.openDialog();
   }
 
-  onLeftTextAreaChange(htmlElement: HTMLInputElement): void {
-    if (htmlElement.value.trim() === '') {
-      this.stylometryForm.get('textAreaRight').disable();
-    } else {
-      this.stylometryForm.get('textAreaRight').enable();
-    }
+  openDialog() {
+    this.display = 'block';
+  }
+
+  closeDialog() {
+    this.display = 'none';
+  }
+
+  enableRightTextArea(htmlElement: HTMLInputElement): void {
+    htmlElement.value.trim() === ''
+    ? this.stylometryForm.get('textAreaRight').disable() : this.stylometryForm.get('textAreaRight').enable();
   }
 }

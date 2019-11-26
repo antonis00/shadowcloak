@@ -46,3 +46,31 @@
     }
   }
 }
+
+.backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+}
+
+.modal-dialog {
+  top: 20%;
+}
+
+.modal-header {
+  background-color: #6d9fc7;
+  color: white;
+  padding: .6rem .6rem .7rem .8rem;
+}
+
+.modal-header .close {
+  position: absolute;
+  right: 20px;
+}
+
+.modal-content {
+  border-radius: .4rem;
+}

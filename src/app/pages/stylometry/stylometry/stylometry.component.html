@@ -6,22 +6,25 @@
       <div class="col-md-6 mb-5 mb-md-0">
 
         <textarea class="form-control" rows="14" placeholder="Write the text you want to anonymize here..."
-          id="textarea-left" formControlName="textAreaLeft" (input)="onLeftTextAreaChange($event.target)" #textAreaLeft>
+          id="textarea-left" formControlName="textAreaLeft" (input)="enableRightTextArea($event.target)" #textAreaLeft>
         </textarea>
 
-        <small *ngIf="!stylometryForm.get('textAreaLeft').valid && stylometryForm.get('textAreaLeft').touched" class="form-text validation-message">* The above text is required</small>
+        <small *ngIf="!stylometryForm.get('textAreaLeft').valid && stylometryForm.get('textAreaLeft').touched"
+          class="form-text validation-message">* The above text is required</small>
 
       </div>
 
       <div class="col-md-6">
 
         <textarea class="form-control" rows="14" id="textarea-right" [value]="anonymizedText"
-          placeholder="Write a second text if you want to compare with the first..." formControlName="textAreaRight"  #textAreaRight>
+          placeholder="Write a second text if you want to compare with the first..." formControlName="textAreaRight"
+          #textAreaRight>
           {{anonymizedText}}
         </textarea>
 
         <div class="alert-container">
-          <div class="alert alert-success inside-textarea" role="alert" *ngIf=isCopyAlertVisible [@fadeInOnEnter] [@fadeOutOnLeave]>
+          <div class="alert alert-success inside-textarea" role="alert" *ngIf=isCopyAlertVisible [@fadeInOnEnter]
+            [@fadeOutOnLeave]>
             <div class="alert-text">
               Copied to clipboard!
             </div>
@@ -38,11 +41,31 @@
           &nbsp;&nbsp;Anonymize Text&nbsp;&nbsp;
         </button>
         <button type="button" (click)="compareStylometricStyle();" class="btn anonymize"
-          [disabled]="!stylometryForm.get('textAreaLeft').valid || stylometryForm.get('textAreaRight').value == ''">Compare Texts
+          [disabled]="!stylometryForm.get('textAreaLeft').valid || stylometryForm.get('textAreaRight').value == ''">Compare
+          Texts
         </button>
       </div>
     </div>
 
   </form>
+
+  <div class="backdrop" [ngStyle]="{'display':display}"></div>
+  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':display}">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" aria-label="Close" (click)="closeDialog()"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Stylometry analysis</h4>
+        </div>
+        <div class="modal-body">
+          <p>{{ comparisonResult }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" (click)="closeDialog()">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal !-->
 
 </div>
