@@ -16,8 +16,8 @@ import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animati
 })
 
 export class StylometryComponent implements OnInit {
-  @ViewChild('textAreaLeft', { static: false }) textAreaLeft: ElementRef;
-  @ViewChild('textAreaRight', { static: false }) textAreaRight: ElementRef;
+  @ViewChild('textAreaLeft', { static: false}) textAreaLeft: ElementRef;
+  @ViewChild('textAreaRight', { static: false}) textAreaRight: ElementRef;
 
   stylometryForm: FormGroup;
   isCopyAlertVisible = false;
