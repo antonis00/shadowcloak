@@ -1,5 +1,6 @@
 # ******************************************  Mendenhall’s Characteristic Curves of Composition  ********************************************
 from stylometry.models import Author
+from rest_framework.exceptions import APIException
 
 import nltk
 import matplotlib
@@ -53,7 +54,7 @@ def john_burrows_delta_method(texts_by_author, anonymous_text):
         whole_corpus += word_tokens_by_author[author]
     
     # Get a frequency distribution
-    whole_corpus_freq_dist = list(nltk.FreqDist(whole_corpus).most_common(500))
+    whole_corpus_freq_dist = list(nltk.FreqDist(whole_corpus).most_common(50))
     whole_corpus_freq_dist[ :10 ]  #assssssssssssssssssssssssssssssssssssssssssssssssssssssssssssassssssssssssssssssssssssssssssssss
 
     # The main data structure that holds features of the whole corpus
@@ -137,7 +138,7 @@ def john_burrows_delta_method(texts_by_author, anonymous_text):
 
 
     # Calculate Delta score between each author and unknown text z-scores
-    print("\n\n")
+    delta_score_by_author = {}    
     for author in texts_by_author:
         delta = 0
         for feature in features:
@@ -145,6 +146,10 @@ def john_burrows_delta_method(texts_by_author, anonymous_text):
                                 feature_zscores[author][feature]))
         delta /= len(features)
         author = Author.objects.filter(pk=author).values().first()
+        delta_score_by_author[author.get("pseudonym")] = delta
         print( "Delta score for candidate", author.get("pseudonym"), "is", delta )
 
-    return 0
+    # Find author name with the lowest Delta score
+    probable_author = min(delta_score_by_author, key=delta_score_by_author.get)
+    print("Most probable author is: " + probable_author)
+    raise APIException("Most probable author is: " + probable_author)
