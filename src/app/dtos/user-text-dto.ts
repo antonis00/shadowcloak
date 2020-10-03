@@ -1,3 +1,4 @@
-export interface UserTextDTO {
-  anonymizedText: string;
+export interface AnonymousTextDTO {
+  body: string;
+  group: number;
 }

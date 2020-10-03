@@ -35,15 +35,15 @@ export class StylometryComponent implements OnInit {
 
   constructor(private apiService: ApiService) { }
 
-  anonymize(): void {
-    this.sendTextForAnonymization(this.stylometryForm.get('textAreaLeft').value);
+  findAuthor(): void {
+    this.sendTextForAnalysis(this.stylometryForm.get('textAreaLeft').value, 1);
     this.showCopyAlert();
   }
 
-  sendTextForAnonymization(userText: string): void {
-    this.apiService.sendText(userText).subscribe(
+  sendTextForAnalysis(text: string, group: number): void {
+    this.apiService.sendText(text, group).subscribe(
       data => {
-        this.populateAnonymousText(data.anonymizedText);
+        this.populateAnonymousText(data.body);
       },
       error => {
         console.log(error);

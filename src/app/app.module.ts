@@ -12,6 +12,8 @@ import { HomepageComponent } from './pages/homepage/homepage/homepage.component'
 import { StylometryComponent } from './pages/stylometry/stylometry/stylometry.component';
 
 import { ApiService } from './services/api.service';
+import { FindAuthorComponent } from './pages/find-author/find-author/find-author.component';
+import { ObfuscateComponent } from './pages/obfuscate/obfuscate/obfuscate.component';
 
 @NgModule({
    declarations: [
@@ -19,7 +21,9 @@ import { ApiService } from './services/api.service';
       NavbarComponent,
       StylometryComponent,
       PageNotFoundComponent,
-      HomepageComponent
+      HomepageComponent,
+      FindAuthorComponent,
+      ObfuscateComponent
    ],
    imports: [
       BrowserModule,
