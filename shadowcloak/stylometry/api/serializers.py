@@ -29,6 +29,11 @@ class GroupSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
 
+class FindAuthor(serializers.Serializer):
+    group = serializers.IntegerField()
+    body = serializers.CharField ()
+
+
 # class AuthorAvatarSerializer(serializers.ModelSerializer):
     
 #     class Meta:

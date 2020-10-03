@@ -151,5 +151,5 @@ def john_burrows_delta_method(texts_by_author, anonymous_text):
 
     # Find author name with the lowest Delta score
     probable_author = min(delta_score_by_author, key=delta_score_by_author.get)
-    print("Most probable author is: " + probable_author)
-    raise APIException("Most probable author is: " + probable_author)
+    result = "Most probable author is: " + probable_author
+    return result
