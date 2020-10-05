@@ -2,17 +2,12 @@
   <h3>User Registration</h3>
   <form [formGroup]="registerForm" (ngSubmit)="onFormSubmit()">
     <div class="form-group">
-      <label for="firstName">First Name</label>
-      <input type="text" formControlName="firstName" class="form-control"
-        [ngClass]="{ 'is-invalid': submitted && fval.firstName.errors }" placeholder="Enter First Name here" />
-      <div *ngIf="submitted && fval.firstName.errors" class="invalid-feedback">
-        <div *ngIf="fval.firstName.errors.required">First Name is required</div>
+      <label for="username">Username</label>
+      <input type="text" formControlName="username" class="form-control"
+        [ngClass]="{ 'is-invalid': submitted && fval.username.errors }" placeholder="Enter Username here" />
+      <div *ngIf="submitted && fval.username.errors" class="invalid-feedback">
+        <div *ngIf="fval.username.errors.required">Username is required</div>
       </div>
-    </div>
-
-    <div class="form-group">
-      <label for="lastName">Last Name</label>
-      <input type="text" formControlName="lastName" class="form-control" placeholder="Enter Last Name here" />
     </div>
     <div class="form-group">
       <label for="email">Email</label>
@@ -23,22 +18,25 @@
         <div *ngIf="fval.email.errors.email">Enter valid email address</div>
       </div>
     </div>
-    <div class="form-group">
-      <label for="email">Phone</label>
-      <input type="text" formControlName="phone" class="form-control"
-        [ngClass]="{ 'is-invalid': submitted && fval.phone.errors }" placeholder="Enter Phone here" />
-      <div *ngIf="submitted && fval.phone.errors" class="invalid-feedback">
-        <div *ngIf="fval.phone.errors.required">Phone is required</div>
-      </div>
-    </div>
 
     <div class="form-group">
       <label for="email">Password</label>
-      <input type="password" formControlName="password" class="form-control"
-        [ngClass]="{ 'is-invalid': submitted && fval.password.errors }" placeholder="Enter Password here" />
-      <div *ngIf="submitted && fval.password.errors" class="invalid-feedback">
-        <div *ngIf="fval.password.errors.required">Password is required</div>
-        <div *ngIf="fval.password.errors.minlength">Password must be at least 6 characters</div>
+      <input type="password" formControlName="password1" class="form-control"
+        [ngClass]="{ 'is-invalid': submitted && fval.password1.errors }" placeholder="Enter Password here" />
+      <div *ngIf="submitted && fval.password1.errors" class="invalid-feedback">
+        <div *ngIf="fval.password1.errors.required">Password is required</div>
+        <div *ngIf="fval.password1.errors.minlength">Password must be at least 4 characters</div>
+      </div>
+
+    </div>
+
+    <div class="form-group">
+      <label for="email">Repeat Password</label>
+      <input type="password" formControlName="password2" class="form-control"
+        [ngClass]="{ 'is-invalid': submitted && fval.password2.errors }" placeholder="Repeat Password here" />
+      <div *ngIf="submitted && fval.password2.errors" class="invalid-feedback">
+        <div *ngIf="fval.password2.errors.required">Password repetetion is required</div>
+        <div *ngIf="fval.password2.errors.minlength">Password must be at least 4 characters</div>
       </div>
 
     </div>
