@@ -12,9 +12,9 @@ import { RegisterComponent } from './pages/register/register/register.component'
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: HomepageComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'home', component: HomepageComponent, canActivate: [AuthGuard] },
   { path: 'documents', component: StylometryComponent, canActivate: [AuthGuard] },
   { path: 'find-author', component: FindAuthorComponent, canActivate: [AuthGuard] },
   { path: 'obfuscate', component: ObfuscateComponent, canActivate: [AuthGuard] },

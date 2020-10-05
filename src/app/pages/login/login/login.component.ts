@@ -33,7 +33,7 @@ export class LoginComponent implements OnInit {
 
   }
 
-  // for accessing to form fields
+  // for accessing form fields
   get fval() { return this.loginForm.controls; }
 
   onFormSubmit() {

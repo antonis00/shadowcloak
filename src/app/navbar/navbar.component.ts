@@ -5,6 +5,7 @@ import { AuthenticationService } from '../services';
 import { User } from '../models';
 // @ts-ignore
 import jwt_decode from 'jwt-decode';
+import { AuthGuard } from '../helpers/auth.guard';
 
 @Component({
   selector: 'app-navbar',
@@ -17,7 +18,8 @@ export class NavbarComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private authenticationService: AuthenticationService
+    private authenticationService: AuthenticationService,
+    public authGuard: AuthGuard
   ) {
     this.authenticationService.currentUser.subscribe(x => this.currentUser = x);
     this.currentUser = localStorage.getItem('stylometryToken') == null ?

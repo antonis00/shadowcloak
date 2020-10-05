@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 // @ts-ignore
 import jwt_decode from 'jwt-decode';
 
@@ -31,15 +31,22 @@ export class AuthenticationService {
       password: pass
     };
 
-    return this.http.post<any>('token/', credentials)
-      .pipe(map(tokens => {
+    return this.http.post<any>('token/', credentials).pipe(
+      mergeMap(tokens => {
         if (tokens.access && tokens.refresh) {
-          localStorage.setItem('stylometryUserToken', tokens.access);
-          user = jwt_decode(tokens.access).name;
-          this.currentUserSubject.next(user);
+          return this.http.post<any>('token/refresh/', { refresh : tokens.refresh})
+            .pipe(
+              map(token => {
+                if (tokens.access) {
+                  localStorage.setItem('stylometryUserToken', tokens.access);
+                  user = jwt_decode(tokens.access).name;
+                  this.currentUserSubject.next(user);
+                }
+              }));
         }
         return user;
-      }));
+      })
+    );
   }
 
   logout() {
