@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from stylometry.models import Author, Document, Group
 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 
 class AuthorSerializer(serializers.ModelSerializer):
 
@@ -32,6 +34,18 @@ class GroupSerializer(serializers.ModelSerializer):
 class FindAuthor(serializers.Serializer):
     group = serializers.IntegerField()
     body = serializers.CharField ()
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token['name'] = user.username
+        # ...
+
+        return token
 
 
 # class AuthorAvatarSerializer(serializers.ModelSerializer):

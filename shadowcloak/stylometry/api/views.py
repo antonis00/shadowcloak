@@ -9,12 +9,12 @@ from rest_framework import mixins
 from rest_framework import views
 from stylometry.models import Author, Document, Group
 from stylometry.api.permissions import IsOwnerOrReadOnly
-from stylometry.api.serializers import AuthorSerializer, DocumentSerializer, GroupSerializer, FindAuthor
+from stylometry.api.serializers import AuthorSerializer, DocumentSerializer, GroupSerializer, FindAuthor, MyTokenObtainPairSerializer 
 
 from stylometry.api.services.retrieve_documents import create_dictionary
 from stylometry.api.services.analysis import mendenhall_characteristic_curves_of_composition, john_burrows_delta_method
 
-
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 class AuthorViewset(mixins.UpdateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Author.objects.all()
@@ -68,6 +68,7 @@ class GroupViewset(ModelViewSet):
 
 
 class FindAuthorView(views.APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
         user = self.request.user
@@ -78,6 +79,10 @@ class FindAuthorView(views.APIView):
         result = john_burrows_delta_method(documents_dictionary, body)
         return Response(result)
 
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 # class AvatarUpdateView(generics.UpdateAPIView):
 #     serializer_class = AuthorAvatarSerializer
