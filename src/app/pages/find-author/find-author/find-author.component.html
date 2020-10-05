@@ -3,45 +3,22 @@
   <form [formGroup]="stylometryForm">
 
     <div class="h-75 row first-row">
-      <div class="col-md-6 mb-5 mb-md-0">
+      <div class="col-md-12 mb-12 mb-md-0">
 
-        <textarea class="form-control" rows="14" placeholder="Write the text you want to anonymize here..."
-          id="textarea-left" formControlName="textAreaLeft" (input)="enableRightTextArea($event.target)" #textAreaLeft>
+        <textarea class="form-control" rows="14" placeholder="Paste the disputed text here..."
+          id="textarea-left" formControlName="textAreaLeft" #textAreaLeft>
         </textarea>
 
         <small *ngIf="!stylometryForm.get('textAreaLeft').valid && stylometryForm.get('textAreaLeft').touched"
           class="form-text validation-message">* The above text is required</small>
 
       </div>
-
-      <div class="col-md-6">
-
-        <textarea class="form-control" rows="14" id="textarea-right" [value]=""
-          placeholder="Write a second text if you want to compare with the first..." formControlName="textAreaRight"
-          #textAreaRight>
-        </textarea>
-
-        <div class="alert-container">
-          <div class="alert alert-success inside-textarea" role="alert" *ngIf=isCopyAlertVisible [@fadeInOnEnter]
-            [@fadeOutOnLeave]>
-            <div class="alert-text">
-              Copied to clipboard!
-            </div>
-          </div>
-        </div>
-
-      </div>
     </div>
 
-    <div class="h-25 row">
+    <div class="h-35 mt-5 row">
       <div class="btn-container mb-4">
         <button type="button" (click)="findAuthor()" class="btn anonymize"
-          [disabled]="!stylometryForm.get('textAreaLeft').valid">
-          &nbsp;&nbsp;Analyse Text&nbsp;&nbsp;
-        </button>
-        <button type="button" (click)="compareStylometricStyle();" class="btn anonymize"
-          [disabled]="!stylometryForm.get('textAreaLeft').valid || stylometryForm.get('textAreaRight').value == ''">Compare
-          Texts
+          [disabled]="!stylometryForm.get('textAreaLeft').valid">Find Author
         </button>
       </div>
     </div>
@@ -55,7 +32,7 @@
         <div class="modal-header">
           <button type="button" class="close" aria-label="Close" (click)="closeDialog()"><span
               aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Stylometry analysis</h4>
+          <h4 class="modal-title">Most Probable Author</h4>
         </div>
         <div class="modal-body">
           <p>{{ comparisonResult }}</p>

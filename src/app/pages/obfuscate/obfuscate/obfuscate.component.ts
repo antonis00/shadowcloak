@@ -43,7 +43,7 @@ export class ObfuscateComponent implements OnInit {
         this.populateAnonymousText(data.body);
       },
       error => {
-        console.log(error);
+        console.log('obfuscate component:' + error);
       }
     );
   }

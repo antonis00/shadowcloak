@@ -24,53 +24,30 @@ export class FindAuthorComponent implements OnInit {
   ngOnInit(): void {
     this.stylometryForm = new FormGroup({
       // tslint:disable-next-line:object-literal-key-quotes
-      'textAreaLeft': new FormControl(null, Validators.required),
-      // tslint:disable-next-line:object-literal-key-quotes
-      'textAreaRight': new FormControl({ value: '', disabled: true })
+      'textAreaLeft': new FormControl(null, Validators.required)
     });
   }
 
   constructor(private apiService: ApiService) { }
 
   findAuthor(): void {
-    this.sendTextForAnalysis(this.stylometryForm.get('textAreaLeft').value, 1);
-    this.showCopyAlert();
+    this.sendTextForAttribution(this.stylometryForm.get('textAreaLeft').value, 3);
   }
 
-  sendTextForAnalysis(text: string, group: number): void {
+  sendTextForAttribution(text: string, group: number): void {
     this.apiService.sendText(text, group).subscribe(
       data => {
-        this.populateAnonymousText(data.body);
+        this.showResultAuthorDialog(data);
       },
       error => {
-        console.log(error);
+        console.log('find author: ' + error);
       }
     );
   }
 
-  populateAnonymousText(text: string): void {
-    this.stylometryForm.get('textAreaRight').patchValue(text);
-    this.copyAnonymousTextToClipboard();
-  }
+  showResultAuthorDialog(author: string): void {
 
-  copyAnonymousTextToClipboard(): void {
-    const rightTextArea: HTMLInputElement = this.textAreaRight.nativeElement;
-    rightTextArea.focus();
-    rightTextArea.select();
-    document.execCommand('copy');
-    rightTextArea.setSelectionRange(0, 0);
-    rightTextArea.blur();
-  }
-
-  showCopyAlert(): void {
-    this.isCopyAlertVisible = true;
-    setTimeout(() => {
-      this.isCopyAlertVisible = false;
-    }, 1800);
-  }
-
-  compareStylometricStyle(): void {
-    this.comparisonResult = 'Similarity = 100%';
+    this.comparisonResult = author;
     this.openDialog();
   }
 
@@ -80,10 +57,5 @@ export class FindAuthorComponent implements OnInit {
 
   closeDialog(): void {
     this.display = 'none';
-  }
-
-  enableRightTextArea(htmlElement: HTMLInputElement): void {
-    htmlElement.value.trim() === ''
-      ? this.stylometryForm.get('textAreaRight').disable() : this.stylometryForm.get('textAreaRight').enable();
   }
 }

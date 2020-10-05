@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
@@ -10,10 +10,14 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { PageNotFoundComponent } from './pages/not-found/page-not-found/page-not-found.component';
 import { HomepageComponent } from './pages/homepage/homepage/homepage.component';
 import { StylometryComponent } from './pages/stylometry/stylometry/stylometry.component';
-
-import { ApiService } from './services/api.service';
 import { FindAuthorComponent } from './pages/find-author/find-author/find-author.component';
 import { ObfuscateComponent } from './pages/obfuscate/obfuscate/obfuscate.component';
+import { RegisterComponent } from './pages/register/register/register.component';
+import { LoginComponent } from './pages/login/login/login.component';
+
+import { InterceptorService } from './services/interceptor.service';
+import { ApiService } from './services/api.service';
+import { UserService } from './services/user.service';
 
 @NgModule({
    declarations: [
@@ -23,17 +27,20 @@ import { ObfuscateComponent } from './pages/obfuscate/obfuscate/obfuscate.compon
       PageNotFoundComponent,
       HomepageComponent,
       FindAuthorComponent,
-      ObfuscateComponent
+      ObfuscateComponent,
+      RegisterComponent,
+      LoginComponent
    ],
    imports: [
       BrowserModule,
       AppRoutingModule,
       HttpClientModule,
       ReactiveFormsModule,
-      BrowserAnimationsModule
+      BrowserAnimationsModule,
    ],
    providers: [
-     ApiService
+     ApiService,
+     UserService, { provide: HTTP_INTERCEPTORS, useClass: InterceptorService, multi: true }
    ],
    bootstrap: [
       AppComponent

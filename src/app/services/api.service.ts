@@ -1,24 +1,24 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AnonymousTextDTO } from '../dtos/user-text-dto';
+import { AnonymousTextDTO } from '../dtos/anonymous-text-dto';
+
+import { AuthenticationService } from '../services';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
 
-  baseUrl = 'http://127.0.0.1:8000/api';
-  httpHeaders = new HttpHeaders({'Content-type': 'application/json'});
+  constructor(
+    private http: HttpClient,
+    ) {}
 
-  constructor(private http: HttpClient) {}
-
-  sendText(text: string, documentGroup: number): Observable<AnonymousTextDTO> {
+  sendText(text: string, documentGroup: number): Observable<any> {
     const anonymousText: AnonymousTextDTO = {
-      body : text,
-      group : documentGroup
+      group : documentGroup,
+      body : text
     };
-    return this.http.post<AnonymousTextDTO>(this.baseUrl + '/findauthor/', anonymousText,
-    {headers: this.httpHeaders});
+    return this.http.post<AnonymousTextDTO>('findauthor/', anonymousText);
   }
 }

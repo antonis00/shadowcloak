@@ -46,7 +46,7 @@ export class StylometryComponent implements OnInit {
         this.populateAnonymousText(data.body);
       },
       error => {
-        console.log(error);
+        console.log('stylometry component: ' + error);
       }
     );
   }
