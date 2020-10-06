@@ -10,6 +10,7 @@ from rest_framework import views
 from stylometry.models import Author, Document, Group
 from stylometry.api.permissions import IsOwnerOrReadOnly
 from stylometry.api.serializers import AuthorSerializer, DocumentSerializer, GroupSerializer, FindAuthor, MyTokenObtainPairSerializer 
+from rest_auth.registration.views import RegisterView
 
 from stylometry.api.services.retrieve_documents import create_dictionary
 from stylometry.api.services.analysis import mendenhall_characteristic_curves_of_composition, john_burrows_delta_method
@@ -24,7 +25,8 @@ class AuthorViewset(mixins.UpdateModelMixin, mixins.ListModelMixin, mixins.Retri
 
     def perform_create(self, serializer):
         user = self.request.user
-        serializer.save(user=user)
+        name = self.request.data.get('name').lower()
+        serializer.save(user=user, name=name)
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
@@ -48,9 +50,18 @@ class DocumentViewset(ModelViewSet):
 
 
     def get_queryset(self):
-        author = self.request.query_params.get('author', None)
+        author = self.request.query_params.get('author', None).lower()
+        group = self.request.query_params.get('group', None).lower()
         if author is not None:
-            return self.queryset.filter(author__pseudonym=author)
+            if group is not None:
+                return self.queryset.filter(author__user__username=self.request.user, author__name=author, group__name=group)
+            else:
+                return self.queryset.filter(author__user__username=self.request.user, author__name=author)
+        else:
+            if group is not None:
+                return self.queryset.filter(author__user__username=self.request.user, group__name=group)
+            else:
+                return self.queryset.filter(author__user__username=self.request.user)
         return self.queryset.filter(author__user__username=self.request.user)
         
     
@@ -61,7 +72,8 @@ class GroupViewset(ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
-        serializer.save(user=user)
+        name = self.request.data.get('name').lower()
+        serializer.save(user=user, name=name)
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
@@ -69,7 +81,7 @@ class GroupViewset(ModelViewSet):
 
 class FindAuthorView(views.APIView):
     permission_classes = [IsAuthenticated]
-
+    
     def post(self, request, format=None):
         user = self.request.user
         group = self.request.data.get('group')
@@ -83,6 +95,16 @@ class FindAuthorView(views.APIView):
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+
+
+class CustomRegisterView(RegisterView):
+    authentication_classes = []
+    permission_classes = []
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        return response
+
 
 # class AvatarUpdateView(generics.UpdateAPIView):
 #     serializer_class = AuthorAvatarSerializer

@@ -146,8 +146,8 @@ def john_burrows_delta_method(texts_by_author, anonymous_text):
                                 feature_zscores[author][feature]))
         delta /= len(features)
         author = Author.objects.filter(pk=author).values().first()
-        delta_score_by_author[author.get("pseudonym")] = delta
-        print( "Delta score for candidate", author.get("pseudonym"), "is", delta )
+        delta_score_by_author[author.get("name")] = delta
+        print( "Delta score for candidate", author.get("name"), "is", delta )
 
     # Find author name with the lowest Delta score
     probable_author = min(delta_score_by_author, key=delta_score_by_author.get)
