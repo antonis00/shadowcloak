@@ -36,7 +36,6 @@ class DocumentViewset(ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
     permission_classes = [IsAuthenticated]
-    ordering = ['author']
 
 
     def perform_create(self, serializer):
@@ -53,6 +52,7 @@ class DocumentViewset(ModelViewSet):
     def get_queryset(self):
         author = self.request.query_params.get('author', None)
         group = self.request.query_params.get('group', None)
+
         if author is not None:
             if group is not None:
                 return self.queryset.filter(author__user__username=self.request.user, author__name=author.lower(), group__name=group.lower()).order_by('author')

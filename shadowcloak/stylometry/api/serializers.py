@@ -18,6 +18,7 @@ def create(self, validated_data):
 
 class DocumentSerializer(serializers.ModelSerializer):
     active = serializers.BooleanField(initial=True)
+    author_name = serializers.StringRelatedField(read_only=True, source='author')
 
     class Meta:
         model = Document
