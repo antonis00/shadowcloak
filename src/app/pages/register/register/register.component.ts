@@ -4,21 +4,29 @@ import { Router } from '@angular/router';
 
 import { UserService } from '../../../services/user.service';
 
+import {
+  MatSnackBar,
+  MatSnackBarHorizontalPosition,
+  MatSnackBarVerticalPosition,
+} from '@angular/material/snack-bar';
+
 @Component({
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent implements OnInit {
-
+  registerForm: FormGroup;
+  loading = false;
+  submitted = false;
+  horizontalPosition: MatSnackBarHorizontalPosition = 'end';
+  verticalPosition: MatSnackBarVerticalPosition = 'top';
 
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
     private userService: UserService,
+    private snackBar: MatSnackBar
   ) { }
-  registerForm: FormGroup;
-  loading = false;
-  submitted = false;
 
   ngOnInit() {
     this.registerForm = this.formBuilder.group({
@@ -40,12 +48,21 @@ export class RegisterComponent implements OnInit {
     this.loading = true;
     this.userService.register(this.registerForm.value).subscribe(
       (data) => {
+        this.openSnackBar();
         this.router.navigate(['/login']);
       },
       (error) => {
         this.loading = false;
       }
     );
+  }
 
+  openSnackBar() {
+    this.snackBar.open('Registration Successful! You will be redirected to Login Page.', '', {
+      duration: 3000,
+      horizontalPosition: this.horizontalPosition,
+      verticalPosition: this.verticalPosition,
+      panelClass: ['green-snackbar']
+    });
   }
 }

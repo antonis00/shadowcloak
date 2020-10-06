@@ -9,13 +9,13 @@
 
   <div class="collapse navbar-collapse" [ngClass]="{ 'show': navbarOpen }" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
-      <li class="nav-item first-list-item" routerLinkActive="active">
+      <li *ngIf="currentUser" class="nav-item first-list-item" routerLinkActive="active">
         <a class="nav-link" routerLink="/home"> Home <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item" routerLinkActive="active">
-        <a class="nav-link" routerLink="/documents">My Documents</a>
+        <a class="nav-link" routerLink="/documents">Documents</a>
       </li>
-      <li class="nav-item" routerLinkActive="active">
+      <li *ngIf="currentUser" class="nav-item" routerLinkActive="active">
         <a class="nav-link" routerLink="/find-author">Find Author</a>
       </li>
       <!-- <li class="nav-item" routerLinkActive="active">
