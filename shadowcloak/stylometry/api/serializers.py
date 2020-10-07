@@ -16,6 +16,8 @@ def create(self, validated_data):
                                  **validated_data)
         return author
 
+
+
 class DocumentSerializer(serializers.ModelSerializer):
     active = serializers.BooleanField(initial=True)
     author_name = serializers.StringRelatedField(read_only=True, source='author')
@@ -23,6 +25,22 @@ class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
         fields = "__all__"
+
+
+
+class DocumentsByAuthorSerializer(serializers.ModelSerializer):
+    documents = DocumentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Author
+        fields = ['id','name', 'documents']
+        read_only_fields = ['user']
+
+    def create(self, validated_data):
+        author = Author.objects.create(user=self.context['request'].user,
+                                 **validated_data)
+        return author
+
 
 class GroupSerializer(serializers.ModelSerializer):
 

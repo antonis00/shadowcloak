@@ -9,7 +9,7 @@ from rest_framework import mixins
 from rest_framework import views
 from stylometry.models import Author, Document, Group
 from stylometry.api.permissions import IsOwnerOrReadOnly
-from stylometry.api.serializers import AuthorSerializer, DocumentSerializer, GroupSerializer, FindAuthor, MyTokenObtainPairSerializer 
+from stylometry.api.serializers import AuthorSerializer, DocumentSerializer, GroupSerializer, FindAuthor, MyTokenObtainPairSerializer, DocumentsByAuthorSerializer
 from rest_auth.registration.views import RegisterView
 
 from stylometry.api.services.retrieve_documents import create_dictionary
@@ -64,6 +64,16 @@ class DocumentViewset(ModelViewSet):
 
         return self.queryset.filter(author__user__username=self.request.user).order_by('author')
         
+
+
+class DocumentsByAuthorViewset(ModelViewSet):
+    queryset = Author.objects.all()
+    serializer_class = DocumentsByAuthorSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
     
 class GroupViewset(ModelViewSet):
     queryset = Group.objects.all()

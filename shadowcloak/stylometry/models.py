@@ -23,7 +23,7 @@ class Group(models.Model):
         return f"{self.name}"
 
 class Document(models.Model):
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='documents')
     group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=240, unique=True)
     description = models.TextField(max_length=999, blank=True)
