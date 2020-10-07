@@ -4,7 +4,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
-import {MatDividerModule, MatSnackBarModule} from '@angular/material';
+import { MatDividerModule, MatOption, MatSelect, MatSnackBarModule } from '@angular/material';
 
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './navbar/navbar.component';
@@ -20,43 +20,47 @@ import { InterceptorService } from './services/interceptor.service';
 import { ApiService } from './services/api.service';
 import { UserService } from './services/user.service';
 
-import {MatExpansionModule} from '@angular/material/expansion';
-import {MatIconModule} from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material';
+import { MatOptionModule } from '@angular/material';
 
 
 @NgModule({
-   declarations: [
-      AppComponent,
-      NavbarComponent,
-      StylometryComponent,
-      PageNotFoundComponent,
-      HomepageComponent,
-      FindAuthorComponent,
-      ObfuscateComponent,
-      RegisterComponent,
-      LoginComponent
-   ],
-   imports: [
-      BrowserModule,
-      AppRoutingModule,
-      HttpClientModule,
-      ReactiveFormsModule,
-      BrowserAnimationsModule,
-      MatExpansionModule,
-      MatSnackBarModule,
-      MatIconModule,
-      MatFormFieldModule,
-      MatInputModule,
-      MatDividerModule
-   ],
-   providers: [
-     ApiService,
-     UserService, { provide: HTTP_INTERCEPTORS, useClass: InterceptorService, multi: true }
-   ],
-   bootstrap: [
-      AppComponent
-   ]
+  declarations: [
+    AppComponent,
+    NavbarComponent,
+    StylometryComponent,
+    PageNotFoundComponent,
+    HomepageComponent,
+    FindAuthorComponent,
+    ObfuscateComponent,
+    RegisterComponent,
+    LoginComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+    BrowserAnimationsModule,
+    MatExpansionModule,
+    MatSnackBarModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDividerModule,
+    MatSelectModule,
+    MatOptionModule
+  ],
+  providers: [
+    ApiService,
+    UserService, { provide: HTTP_INTERCEPTORS, useClass: InterceptorService, multi: true }
+  ],
+  bootstrap: [
+    AppComponent
+  ]
 })
 export class AppModule { }

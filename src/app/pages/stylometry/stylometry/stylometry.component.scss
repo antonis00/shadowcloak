@@ -8,7 +8,7 @@
     cursor: pointer;
 
     .add-document {
-      margin-top: 21px;
+      margin-top: 36px;
       margin-right: 20px;
       margin-left: 18px;
       padding: 6px;
@@ -21,7 +21,7 @@
       }
     }
 
-    & > span {
+    &>span {
       margin-top: 2px;
     }
   }
@@ -32,11 +32,10 @@
 
   .expand-button {
     font-weight: 500;
-    margin-top: 20px;
     color: #2f2f2f;
     outline-color: grey;
     padding: 6px;
-    margin: 20px 14px 10px 10px;
+    margin: 35px 14px 10px 10px;
     background: none;
     border: none;
     border-radius: 6px;
@@ -44,10 +43,6 @@
     &:hover {
       background-color: rgba(0, 0, 0, 0.05);
     }
-  }
-
-  .action-buttons {
-    padding-bottom: 20px;
   }
 
   .headers-align .mat-expansion-panel-header-title,
@@ -83,16 +78,9 @@
     box-sizing: content-box;
   }
 
-  .accordion-group-container {
-    background-color: #dadada;
-    margin-bottom: -5px;
-    width: 260px;
-    border-radius: 6px;
-    margin-top: 20px;
-  }
-
   .accordion-author-container {
-    background-color: #e4e4e4;
+    margin-top: 40px;
+    background-color: #ededed;
     margin-bottom: -5px;
     width: 400px;
     border-radius: 6px;
@@ -101,13 +89,17 @@
   .group-text {
     font-size: 17px;
     padding: 14px;
-    padding-top: 8px;
+    padding-top: 12px;
     display: block;
   }
 
   .edit-delete-icons-container {
-    & > mat-icon {
+    margin-right: 10px;
+
+    &>mat-icon {
       margin: 6px 8px 0 8px;
+      opacity: 0.6;
+
       &:hover {
         opacity: 0.8;
       }
@@ -115,11 +107,21 @@
   }
 
   .filter-container {
-    margin-left:auto;
+    margin-left: auto;
     display: flex;
-    & > mat-form-field {
+
+    &>mat-form-field {
       margin-right: 30px;
       margin-top: 10px;
     }
   }
+
+  .author-filter {
+    margin-top: 23px!important;
+  }
+
+  mat-form-field > .mat-form-field-wrapper > .mat-form-field-flex {
+    background: white!important;
+  }
+
 }

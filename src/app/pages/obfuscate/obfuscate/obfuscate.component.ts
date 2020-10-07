@@ -38,7 +38,7 @@ export class ObfuscateComponent implements OnInit {
   }
 
   sendTextForAnalysis(text: string, group: number): void {
-    this.apiService.sendText(text, group).subscribe(
+    this.apiService.findAuthor(text, group).subscribe(
       data => {
         this.populateAnonymousText(data.body);
       },
