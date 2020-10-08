@@ -3,8 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AnonymousTextDTO } from '../dtos/anonymous-text-dto';
 
-import { DocumentByAuthor } from '../models/document-by-author';
+import { DocumentsByAuthor } from '../models/documents-by-author';
 import { DocumentGroup } from '../models/document-group';
+import { DocumentAuthor } from '../models/document-author';
 
 
 @Injectable({
@@ -26,17 +27,21 @@ export class ApiService {
 
 
 
-  getDocuments(groupName?: string): Observable<DocumentByAuthor[]> {
+  getDocuments(groupName?: string): Observable<DocumentsByAuthor[]> {
     if (groupName) {
-      return this.http.get<DocumentByAuthor[]>('docsbyauthor/?group=' + groupName);
+      return this.http.get<DocumentsByAuthor[]>('docsbyauthor/?group=' + groupName);
     }
-    return this.http.get<DocumentByAuthor[]>('docsbyauthor/');
+    return this.http.get<DocumentsByAuthor[]>('docsbyauthor/');
 
   }
 
 
   getDocumentsGroups(): Observable<DocumentGroup[]> {
     return this.http.get<DocumentGroup[]>('groups/');
+  }
+
+  getDocumentsAuthors(): Observable<DocumentAuthor[]> {
+    return this.http.get<DocumentAuthor[]>('authors/');
   }
 
   // get(id): Observable<any> {

@@ -2,8 +2,8 @@ import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
 import { ApiService } from 'src/app/services/api.service';
 import { MatAccordion } from '@angular/material/expansion';
 import { DocumentGroup } from 'src/app/models/document-group';
-import { DocumentByAuthor } from 'src/app/models/document-by-author';
-import { groupBy, map, mergeMap, reduce } from 'rxjs/operators';
+import { DocumentsByAuthor } from 'src/app/models/documents-by-author';
+import { DocumentAuthor } from 'src/app/models/document-author';
 
 
 
@@ -18,7 +18,8 @@ export class StylometryComponent implements OnInit {
   @ViewChild(MatAccordion) accordion: MatAccordion;
 
   documentGroups: DocumentGroup[] = [];
-  documentsByAuthor: DocumentByAuthor[] = [];
+  documentsByAuthor: DocumentsByAuthor[] = [];
+  documentAuthors: DocumentAuthor[] = [];
 
   @Input()
   addedAuthors: number[] = [];
@@ -28,6 +29,11 @@ export class StylometryComponent implements OnInit {
   ngOnInit(): void {
     this.apiService.getDocumentsGroups().subscribe(res => {
       this.documentGroups = res;
+    });
+
+
+    this.apiService.getDocumentsAuthors().subscribe(res => {
+      this.documentAuthors = res;
     });
 
 

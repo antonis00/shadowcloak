@@ -37,9 +37,9 @@ export class AuthenticationService {
           return this.http.post<any>('token/refresh/', { refresh : tokens.refresh})
             .pipe(
               map(token => {
-                if (tokens.access) {
-                  localStorage.setItem('stylometryUserToken', tokens.access);
-                  user = jwt_decode(tokens.access).name;
+                if (token.access) {
+                  localStorage.setItem('stylometryUserToken', token.access);
+                  user = jwt_decode(token.access).name;
                   this.currentUserSubject.next(user);
                 }
               }));

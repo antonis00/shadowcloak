@@ -8,7 +8,7 @@
     cursor: pointer;
 
     .add-document {
-      margin-top: 36px;
+      margin-top: 25px;
       margin-right: 20px;
       margin-left: 18px;
       padding: 6px;
@@ -35,7 +35,7 @@
     color: #2f2f2f;
     outline-color: grey;
     padding: 6px;
-    margin: 35px 14px 10px 10px;
+    margin: 24px 14px 10px 10px;
     background: none;
     border: none;
     border-radius: 6px;
@@ -80,7 +80,7 @@
 
   .accordion-author-container {
     margin-top: 40px;
-    background-color: #ededed;
+    background-color: #e0c9ad;
     margin-bottom: -5px;
     width: 400px;
     border-radius: 6px;
@@ -113,15 +113,16 @@
     &>mat-form-field {
       margin-right: 30px;
       margin-top: 10px;
+      margin-bottom: -10px;
     }
   }
 
-  .author-filter {
-    margin-top: 23px!important;
-  }
+}
 
-  mat-form-field > .mat-form-field-wrapper > .mat-form-field-flex {
-    background: white!important;
-  }
+.select-panel {
+  background-color: rgb(255, 255, 255)!important;
+}
 
+.select-panel, .select-panel > * {
+  background-color: rgb(255, 255, 255)!important;
 }

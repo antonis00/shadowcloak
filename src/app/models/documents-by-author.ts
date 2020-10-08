@@ -1,6 +1,6 @@
 import { SingleDocument } from './single-document';
 
-export class DocumentByAuthor {
+export class DocumentsByAuthor {
   id: number;
   name: string;
   documents: SingleDocument[];

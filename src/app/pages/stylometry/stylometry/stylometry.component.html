@@ -8,22 +8,27 @@
       <button mat-button class="expand-button" (click)="accordion.closeAll()">Collapse All</button>
     </span>
     <span class="add-document">
-      <span class="add-text"> Add new document <mat-icon>add</mat-icon> </span>
+      <span class="add-text"> Add New <mat-icon>add</mat-icon> </span>
     </span>
     <span class="filter-container">
-      <mat-form-field class="author-filter">
-        <mat-label>Search Author</mat-label>
-        <input type="tel" matInput placeholder="Eg: Edward Snowden">
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
       <mat-form-field appearance="fill">
-        <mat-label>Group</mat-label>
-        <mat-select>
-          <mat-option *ngFor="let group of documentGroups" [value]="group.name">
-            {{group.name}}
+        <mat-label>Authors</mat-label>
+        <mat-select multiple panelClass="select-panel">
+          <mat-option *ngFor="let author of documentAuthors" [value]="author.name">
+            {{author.name | titlecase}}
           </mat-option>
         </mat-select>
       </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Group</mat-label>
+        <mat-select panelClass="select-panel">
+          <mat-option *ngFor="let group of documentGroups" [value]="group.name">
+            {{group.name | titlecase}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
     </span>
   </div>
   <mat-divider></mat-divider>
@@ -31,16 +36,16 @@
   <ng-container *ngFor="let documentByAuthor of documentsByAuthor">
 
     <div class="accordion-author-container">
-      <span class="group-text"> Author: {{ documentByAuthor.name }} </span>
+      <span class="group-text"> Author: {{ documentByAuthor.name | titlecase }} </span>
     </div>
     <mat-accordion *ngFor="let document of documentByAuthor.documents" class="headers-align" multi>
       <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title>
-            {{document.title}}
+            Title: {{document.title | titlecase}}
           </mat-panel-title>
           <mat-panel-description>
-            {{document.description}}
+           {{document.description | titlecase}}
           </mat-panel-description>
           <div class="edit-delete-icons-container">
             <mat-icon (click)="$event.stopPropagation();$event.preventDefault()">edit</mat-icon>
