@@ -66,13 +66,13 @@ class DocumentViewset(ModelViewSet):
         
 
 
-class DocumentsByAuthorViewset(ModelViewSet):
-    queryset = Author.objects.all()
-    serializer_class = DocumentsByAuthorSerializer
+class DocumentsByAuthorView(views.APIView):
     permission_classes = [IsAuthenticated]
+    
+    def get(self, request, format=None):
+        user = self.request.user
+        return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user), many=True).data)
 
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
 
     
 class GroupViewset(ModelViewSet):
@@ -114,12 +114,3 @@ class CustomRegisterView(RegisterView):
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         return response
-
-
-# class AvatarUpdateView(generics.UpdateAPIView):
-#     serializer_class = AuthorAvatarSerializer
-#     permission_classes = [IsAuthenticated, IsOwnOrReadOnly]
-
-#     def get_object(self):
-#         author_object = self.request.user
-#         return author_object

@@ -61,10 +61,3 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token['name'] = user.username
         return token
-
-
-# class AuthorAvatarSerializer(serializers.ModelSerializer):
-    
-#     class Meta:
-#         model = Author
-#         fields = ("avatar",)
