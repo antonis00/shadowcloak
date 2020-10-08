@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
 import { ApiService } from 'src/app/services/api.service';
 import { MatAccordion } from '@angular/material/expansion';
 import { DocumentGroup } from 'src/app/models/document-group';
@@ -21,7 +21,7 @@ export class StylometryComponent implements OnInit {
   documentsByAuthor: DocumentsByAuthor[] = [];
   documentAuthors: DocumentAuthor[] = [];
 
-  @Input()
+  @Output() groupSlidePanelEvent = new EventEmitter();
   addedAuthors: number[] = [];
 
   constructor(private apiService: ApiService) { }
@@ -41,6 +41,34 @@ export class StylometryComponent implements OnInit {
       this.documentsByAuthor = res;
     });
 
+  }
+
+  openGroupSlidePanel(choice: number) {
+    this.groupSlidePanelEvent.emit(choice);
+    console.log('clicked: group');
+    return choice;
+  }
+
+  closeGroupSlidePanel() {
+    return 0;
+  }
+
+  openAuthorSlidePanel(choice: number) {
+    choice === 1 ? console.log('add') : console.log('edit');
+    return choice;
+  }
+
+  closeAuthorSlidePanel() {
+    return 0;
+  }
+
+  openDocumentSlidePanel(choice: number) {
+    choice === 1 ? console.log('add') : console.log('edit');
+    return choice;
+  }
+
+  closeDocumentSlidePanel() {
+    return 0;
   }
 
 }

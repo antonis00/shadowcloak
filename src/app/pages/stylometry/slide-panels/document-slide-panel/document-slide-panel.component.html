@@ -1,0 +1,62 @@
+<mat-card class="card">
+  <mat-card-header>
+    <mat-card-title>Add Document</mat-card-title>
+    <mat-icon class="close-icon">close</mat-icon>
+  </mat-card-header>
+  <mat-divider> </mat-divider>
+  <mat-card-content>
+    <div class="form-container">
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Title*</mat-label>
+          <input matInput>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <input matInput>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Publication Date</mat-label>
+          <input matInput [matDatepicker]="picker2">
+          <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+          <mat-datepicker #picker2></mat-datepicker>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Author</mat-label>
+          <mat-select>
+            <mat-option value="Author1"> Author1
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Group</mat-label>
+          <mat-select>
+            <mat-option value="Group1"> Group1
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Text*</mat-label>
+          <textarea matInput rows="10" cols="40"></textarea>
+        </mat-form-field>
+      </p>
+    </div>
+  </mat-card-content>
+  <mat-divider> </mat-divider>
+  <mat-card-actions>
+    <span class="buttons-container">
+      <button type="button" class="btn btn-default s-button" (click)="true">Cancel</button>
+      <button type="button" class="btn btn-default s-button" (click)="true">Save</button>
+    </span>
+  </mat-card-actions>
+</mat-card>

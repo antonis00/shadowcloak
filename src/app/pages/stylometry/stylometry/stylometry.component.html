@@ -7,11 +7,19 @@
     <span>
       <button mat-button class="expand-button" (click)="accordion.closeAll()">Collapse All</button>
     </span>
-    <span class="add-document">
+    <span class="add-new">
       <span class="add-text"> Add New <mat-icon>add</mat-icon> </span>
+
+      <div class="hidden-add-option">
+        <mat-list role="list">
+          <mat-list-item role="listitem" value="document" (click)="openDocumentSlidePanel(1);">Document</mat-list-item>
+          <mat-list-item role="listitem" value="author" (click)="openAuthorSlidePanel(1);">Author</mat-list-item>
+          <mat-list-item role="listitem" value="group" (click)="openGroupSlidePanel(1);">Group</mat-list-item>
+        </mat-list>
+      </div>
     </span>
     <span class="filter-container">
-      <mat-form-field appearance="fill">
+      <mat-form-field appearance="legacy">
         <mat-label>Authors</mat-label>
         <mat-select multiple panelClass="select-panel">
           <mat-option *ngFor="let author of documentAuthors" [value]="author.name">
@@ -20,7 +28,7 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="fill">
+      <mat-form-field appearance="legacy">
         <mat-label>Group</mat-label>
         <mat-select panelClass="select-panel">
           <mat-option *ngFor="let group of documentGroups" [value]="group.name">
@@ -31,6 +39,8 @@
 
     </span>
   </div>
+
+
   <mat-divider></mat-divider>
 
   <ng-container *ngFor="let documentByAuthor of documentsByAuthor">
@@ -38,14 +48,14 @@
     <div class="accordion-author-container">
       <span class="group-text"> Author: {{ documentByAuthor.name | titlecase }} </span>
     </div>
-    <mat-accordion *ngFor="let document of documentByAuthor.documents" class="headers-align" multi>
-      <mat-expansion-panel>
+    <mat-accordion class="headers-align" multi="true">
+      <mat-expansion-panel  *ngFor="let document of documentByAuthor.documents">
         <mat-expansion-panel-header>
           <mat-panel-title>
             Title: {{document.title | titlecase}}
           </mat-panel-title>
           <mat-panel-description>
-           {{document.description | titlecase}}
+            {{document.description | titlecase}}
           </mat-panel-description>
           <div class="edit-delete-icons-container">
             <mat-icon (click)="$event.stopPropagation();$event.preventDefault()">edit</mat-icon>
@@ -65,4 +75,13 @@
     </mat-accordion>
 
   </ng-container>
+
 </div>
+
+
+<div class="slide-panel-container">
+  <app-document-slide-panel></app-document-slide-panel>
+  <!-- <app-author-slide-panel></app-author-slide-panel> -->
+  <!-- <app-group-slide-panel></app-group-slide-panel> -->
+</div>
+
