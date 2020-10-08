@@ -19,6 +19,10 @@ from rest_framework_simplejwt import views as jwt_views
 
 from rest_auth.views import LoginView
 from stylometry.api.views import MyTokenObtainPairView, CustomRegisterView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,7 +32,7 @@ urlpatterns = [
     path("api/rest-auth/registration/", include("rest_auth.registration.urls")),
     path("api/custom/registration/", CustomRegisterView.as_view(), name='my_custom_registration'),
     path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
 from django.conf.urls.static import static
