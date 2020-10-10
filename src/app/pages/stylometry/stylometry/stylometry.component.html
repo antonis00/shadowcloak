@@ -10,11 +10,14 @@
     <span class="add-new">
       <span class="add-text"> Add New <mat-icon>add</mat-icon> </span>
 
-      <div class="hidden-add-option">
+      <div class="hidden-add-option" *ngIf="!slidePanelsSharedService.showPanelContainer">
         <mat-list role="list">
-          <mat-list-item role="listitem" value="document" (click)="openDocumentSlidePanel(1);">Document</mat-list-item>
-          <mat-list-item role="listitem" value="author" (click)="openAuthorSlidePanel(1);">Author</mat-list-item>
-          <mat-list-item role="listitem" value="group" (click)="openGroupSlidePanel(1);">Group</mat-list-item>
+          <mat-list-item role="listitem" value="document" (click)="accordion.closeAll();openDocumentSlidePanel(1);">
+            Document</mat-list-item>
+          <mat-list-item role="listitem" value="author" (click)="accordion.closeAll();openAuthorSlidePanel(1);">Author
+          </mat-list-item>
+          <mat-list-item role="listitem" value="group" (click)="accordion.closeAll();openGroupSlidePanel(1);">Group
+          </mat-list-item>
         </mat-list>
       </div>
     </span>
@@ -34,37 +37,44 @@
           <mat-option *ngFor="let group of documentGroups" [value]="group.name">
             {{group.name | titlecase}}
           </mat-option>
+          <mat-option (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();openGroupSlidePanel(2,selectedGroup)"> Edit Current Group  </mat-option>
         </mat-select>
       </mat-form-field>
 
     </span>
   </div>
 
-
   <mat-divider></mat-divider>
 
   <ng-container *ngFor="let documentByAuthor of documentsByAuthor">
 
     <div class="accordion-author-container">
-      <span class="group-text"> Author: {{ documentByAuthor.name | titlecase }} </span>
+      <span class="group-text"> Author: {{ documentByAuthor.name | titlecase }}
+        <mat-icon class="edit-author-icon"
+        *ngIf="!slidePanelsSharedService.showPanelContainer"
+          (click)="accordion.closeAll();openAuthorSlidePanel(2, documentByAuthor.id)">edit</mat-icon>
+      </span>
     </div>
     <mat-accordion class="headers-align" multi="true">
-      <mat-expansion-panel  *ngFor="let document of documentByAuthor.documents">
-        <mat-expansion-panel-header>
+      <mat-expansion-panel *ngFor="let document of documentByAuthor.documents; let i = index">
+        <mat-expansion-panel-header  (mouseover)="rowIndex = i" (mouseleave)="rowIndex = null">
           <mat-panel-title>
             Title: {{document.title | titlecase}}
           </mat-panel-title>
           <mat-panel-description>
             {{document.description | titlecase}}
           </mat-panel-description>
-          <div class="edit-delete-icons-container">
-            <mat-icon (click)="$event.stopPropagation();$event.preventDefault()">edit</mat-icon>
-            <mat-icon (click)="$event.stopPropagation();$event.preventDefault()">delete_outline</mat-icon>
+          <div class="edit-delete-icons-container"  *ngIf="rowIndex == i">
+            <mat-icon *ngIf="!slidePanelsSharedService.showPanelContainer"
+              (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();openDocumentSlidePanel(2, document)">
+              edit</mat-icon>
+            <mat-icon *ngIf="!slidePanelsSharedService.showPanelContainer"
+              (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();deleteDocument(document)">
+              delete_outline</mat-icon>
           </div>
         </mat-expansion-panel-header>
 
         <mat-form-field>
-          <!-- <mat-label>Age</mat-label> -->
           <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1">
             {{document.body}}
         </textarea>
@@ -79,9 +89,8 @@
 </div>
 
 
-<div class="slide-panel-container">
-  <app-document-slide-panel></app-document-slide-panel>
-  <!-- <app-author-slide-panel></app-author-slide-panel> -->
-  <!-- <app-group-slide-panel></app-group-slide-panel> -->
+<div class="slide-panel-container" *ngIf="slidePanelsSharedService.showPanelContainer">
+  <app-document-slide-panel *ngIf="slidePanelsSharedService.showDocumentPanel"></app-document-slide-panel>
+  <app-author-slide-panel *ngIf="slidePanelsSharedService.showAuthorPanel"></app-author-slide-panel>
+  <app-group-slide-panel *ngIf="slidePanelsSharedService.showGroupPanel"></app-group-slide-panel>
 </div>
-

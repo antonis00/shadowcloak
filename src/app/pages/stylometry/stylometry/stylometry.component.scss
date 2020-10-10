@@ -42,6 +42,7 @@
     margin: 24px 14px 10px 10px;
     background: none;
     border: none;
+    font-size: 18px;
     border-radius: 6px;
 
     &:hover {
@@ -92,9 +93,15 @@
 
   .group-text {
     font-size: 17px;
+    font-weight: 500;
     padding: 14px;
     padding-top: 12px;
-    display: block;
+    display: flex;
+    &:hover {
+      .edit-author-icon {
+        visibility: visible;
+      }
+    }
   }
 
   .edit-delete-icons-container {
@@ -163,5 +170,15 @@ mat-list-item {
   }
   @media only screen and (max-width: 1200px) {
     width: 100%;
+  }
+}
+
+.edit-author-icon {
+  margin-left: auto;
+  cursor: pointer;
+  opacity: 0.7;
+  visibility: hidden;
+  &:hover {
+    opacity: 1;
   }
 }

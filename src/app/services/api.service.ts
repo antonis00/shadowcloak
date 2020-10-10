@@ -6,6 +6,9 @@ import { AnonymousTextDTO } from '../dtos/anonymous-text-dto';
 import { DocumentsByAuthor } from '../models/documents-by-author';
 import { DocumentGroup } from '../models/document-group';
 import { DocumentAuthor } from '../models/document-author';
+import { CreateDocumentDTO } from '../dtos/create-document-dto';
+import { CreateAuthorDTO } from '../dtos/create-author-dto';
+import { CreateGroupDTO } from '../dtos/create-group-dto';
 
 
 @Injectable({
@@ -26,7 +29,6 @@ export class ApiService {
   }
 
 
-
   getDocuments(groupName?: string): Observable<DocumentsByAuthor[]> {
     if (groupName) {
       return this.http.get<DocumentsByAuthor[]>('docsbyauthor/?group=' + groupName);
@@ -34,7 +36,6 @@ export class ApiService {
     return this.http.get<DocumentsByAuthor[]>('docsbyauthor/');
 
   }
-
 
   getDocumentsGroups(): Observable<DocumentGroup[]> {
     return this.http.get<DocumentGroup[]>('groups/');
@@ -44,29 +45,51 @@ export class ApiService {
     return this.http.get<DocumentAuthor[]>('authors/');
   }
 
-  // get(id): Observable<any> {
-  //   return this.http.get(`${environment.apiBaseUrl}/${id}`);
-  // }
+  getAuthor(authorId: number): Observable<DocumentAuthor> {
+    return this.http.get<DocumentAuthor>('authors/' + authorId + '/');
+  }
 
-  // create(data): Observable<any> {
-  //   return this.http.post(environment.apiBaseUrl, data);
-  // }
+  getGroup(groupId: number): Observable<DocumentGroup> {
+    return this.http.get<DocumentGroup>('groups/' + groupId + '/');
+  }
 
-  // update(id, data): Observable<any> {
-  //   return this.http.put(`${environment.apiBaseUrl}/${id}`, data);
-  // }
+  createDocument(data): Observable<CreateDocumentDTO> {
+    return this.http.post<CreateDocumentDTO>('documents/', data);
+  }
 
-  // delete(id): Observable<any> {
-  //   return this.http.delete(`${environment.apiBaseUrl}/${id}`);
-  // }
+  createAuthor(data): Observable<CreateAuthorDTO> {
+    return this.http.post<CreateAuthorDTO>('authors/', data);
+  }
 
-  // deleteAll(): Observable<any> {
-  //   return this.http.delete(environment.apiBaseUrl);
-  // }
+  createGroup(data): Observable<CreateGroupDTO> {
+    return this.http.post<CreateGroupDTO>('groups/', data);
+  }
 
-  // findByTitle(title): Observable<any> {
-  //   return this.http.get(`${environment.apiBaseUrl}?title=${title}`);
-  // }
+  editDocument(data, id: number): Observable<CreateDocumentDTO> {
+    return this.http.put<CreateDocumentDTO>('documents/' + id + '/', data);
+  }
 
 
+  editAuthor(data, id: number): Observable<CreateAuthorDTO> {
+    return this.http.put<CreateAuthorDTO>('authors/' + id + '/', data);
+  }
+
+
+  editGroup(data, id: number): Observable<CreateGroupDTO> {
+    return this.http.put<CreateGroupDTO>('groups/' + id + '/', data);
+  }
+
+
+  deleteDocument(id: number): Observable<number> {
+    return this.http.delete<number>('documents/' + id + '/');
+  }
+
+
+  deleteGroup(id: number): Observable<number> {
+    return this.http.delete<number>('groups/' + id + '/');
+  }
+
+  deleteAuthor(id: number): Observable<number> {
+    return this.http.delete<number>('authors/' + id + '/');
+  }
 }

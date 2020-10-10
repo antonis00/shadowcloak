@@ -1,7 +1,10 @@
+
+
+<form [formGroup]="documentForm" (ngSubmit)="onFormSubmit()" class="document-form">
 <mat-card class="card">
   <mat-card-header>
-    <mat-card-title>Add Document</mat-card-title>
-    <mat-icon class="close-icon">close</mat-icon>
+    <mat-card-title> {{ headerText }} </mat-card-title>
+    <mat-icon class="close-icon" (click)="closeSlidePanel()">close</mat-icon>
   </mat-card-header>
   <mat-divider> </mat-divider>
   <mat-card-content>
@@ -9,45 +12,44 @@
       <p>
         <mat-form-field appearance="outline">
           <mat-label>Title*</mat-label>
-          <input matInput>
+          <input matInput formControlName="title">
         </mat-form-field>
       </p>
       <p>
         <mat-form-field appearance="outline">
           <mat-label>Description</mat-label>
-          <input matInput>
+          <input matInput formControlName="description">
         </mat-form-field>
       </p>
       <p>
         <mat-form-field appearance="outline">
           <mat-label>Publication Date</mat-label>
-          <input matInput [matDatepicker]="picker2">
-          <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
-          <mat-datepicker #picker2></mat-datepicker>
+          <input matInput [matDatepicker]="datePicker" formControlName="publication_date">
+          <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+          <mat-datepicker #datePicker
+          startView="multi-year"></mat-datepicker>
         </mat-form-field>
       </p>
       <p>
         <mat-form-field appearance="outline">
-          <mat-label>Author</mat-label>
-          <mat-select>
-            <mat-option value="Author1"> Author1
-            </mat-option>
+          <mat-label>Author*</mat-label>
+          <mat-select formControlName="author">
+            <mat-option *ngFor="let author of authorOptions" [value]="author.id"> {{ author.name }}</mat-option>
           </mat-select>
         </mat-form-field>
       </p>
       <p>
         <mat-form-field appearance="outline">
-          <mat-label>Group</mat-label>
-          <mat-select>
-            <mat-option value="Group1"> Group1
-            </mat-option>
+          <mat-label>Group*</mat-label>
+          <mat-select formControlName="group">
+            <mat-option *ngFor="let group of groupOptions" [value]="group.id"> {{ group.name }}</mat-option>
           </mat-select>
         </mat-form-field>
       </p>
       <p>
         <mat-form-field appearance="outline">
           <mat-label>Text*</mat-label>
-          <textarea matInput rows="10" cols="40"></textarea>
+          <textarea matInput rows="10" cols="40" formControlName="body"></textarea>
         </mat-form-field>
       </p>
     </div>
@@ -55,8 +57,10 @@
   <mat-divider> </mat-divider>
   <mat-card-actions>
     <span class="buttons-container">
-      <button type="button" class="btn btn-default s-button" (click)="true">Cancel</button>
-      <button type="button" class="btn btn-default s-button" (click)="true">Save</button>
+      <button type="button" class="btn btn-default s-button"  (click)="closeSlidePanel()">Cancel</button>
+      <button type="submit" class="btn btn-default s-button">{{ buttonText }}</button>
     </span>
   </mat-card-actions>
 </mat-card>
+
+</form>

@@ -49,7 +49,9 @@ export class RegisterComponent implements OnInit {
     this.userService.register(this.registerForm.value).subscribe(
       (data) => {
         this.openSnackBar();
-        this.router.navigate(['/login']);
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 2000);
       },
       (error) => {
         this.loading = false;
@@ -58,7 +60,7 @@ export class RegisterComponent implements OnInit {
   }
 
   openSnackBar() {
-    this.snackBar.open('Registration Successful! You will be redirected to Login Page.', '', {
+    this.snackBar.open('Registration Successful! Redirecting to Login Page...', '', {
       duration: 3000,
       horizontalPosition: this.horizontalPosition,
       verticalPosition: this.verticalPosition,

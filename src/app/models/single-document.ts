@@ -4,7 +4,8 @@ export class SingleDocument {
   title: string;
   description: string;
   body: string;
-  publicationDate: Date;
+  // tslint:disable-next-line:variable-name
+  publication_date: Date;
   group: number;
-
+  author: number;
 }

@@ -1,15 +1,17 @@
+<form [formGroup]="groupForm" (ngSubmit)="onFormSubmit()" class="group-form">
+
 <mat-card class="card">
   <mat-card-header>
-    <mat-card-title>Add Group</mat-card-title>
-    <mat-icon class="close-icon">close</mat-icon>
+    <mat-card-title>{{ headerText }}</mat-card-title>
+    <mat-icon class="close-icon" (click)="closeSlidePanel()">close</mat-icon>
   </mat-card-header>
   <mat-divider> </mat-divider>
   <mat-card-content>
     <div class="form-container">
       <p>
         <mat-form-field appearance="outline">
-          <mat-label>Name</mat-label>
-          <input matInput placeholder="Group Name">
+          <mat-label>Name*</mat-label>
+          <input matInput placeholder="Group Name" formControlName="name">
           <mat-hint>Required</mat-hint>
         </mat-form-field>
       </p>
@@ -17,7 +19,7 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Description</mat-label>
-          <textarea matInput placeholder="Group Description" rows="5" cols="40"></textarea>
+          <textarea matInput placeholder="Group Description" rows="5" cols="40" formControlName="description"></textarea>
           <mat-hint>Optional</mat-hint>
         </mat-form-field>
       </p>
@@ -26,8 +28,10 @@
   <mat-divider> </mat-divider>
   <mat-card-actions>
     <span class="buttons-container">
-      <button type="button" class="btn btn-default s-button" (click)="true">Cancel</button>
-      <button type="button" class="btn btn-default s-button" (click)="true">Save</button>
+      <button type="button" class="btn btn-default s-button"  (click)="closeSlidePanel()">Cancel</button>
+      <button type="submit" class="btn btn-default s-button">{{ buttonText }}</button>
     </span>
   </mat-card-actions>
 </mat-card>
+
+</form>
