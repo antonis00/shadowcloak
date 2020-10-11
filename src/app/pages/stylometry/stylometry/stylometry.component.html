@@ -24,20 +24,19 @@
     <span class="filter-container">
       <mat-form-field appearance="legacy">
         <mat-label>Authors</mat-label>
-        <mat-select multiple panelClass="select-panel">
-          <mat-option *ngFor="let author of documentAuthors" [value]="author.name">
+        <mat-select multiple panelClass="select-panel" (onSelectionChange)="getSelectedAuthors($event)" (openedChange)="sendSelectedAuthors($event)">
+          <mat-option *ngFor="let author of documentAuthors" [value]="author.id" (onSelectionChange)="getSelectedAuthors($event)">
             {{author.name | titlecase}}
           </mat-option>
         </mat-select>
       </mat-form-field>
-
       <mat-form-field appearance="legacy">
         <mat-label>Group</mat-label>
-        <mat-select panelClass="select-panel">
-          <mat-option *ngFor="let group of documentGroups" [value]="group.name">
+        <mat-select panelClass="select-panel" [value]="CurrentGroup">
+          <mat-option *ngFor="let group of documentGroups" [value]="group.name" (click)="getSelectedGroup(group.id)">
             {{group.name | titlecase}}
           </mat-option>
-          <mat-option (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();openGroupSlidePanel(2,selectedGroup)"> Edit Current Group  </mat-option>
+          <mat-option (click)="openGroupSlidePanel(2,selectedGroup)" class="authors-select-last-item"> Edit Current Group  </mat-option>
         </mat-select>
       </mat-form-field>
 
@@ -64,7 +63,7 @@
           <mat-panel-description>
             {{document.description | titlecase}}
           </mat-panel-description>
-          <div class="edit-delete-icons-container"  *ngIf="rowIndex == i">
+          <div class="edit-delete-icons-container" [ngClass]="rowIndex == i ? 'visible-icons': 'hidden-icons'">
             <mat-icon *ngIf="!slidePanelsSharedService.showPanelContainer"
               (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();openDocumentSlidePanel(2, document)">
               edit</mat-icon>
@@ -85,7 +84,6 @@
     </mat-accordion>
 
   </ng-container>
-
 </div>
 
 

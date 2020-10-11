@@ -18,20 +18,24 @@ export class ApiService {
 
   constructor(
     private http: HttpClient,
-    ) {}
+  ) { }
 
   findAuthor(text: string, documentGroup: number): Observable<any> {
     const anonymousText: AnonymousTextDTO = {
-      group : documentGroup,
-      body : text
+      group: documentGroup,
+      body: text
     };
     return this.http.post<AnonymousTextDTO>('findauthor/', anonymousText);
   }
 
 
-  getDocuments(groupName?: string): Observable<DocumentsByAuthor[]> {
-    if (groupName) {
-      return this.http.get<DocumentsByAuthor[]>('docsbyauthor/?group=' + groupName);
+  getDocuments(group?: number, authors?: number[]): Observable<DocumentsByAuthor[]> {
+    if (group && authors.length > 0) {
+      return this.http.get<DocumentsByAuthor[]>('docsbyauthor/?group=' + group + '&&author=' + authors);
+    } else if (group) {
+      return this.http.get<DocumentsByAuthor[]>('docsbyauthor/?group=' + group);
+    } else if (authors.length > 0) {
+      return this.http.get<DocumentsByAuthor[]>('docsbyauthor/?author=' + authors);
     }
     return this.http.get<DocumentsByAuthor[]>('docsbyauthor/');
 

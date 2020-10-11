@@ -1,7 +1,7 @@
 
 export class DocumentAuthor {
   id: number;
-  user: 1;
+  user: number;
   name: string;
   description: string;
 }

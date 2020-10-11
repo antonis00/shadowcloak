@@ -8,7 +8,6 @@ import { SlidePanelsSharedService } from 'src/app/services/slide.panels.shared.s
 import { SingleDocument } from 'src/app/models/single-document';
 
 
-
 @Component({
   selector: 'app-stylometry',
   templateUrl: './stylometry.component.html',
@@ -25,7 +24,9 @@ export class StylometryComponent implements OnInit {
   reloadPage = false;
 
   rowIndex;
+
   selectedGroup = 3;
+  selectedAuthors: number[] = [];
 
 
   ngOnInit(): void {
@@ -114,10 +115,14 @@ export class StylometryComponent implements OnInit {
 
   initializePage() {
     this.slidePanelsSharedService.reloadPage.subscribe((value) => {
-      if (true === value) {
+      if (value === true) {
+
         this.apiService.getDocumentsGroups().subscribe(res => {
           this.documentGroups = res;
           this.newGroups();
+          if (!this.selectedGroup) {
+            this.selectedGroup = this.documentGroups[0].id;
+          }
         });
 
         this.apiService.getDocumentsAuthors().subscribe(res => {
@@ -125,7 +130,7 @@ export class StylometryComponent implements OnInit {
           this.newAuthors();
         });
 
-        this.apiService.getDocuments('books').subscribe(res => {
+        this.apiService.getDocuments(this.selectedGroup, this.selectedAuthors).subscribe(res => {
           this.documentsByAuthor = res;
         });
 
@@ -133,5 +138,41 @@ export class StylometryComponent implements OnInit {
       }
     });
   }
+
+  getSelectedGroup(grouId: number) {
+    this.selectedGroup = grouId;
+    this.newReloadPage(true);
+  }
+
+
+  getSelectedAuthors(event: {
+    isUserInput: any;
+    source: { value: any; selected: any };
+  }) {
+    if (event.isUserInput) {
+      const selectedAuthorId = event.source.value;
+      if (event.source.selected === true) {
+        if (this.selectedAuthors.indexOf(selectedAuthorId) === -1) {
+          this.selectedAuthors.push(selectedAuthorId);
+        }
+      } else {
+        const index = this.selectedAuthors.indexOf(selectedAuthorId, 0);
+        if (index > -1) {
+          this.selectedAuthors.splice(index, 1);
+        }
+      }
+    }
+  }
+
+  sendSelectedAuthors(clickOpen: boolean) {
+    if (!clickOpen) {
+      this.newReloadPage(true);
+    }
+  }
+
+  get CurrentGroup() {
+    const group = this.documentGroups.find(x => x.id === this.selectedGroup);
+    return group.name;
+}
 
 }

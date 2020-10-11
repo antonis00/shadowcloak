@@ -106,7 +106,7 @@
 
   .edit-delete-icons-container {
     margin-right: 10px;
-
+    visibility: hidden;
     &>mat-icon {
       margin: 6px 8px 0 8px;
       opacity: 0.6;
@@ -156,7 +156,6 @@ mat-list-item {
     background-color: rgba(0, 0, 0, 0.05);
   }
 
-
 }
 
 .slide-panel-container {
@@ -181,4 +180,13 @@ mat-list-item {
   &:hover {
     opacity: 1;
   }
+}
+
+.edit-delete-icons-container.visible-icons {
+    visibility: visible!important;
+}
+
+.authors-select-last-item {
+  border-top: 1px dashed grey;
+  font-weight: 500;
 }

@@ -18,6 +18,8 @@ import { MatSidenavModule } from '@angular/material';
 import { MatCardModule } from '@angular/material';
 import { MatDatepickerModule } from '@angular/material';
 import { MatNativeDateModule  } from '@angular/material';
+import { FormsModule } from '@angular/forms';
+
 
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './navbar/navbar.component';
@@ -72,7 +74,8 @@ import { UserService } from './services/user.service';
     MatSidenavModule,
     MatCardModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    FormsModule
   ],
   providers: [
     ApiService,
