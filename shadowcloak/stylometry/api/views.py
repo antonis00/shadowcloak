@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework import mixins
 from rest_framework import views
+from rest_framework import filters
+
 from stylometry.models import Author, Document, Group
 from stylometry.api.permissions import IsOwnerOrReadOnly
 from stylometry.api.serializers import AuthorSerializer, DocumentSerializer, GroupSerializer, FindAuthor, MyTokenObtainPairSerializer, DocumentsByAuthorSerializer
@@ -53,14 +55,12 @@ class DocumentViewset(ModelViewSet):
         author = self.request.query_params.get('author', None)
         group = self.request.query_params.get('group', None)
 
-        if author is not None:
-            if group is not None:
-                return self.queryset.filter(author__user__username=self.request.user, author__name=author.lower(), group__name=group.lower()).order_by('author')
-            else:
-                return self.queryset.filter(author__user__username=self.request.user, author__name=author.lower()).order_by('author')
-        else:
-            if group is not None:
-                return self.queryset.filter(author__user__username=self.request.user, group__name=group.lower()).order_by('author')
+        if author is not None and group is not None:
+            return self.queryset.filter(author__user__username=self.request.user, author__name=author.lower(), group__name=group.lower()).order_by('author')
+        elif author is not None:
+            return self.queryset.filter(author__user__username=self.request.user, author__name=author.lower()).order_by('author')
+        elif group is not None:
+            return self.queryset.filter(author__user__username=self.request.user, group__name=group.lower()).order_by('author')
 
         return self.queryset.filter(author__user__username=self.request.user).order_by('author')
         
@@ -68,9 +68,19 @@ class DocumentViewset(ModelViewSet):
 
 class DocumentsByAuthorView(views.APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request, format=None):
         user = self.request.user
+        author = self.request.query_params.get('author', None)
+        group = self.request.query_params.get('group', None)
+
+        if author is not None and group is not None:
+            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, id=author, documents__group=group), many=True).data)
+        elif author is not None:
+            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, id=author), many=True).data)
+        elif group is not None:
+            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, documents__group=group), many=True).data)
+
         return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user), many=True).data)
 
 
