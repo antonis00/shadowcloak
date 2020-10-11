@@ -75,13 +75,13 @@ class DocumentsByAuthorView(views.APIView):
         group = self.request.query_params.get('group', None)
 
         if author is not None and group is not None:
-            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, id=author, documents__group=group), many=True).data)
+            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, id=author, documents__group=group).distinct(), many=True).data)
         elif author is not None:
-            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, id=author), many=True).data)
+            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, id=author), many=True).distinct().data)
         elif group is not None:
-            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, documents__group=group), many=True).data)
-
-        return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user), many=True).data)
+            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, documents__group=group).distinct(), many=True).data)
+        
+        return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user).distinct(), many=True).data)
 
 
     
