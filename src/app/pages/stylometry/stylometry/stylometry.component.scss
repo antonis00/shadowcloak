@@ -1,5 +1,6 @@
 .container {
   min-width: 94%;
+  margin-bottom: 40px;
 
   .documents-header {
     display: flex;
@@ -69,7 +70,7 @@
   }
 
   .mat-expansion-panel-header-description {
-    @media only screen and (max-width: 600px) {
+    @media only screen and (max-width: 980px) {
       display: none;
     }
   }
@@ -98,7 +99,7 @@
     padding-top: 12px;
     display: flex;
     &:hover {
-      .edit-author-icon {
+      .edit-delete-author-icons {
         visibility: visible;
       }
     }
@@ -159,11 +160,13 @@ mat-list-item {
 }
 
 .slide-panel-container {
-  position: absolute;
-  top: 66px;
+  position: fixed;
+  top: 0px;
   right: 0px;
   width: 40%;
-  height: calc(100% - 66px);
+  height: 100%;
+  z-index: 12;
+
   @media only screen and (max-width: 1600px) {
     width: 50%;
   }
@@ -173,13 +176,26 @@ mat-list-item {
 }
 
 .edit-author-icon {
-  margin-left: auto;
+  margin-right: 12px;
   cursor: pointer;
   opacity: 0.7;
-  visibility: hidden;
   &:hover {
-    opacity: 1;
+    opacity: 0.9;
   }
+}
+
+.delete-author-icon {
+  margin-right: 6px;
+  cursor: pointer;
+  opacity: 0.7;
+  &:hover {
+    opacity:0.9;
+  }
+}
+
+.edit-delete-author-icons {
+  margin-left: auto;
+  visibility: hidden;
 }
 
 .edit-delete-icons-container.visible-icons {
@@ -189,4 +205,36 @@ mat-list-item {
 .authors-select-last-item {
   border-top: 1px dashed grey;
   font-weight: 500;
+}
+
+.mat-expansion-panel {
+  width: 91vw;
+}
+
+.backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+}
+
+.modal-dialog {
+  top: 20%;
+}
+
+.modal-header {
+  background-color: #478cc3;
+  color: white;
+  padding: .6rem .6rem .7rem .8rem;
+}
+
+.modal-header .close {
+  position: absolute;
+  right: 20px;
+}
+
+.modal-content {
+  border-radius: .4rem;
 }

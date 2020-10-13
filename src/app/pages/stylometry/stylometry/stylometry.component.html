@@ -24,8 +24,10 @@
     <span class="filter-container">
       <mat-form-field appearance="legacy">
         <mat-label>Authors</mat-label>
-        <mat-select multiple panelClass="select-panel" (onSelectionChange)="getSelectedAuthors($event)" (openedChange)="sendSelectedAuthors($event)">
-          <mat-option *ngFor="let author of documentAuthors" [value]="author.id" (onSelectionChange)="getSelectedAuthors($event)">
+        <mat-select multiple panelClass="select-panel" (onSelectionChange)="getSelectedAuthors($event)"
+          (openedChange)="sendSelectedAuthors($event)">
+          <mat-option *ngFor="let author of documentAuthors" [value]="author.id"
+            (onSelectionChange)="getSelectedAuthors($event)">
             {{author.name | titlecase}}
           </mat-option>
         </mat-select>
@@ -36,7 +38,8 @@
           <mat-option *ngFor="let group of documentGroups" [value]="group.name" (click)="getSelectedGroup(group.id)">
             {{group.name | titlecase}}
           </mat-option>
-          <mat-option (click)="openGroupSlidePanel(2,selectedGroup)" class="authors-select-last-item"> Edit Current Group  </mat-option>
+          <mat-option (click)="openGroupSlidePanel(2,selectedGroup)" class="authors-select-last-item"> Edit Current
+            Group </mat-option>
         </mat-select>
       </mat-form-field>
 
@@ -49,14 +52,20 @@
 
     <div class="accordion-author-container">
       <span class="group-text"> Author: {{ documentByAuthor.name | titlecase }}
-        <mat-icon class="edit-author-icon"
-        *ngIf="!slidePanelsSharedService.showPanelContainer"
-          (click)="accordion.closeAll();openAuthorSlidePanel(2, documentByAuthor.id)">edit</mat-icon>
+        <span class="edit-delete-author-icons">
+          <mat-icon class="edit-author-icon" *ngIf="!slidePanelsSharedService.showPanelContainer"
+            (click)="accordion.closeAll();openAuthorSlidePanel(2, documentByAuthor.id)">edit
+          </mat-icon>
+          <mat-icon class="delete-author-icon" *ngIf="!slidePanelsSharedService.showPanelContainer"
+            (click)="accordion.closeAll();showDeleteDialog(2, documentByAuthor.name, documentByAuthor.id)">
+            delete_outline
+          </mat-icon>
+        </span>
       </span>
     </div>
     <mat-accordion class="headers-align" multi="true">
       <mat-expansion-panel *ngFor="let document of documentByAuthor.documents; let i = index">
-        <mat-expansion-panel-header  (mouseover)="rowIndex = i" (mouseleave)="rowIndex = null">
+        <mat-expansion-panel-header (mouseover)="rowIndex = i" (mouseleave)="rowIndex = null">
           <mat-panel-title>
             Title: {{document.title | titlecase}}
           </mat-panel-title>
@@ -64,23 +73,20 @@
             {{document.description | titlecase}}
           </mat-panel-description>
           <div class="edit-delete-icons-container" [ngClass]="rowIndex == i ? 'visible-icons': 'hidden-icons'">
-            <mat-icon *ngIf="!slidePanelsSharedService.showPanelContainer"
+            <mat-icon
               (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();openDocumentSlidePanel(2, document)">
               edit</mat-icon>
-            <mat-icon *ngIf="!slidePanelsSharedService.showPanelContainer"
-              (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();deleteDocument(document)">
+            <mat-icon
+              (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();showDeleteDialog(1, document.title, document.id)">
               delete_outline</mat-icon>
           </div>
         </mat-expansion-panel-header>
 
-        <mat-form-field>
-          <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="1">
-            {{document.body}}
-        </textarea>
-        </mat-form-field>
+        <ng-template matExpansionPanelContent>
+          {{document.body}}
+        </ng-template>
 
       </mat-expansion-panel>
-
     </mat-accordion>
 
   </ng-container>
@@ -92,3 +98,26 @@
   <app-author-slide-panel *ngIf="slidePanelsSharedService.showAuthorPanel"></app-author-slide-panel>
   <app-group-slide-panel *ngIf="slidePanelsSharedService.showGroupPanel"></app-group-slide-panel>
 </div>
+
+<div class="backdrop" *ngIf="slidePanelsSharedService.showPanelContainer"></div>
+
+
+<div class="backdrop" [ngStyle]="{'display':display}"></div>
+<div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':display}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="closeDialog()"><span
+            aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Delete {{ modalType }} </h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete: "{{ modalMessage }}"?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" (click)="closeDialog()">Cancel</button>
+        <button type="button" class="btn btn-default" (click)="deleteByType(this.modalIdToDelete)">Confirm</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal !-->

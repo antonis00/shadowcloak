@@ -58,6 +58,7 @@ export class ApiService {
   }
 
   createDocument(data): Observable<CreateDocumentDTO> {
+    console.log(data);
     return this.http.post<CreateDocumentDTO>('documents/', data);
   }
 

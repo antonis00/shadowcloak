@@ -6,6 +6,7 @@ import { DocumentsByAuthor } from 'src/app/models/documents-by-author';
 import { DocumentAuthor } from 'src/app/models/document-author';
 import { SlidePanelsSharedService } from 'src/app/services/slide.panels.shared.service';
 import { SingleDocument } from 'src/app/models/single-document';
+import { MatSnackBar, MatSnackBarHorizontalPosition, MatSnackBarVerticalPosition } from '@angular/material';
 
 
 @Component({
@@ -29,6 +30,14 @@ export class StylometryComponent implements OnInit {
   selectedAuthors: number[] = [];
 
 
+  modalMessage = '';
+  modalType = '';
+  modalIdToDelete: number;
+  display = 'none';
+
+  horizontalPosition: MatSnackBarHorizontalPosition = 'end';
+  verticalPosition: MatSnackBarVerticalPosition = 'top';
+
   ngOnInit(): void {
     this.initializePage();
   }
@@ -36,6 +45,7 @@ export class StylometryComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     public slidePanelsSharedService: SlidePanelsSharedService,
+    private snackBar: MatSnackBar,
   ) { }
 
   openGroupSlidePanel(choice: number, group?: number) {
@@ -83,22 +93,39 @@ export class StylometryComponent implements OnInit {
     }
   }
 
-  deleteGroup(group: DocumentGroup) {
-    this.apiService.deleteGroup(group.id).subscribe((data) => {
+  deleteGroup(groupId: number) {
+    this.apiService.deleteGroup(groupId).subscribe((data) => {
       this.newReloadPage(true);
+      this.openSnackBar('Group Deleted Succesfully!');
+      this.closeDialog();
     });
   }
 
-  deleteAuthor(author: DocumentAuthor) {
-    this.apiService.deleteAuthor(author.id).subscribe((data) => {
+  deleteAuthor(authorId: number) {
+    this.apiService.deleteAuthor(authorId).subscribe((data) => {
       this.newReloadPage(true);
+      this.openSnackBar('Author Deleted Succesfully!');
+      this.closeDialog();
     });
   }
 
-  deleteDocument(document: SingleDocument) {
-    this.apiService.deleteDocument(document.id).subscribe((data) => {
+  deleteDocument(documentId: number) {
+    console.log(documentId);
+    this.apiService.deleteDocument(documentId).subscribe((data) => {
       this.newReloadPage(true);
+      this.openSnackBar('Document Deleted Succesfully!');
+      this.closeDialog();
     });
+  }
+
+  deleteByType(id: number) {
+    if (this.modalType === 'Document') {
+      this.deleteDocument(id);
+    } else if (this.modalType === 'Author') {
+      this.deleteAuthor(id);
+    } else if (this.modalType === 'Group') {
+      this.deleteGroup(id);
+    }
   }
 
   newGroups() {
@@ -173,6 +200,37 @@ export class StylometryComponent implements OnInit {
   get CurrentGroup() {
     const group = this.documentGroups.find(x => x.id === this.selectedGroup);
     return group.name;
-}
+  }
 
+  showDeleteDialog(type: number, name: string, id: number): void {
+    if (type === 1) {
+      this.modalType = 'Document';
+    } else if (type === 2) {
+      this.modalType = 'Author';
+    } else if (type === 3) {
+      this.modalType = 'Group';
+    }
+
+    this.modalMessage = name;
+    this.modalIdToDelete = id;
+    this.openDialog();
+  }
+
+  openDialog(): void {
+    this.display = 'block';
+  }
+
+  closeDialog(): void {
+    this.modalIdToDelete = null;
+    this.display = 'none';
+  }
+
+  openSnackBar(message: string) {
+    this.snackBar.open(message, '', {
+      duration: 3000,
+      horizontalPosition: this.horizontalPosition,
+      verticalPosition: this.verticalPosition,
+      panelClass: ['green-snackbar']
+    });
+  }
 }
