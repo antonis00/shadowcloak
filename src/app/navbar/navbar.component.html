@@ -25,8 +25,8 @@
     </ul>
 
     <ul class="nav navbar-nav navbar-right">
-      <li>
-        <a *ngIf="currentUser" class="nav-link" style="cursor:pointer" (click)="logout()">Logout({{currentUser}})</a>
+      <li class="logout-list-row">
+        <a *ngIf="currentUser" class="nav-link logout-username" (click)="logout()"> {{currentUser | titlecase }}   <mat-icon class="exit-icon">exit_to_app</mat-icon> </a>
       </li>
     </ul>
   </div>

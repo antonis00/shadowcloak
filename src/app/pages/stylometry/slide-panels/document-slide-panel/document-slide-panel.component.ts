@@ -86,7 +86,6 @@ export class DocumentSlidePanelComponent implements OnInit {
         }
       );
     } else {
-      console.log(this.documentForm.value);
       this.apiService.createDocument(this.documentForm.value).subscribe(
         (data) => {
           this.openSnackBar('Document Created Succesfully!');

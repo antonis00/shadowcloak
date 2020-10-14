@@ -38,7 +38,9 @@
           <mat-option *ngFor="let group of documentGroups" [value]="group.name" (click)="getSelectedGroup(group.id)">
             {{group.name | titlecase}}
           </mat-option>
-          <mat-option (click)="openGroupSlidePanel(2,selectedGroup)" class="authors-select-last-item"> Edit Current
+          <mat-option (click)="openGroupSlidePanel(2,selectedGroup)" class="group-edit-selected"> Edit Current
+            Group </mat-option>
+          <mat-option (click)="showDeleteDialog(3,CurrentGroup, selectedGroup)" class="group-delete-selected"> Delete Current
             Group </mat-option>
         </mat-select>
       </mat-form-field>
@@ -48,7 +50,7 @@
 
   <mat-divider></mat-divider>
 
-  <ng-container *ngFor="let documentByAuthor of documentsByAuthor">
+  <ng-container *ngFor="let documentByAuthor of documentsByAuthor; let j = index">
 
     <div class="accordion-author-container">
       <span class="group-text"> Author: {{ documentByAuthor.name | titlecase }}
@@ -63,16 +65,19 @@
         </span>
       </span>
     </div>
-    <mat-accordion class="headers-align" multi="true">
+
+    <mat-accordion class="headers-align" multi=false>
       <mat-expansion-panel *ngFor="let document of documentByAuthor.documents; let i = index">
-        <mat-expansion-panel-header (mouseover)="rowIndex = i" (mouseleave)="rowIndex = null">
+        <mat-expansion-panel-header (mouseover)="rowIndex = i; rowAuthor = documentByAuthor.id"
+          (mouseleave)="rowIndex = null">
           <mat-panel-title>
             Title: {{document.title | titlecase}}
           </mat-panel-title>
           <mat-panel-description>
             {{document.description | titlecase}}
           </mat-panel-description>
-          <div class="edit-delete-icons-container" [ngClass]="rowIndex == i ? 'visible-icons': 'hidden-icons'">
+          <div class="edit-delete-icons-container"
+            [ngClass]="rowIndex == i &&  rowAuthor === documentByAuthor.id? 'visible-icons': 'hidden-icons'">
             <mat-icon
               (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();openDocumentSlidePanel(2, document)">
               edit</mat-icon>
@@ -101,7 +106,6 @@
 
 <div class="backdrop" *ngIf="slidePanelsSharedService.showPanelContainer"></div>
 
-
 <div class="backdrop" [ngStyle]="{'display':display}"></div>
 <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':display}">
   <div class="modal-dialog" role="document">
@@ -112,7 +116,9 @@
         <h4 class="modal-title">Delete {{ modalType }} </h4>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to delete: "{{ modalMessage }}"?</p>
+        <p>Are you sure you want to delete: "{{ modalMessage | titlecase }}"?</p>
+        <p *ngIf="this.modalType==='Author' || this.modalType==='Group'">All documents of that
+          {{ modalType | lowercase }} will also be deleted!</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" (click)="closeDialog()">Cancel</button>

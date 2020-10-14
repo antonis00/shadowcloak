@@ -25,10 +25,10 @@ export class StylometryComponent implements OnInit {
   reloadPage = false;
 
   rowIndex;
+  rowAuthor;
 
   selectedGroup = 3;
   selectedAuthors: number[] = [];
-
 
   modalMessage = '';
   modalType = '';
@@ -110,7 +110,6 @@ export class StylometryComponent implements OnInit {
   }
 
   deleteDocument(documentId: number) {
-    console.log(documentId);
     this.apiService.deleteDocument(documentId).subscribe((data) => {
       this.newReloadPage(true);
       this.openSnackBar('Document Deleted Succesfully!');
@@ -199,7 +198,9 @@ export class StylometryComponent implements OnInit {
 
   get CurrentGroup() {
     const group = this.documentGroups.find(x => x.id === this.selectedGroup);
-    return group.name;
+    if (group) {
+      return group.name;
+    }
   }
 
   showDeleteDialog(type: number, name: string, id: number): void {
