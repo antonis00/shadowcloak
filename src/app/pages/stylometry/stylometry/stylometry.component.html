@@ -2,7 +2,7 @@
 
   <div class="documents-header">
     <span>
-      <button mat-button class="expand-button" (click)="accordion.openAll()">Expand All</button>
+      <!-- <button mat-button class="expand-button" (click)="accordion.openAll()">Expand All</button> -->
     </span>
     <span>
       <button mat-button class="expand-button" (click)="accordion.closeAll()">Collapse All</button>
@@ -50,6 +50,8 @@
 
   <mat-divider></mat-divider>
 
+  <mat-accordion class="headers-align" multi=true>
+
   <ng-container *ngFor="let documentByAuthor of documentsByAuthor; let j = index">
 
     <div class="accordion-author-container">
@@ -66,10 +68,8 @@
       </span>
     </div>
 
-    <mat-accordion class="headers-align" multi=false>
       <mat-expansion-panel *ngFor="let document of documentByAuthor.documents; let i = index">
-        <mat-expansion-panel-header (mouseover)="rowIndex = i; rowAuthor = documentByAuthor.id"
-          (mouseleave)="rowIndex = null">
+        <mat-expansion-panel-header (mouseover)="rowIndex = i; rowAuthor = documentByAuthor.id" (mouseleave)="rowIndex = null">
           <mat-panel-title>
             Title: {{document.title | titlecase}}
           </mat-panel-title>
@@ -92,9 +92,9 @@
         </ng-template>
 
       </mat-expansion-panel>
-    </mat-accordion>
 
   </ng-container>
+</mat-accordion>
 </div>
 
 
