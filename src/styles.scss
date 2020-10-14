@@ -40,3 +40,19 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     color: white;
   }
 }
+
+
+@font-face {
+  font-family: damion;
+  src: url(assets/fonts/Damion-Regular.ttf) format("opentype");
+}
+
+@font-face {
+  font-family: kalam-bold;
+  src: url(assets/fonts/Kalam-Bold.ttf) format("opentype");
+}
+
+@font-face {
+  font-family: kalam;
+  src: url(assets/fonts/Kalam-Regular.ttf) format("opentype");
+}

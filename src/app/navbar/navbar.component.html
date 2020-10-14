@@ -1,5 +1,12 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
-  <img height="50" alt="ShadowCloak" src="../assets/shadow-cloak.png" ondragstart="return false;" />
+  <img height="60" alt="ShadowCloak" src="../assets/shadow-cloak.png" ondragstart="return false;" (click)="this.router.navigate(['./'])" />
+  <span class="shadow-cloak-logo-text" ondragstart="return false;" (click)="this.router.navigate(['./'])">
+    <p>
+      Shadow <br>
+      &nbsp;Cloak
+    </p>
+
+  </span>
 
   <button class="navbar-toggler" type="button" (click)="toggleNavbar()" data-toggle="collapse"
     data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"

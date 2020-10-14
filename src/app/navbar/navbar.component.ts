@@ -17,7 +17,7 @@ export class NavbarComponent implements OnInit {
   navbarOpen = false;
 
   constructor(
-    private router: Router,
+    public router: Router,
     private authenticationService: AuthenticationService,
     public authGuard: AuthGuard
   ) {

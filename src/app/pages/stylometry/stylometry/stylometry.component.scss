@@ -33,6 +33,12 @@
 
   .add-text {
     display: flex;
+    font-size: 18px;
+
+    &>mat-icon {
+      position: relative;
+      top: 0.5px;
+    }
   }
 
   .expand-button {
@@ -99,6 +105,7 @@
     padding-top: 12px;
     height: 50px;
     display: flex;
+
     &:hover {
       .edit-delete-author-icons {
         visibility: visible;
@@ -109,6 +116,7 @@
   .edit-delete-icons-container {
     margin-right: 10px;
     visibility: hidden;
+
     &>mat-icon {
       margin: 6px 8px 0 8px;
       opacity: 0.6;
@@ -171,6 +179,7 @@ mat-list-item {
   @media only screen and (max-width: 1600px) {
     width: 50%;
   }
+
   @media only screen and (max-width: 1200px) {
     width: 100%;
   }
@@ -180,6 +189,7 @@ mat-list-item {
   margin-right: 12px;
   cursor: pointer;
   opacity: 0.7;
+
   &:hover {
     opacity: 0.9;
   }
@@ -189,8 +199,9 @@ mat-list-item {
   margin-right: 6px;
   cursor: pointer;
   opacity: 0.7;
+
   &:hover {
-    opacity:0.9;
+    opacity: 0.9;
   }
 }
 
@@ -200,13 +211,14 @@ mat-list-item {
 }
 
 .edit-delete-icons-container.visible-icons {
-    visibility: visible!important;
+  visibility: visible !important;
 }
 
 .group-edit-selected {
   border-top: 1px dashed rgb(153, 153, 153);
   font-weight: 500;
 }
+
 .group-delete-selected {
   font-weight: 500;
 }
