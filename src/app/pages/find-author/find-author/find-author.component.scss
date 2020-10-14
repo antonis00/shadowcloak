@@ -21,7 +21,9 @@
     .btn {
       background-color: #007bff;
       border-color: #007bff;
+      padding: 8px 12px;
       color: white;
+      font-size: 18px;
       margin: 0 10px 0 0;
     }
   }
@@ -53,4 +55,13 @@
 
 .modal-content {
   border-radius: .4rem;
+}
+
+.modal-footer {
+  margin-top: 20px;
+  height: 60px;
+}
+
+mat-form-field {
+  width: 100%;
 }

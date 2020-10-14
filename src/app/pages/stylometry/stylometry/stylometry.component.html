@@ -34,8 +34,8 @@
       </mat-form-field>
       <mat-form-field appearance="legacy">
         <mat-label>Group</mat-label>
-        <mat-select panelClass="select-panel" [value]="CurrentGroup">
-          <mat-option *ngFor="let group of documentGroups" [value]="group.name" (click)="getSelectedGroup(group.id)">
+        <mat-select panelClass="select-panel" [value]="selectedGroup">
+          <mat-option *ngFor="let group of documentGroups" [value]="group.id" (click)="getSelectedGroup(group.id)">
             {{group.name | titlecase}}
           </mat-option>
           <mat-option (click)="openGroupSlidePanel(2,selectedGroup)" class="group-edit-selected"> Edit Current
@@ -71,10 +71,10 @@
       <mat-expansion-panel *ngFor="let document of documentByAuthor.documents; let i = index">
         <mat-expansion-panel-header (mouseover)="rowIndex = i; rowAuthor = documentByAuthor.id" (mouseleave)="rowIndex = null">
           <mat-panel-title>
-            Title: {{document.title | titlecase}}
+            {{document.title | titlecase}}
           </mat-panel-title>
           <mat-panel-description>
-            {{document.description | titlecase}}
+            {{document.description}}
           </mat-panel-description>
           <div class="edit-delete-icons-container"
             [ngClass]="rowIndex == i &&  rowAuthor === documentByAuthor.id? 'visible-icons': 'hidden-icons'">

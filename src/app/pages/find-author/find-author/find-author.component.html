@@ -5,6 +5,15 @@
     <div class="h-75 row first-row">
       <div class="col-md-12 mb-12 mb-md-0">
 
+        <mat-form-field appearance="outline">
+          <mat-label>Category</mat-label>
+          <mat-select panelClass="select-panel" formControlName="groupSelect">
+            <mat-option *ngFor="let group of documentGroups" [value]="group.id" (click)="selectGroup(group.id)">
+              {{group.name | titlecase}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
         <textarea class="form-control" rows="14" placeholder="Paste the disputed text here..."
           id="textarea-left" formControlName="textAreaLeft" #textAreaLeft>
         </textarea>
@@ -21,16 +30,17 @@
           [disabled]="!stylometryForm.get('textAreaLeft').valid">Find Author
         </button>
       </div>
+
     </div>
 
   </form>
 
-  <div class="backdrop" [ngStyle]="{'display':display}"></div>
-  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':display}">
+  <div class="backdrop" [ngStyle]="{'display':displaySuccessModal}"></div>
+  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':displaySuccessModal}">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" aria-label="Close" (click)="closeDialog()"><span
+          <button type="button" class="close" aria-label="Close" (click)="closeDialog(1)"><span
               aria-hidden="true">&times;</span></button>
           <h4 class="modal-title">Most Probable Author</h4>
         </div>
@@ -38,7 +48,26 @@
           <p>{{ comparisonResult | titlecase}}</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" (click)="closeDialog()">Close</button>
+          <button type="button" class="btn btn-default" (click)="closeDialog(1)">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal !-->
+
+  <div class="backdrop" [ngStyle]="{'display':displayErrorModal}"></div>
+  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':displayErrorModal}">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" aria-label="Close" (click)="closeDialog(2)"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Request Unsuccessful</h4>
+        </div>
+        <div class="modal-body">
+          <p>{{ comparisonError }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" (click)="closeDialog(2)">Close</button>
         </div>
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

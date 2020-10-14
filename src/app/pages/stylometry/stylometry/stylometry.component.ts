@@ -27,7 +27,7 @@ export class StylometryComponent implements OnInit {
   rowIndex;
   rowAuthor;
 
-  selectedGroup = 3;
+  selectedGroup = 0;
   selectedAuthors: number[] = [];
 
   modalMessage = '';
@@ -146,7 +146,7 @@ export class StylometryComponent implements OnInit {
         this.apiService.getDocumentsGroups().subscribe(res => {
           this.documentGroups = res;
           this.newGroups();
-          if (!this.selectedGroup) {
+          if (this.selectedGroup === 0) {
             this.selectedGroup = this.documentGroups[0].id;
           }
         });
@@ -169,7 +169,6 @@ export class StylometryComponent implements OnInit {
     this.selectedGroup = grouId;
     this.newReloadPage(true);
   }
-
 
   getSelectedAuthors(event: {
     isUserInput: any;
