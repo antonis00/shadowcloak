@@ -21,6 +21,6 @@ def create_dictionary(user, group):
         papers[str(author)] = athor_text.rstrip()
 
     if len(papers) < 2:
-        raise APIException("There must be more than one authors in this specific group in order to infer authorship!")
+        raise APIException("There must be known documents from more than one authors in the selected category in order to infer authorship! Add more known documents or try another category.")
 
     return papers
