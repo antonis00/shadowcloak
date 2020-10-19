@@ -7,6 +7,8 @@
       width: 100%;
       line-height: 30px;
       color: #6a5f49;
+      min-height: 440px;
+      height: 66vh;
       text-shadow: 0 1px 1px white;
       background-color: #fefff4;
       background-image: -webkit-radial-gradient(center, cover, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.1) 90%), -webkit-repeating-linear-gradient(top, transparent 0%, transparent 29px, rgba(239, 207, 173, 0.7) 29px, rgba(239, 207, 173, 0.7) 30px);
@@ -46,6 +48,7 @@
       z-index: -1;
       left: 0;
       right: 0;
+      height: 66vh;
       background: #feffefe6;
       border: 1px solid rgba(170, 157, 134, 0.7);
       -webkit-transform: rotate(2deg);

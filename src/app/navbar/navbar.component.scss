@@ -14,7 +14,7 @@
   .shadow-cloak-logo-text {
     color: white;
     font-family: 'Damion', cursive;
-    line-height: 100%;
+    line-height: 94%;
     font-size: 30px;
     margin-right: 60px;
     -webkit-user-select: none;
@@ -38,14 +38,18 @@
     font-size: 24px;
     font-family: 'kalam', cursive;
 
-    @media (min-width: 768px) {
-      margin: 0 24px 0 0;
+    @media (max-width: 991px) {
+      margin: 0 auto;
     }
   }
 
   .first-list-item {
-    @media (min-width: 768px) {
+    @media (min-width: 992px) {
       margin-left: 30px;
+    }
+
+    @media (max-width: 991px) {
+      margin-top: 40px;
     }
   }
 
@@ -62,6 +66,7 @@
     cursor: pointer;
     font-size: 24px;
     font-family: 'kalam', cursive;
+
     @media (max-width: 768px) {
       margin: 0 auto;
     }
@@ -75,8 +80,16 @@
 }
 
 .navbar-dark .navbar-nav .nav-link {
-  border-left: 1px solid #f5f5f5;
-  border-right: 1px solid #f5f5f5;
-  border-radius: 29px;
+  // border-left: 1px solid #f5f5f5;
+  // border-right: 1px solid #f5f5f5;
+  // border-radius: 29px;
   margin-right: 34px;
+
+  @media (max-width: 1020px) {
+    border: none;
+  }
+
+  @media (max-width: 991px) {
+    margin: 0 auto;
+  }
 }
