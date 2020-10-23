@@ -1,67 +1,134 @@
 <div class="container">
-
   <form [formGroup]="stylometryForm">
 
-    <div class="h-75 row first-row">
-      <div class="col-md-6 mb-5 mb-md-0">
+    <div class="row first-row">
+      <mat-label>Most Frequent Tokens:</mat-label>
+      <div class="chips-container">
+        <mat-chip-list aria-label="Tokens">
+          <mat-chip *ngFor="let token of filteredTtokens" [removable]="true" (removed)="removeToken(token)" selected  [color]="getChipColor()">
+            {{ token }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+        </mat-chip-list>
+      </div>
+    </div>
+    <!-- <button type="button" class="btn btn-default" (click)="applyTokens()">Apply</button>
+    <button type="button" class="btn btn-default" (click)="resetTokens()">Reset</button> -->
+
+    <div class="h-50 row second-row">
+      <div class="col-md-12 mb-6 mb-md-0">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Category</mat-label>
+          <mat-select panelClass="select-panel" formControlName="groupSelect">
+            <mat-option *ngFor="let group of documentGroups" [value]="group.id">
+              {{group.name | titlecase}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
         <textarea class="form-control" rows="14" placeholder="Write the text you want to anonymize here..."
-          id="textarea-left" formControlName="textAreaLeft" (input)="enableRightTextArea($event.target)" #textAreaLeft>
+          id="textarea-left" formControlName="anonymousTextArea" #anonymousTextArea>
         </textarea>
 
-        <small *ngIf="!stylometryForm.get('textAreaLeft').valid && stylometryForm.get('textAreaLeft').touched"
+        <small *ngIf="!stylometryForm.get('anonymousTextArea').valid && stylometryForm.get('anonymousTextArea').touched"
           class="form-text validation-message">* The above text is required</small>
-
-      </div>
-
-      <div class="col-md-6">
-
-        <textarea class="form-control" rows="14" id="textarea-right" [value]=""
-          placeholder="Write a second text if you want to compare with the first..." formControlName="textAreaRight"
-          #textAreaRight>
-        </textarea>
-
-        <div class="alert-container">
-          <div class="alert alert-success inside-textarea" role="alert" *ngIf=isCopyAlertVisible [@fadeInOnEnter]
-            [@fadeOutOnLeave]>
-            <div class="alert-text">
-              Copied to clipboard!
-            </div>
-          </div>
-        </div>
 
       </div>
     </div>
 
-    <div class="h-25 row">
+    <div class="h-15 row">
       <div class="btn-container mb-4">
-        <button type="button" (click)="findAuthor()" class="btn anonymize"
-          [disabled]="!stylometryForm.get('textAreaLeft').valid">
-          &nbsp;&nbsp;Analyse Text&nbsp;&nbsp;
+        <button type="button" (click)="startAnalysis()" class="btn anonymize"
+          [disabled]="!stylometryForm.get('anonymousTextArea').valid">
+          &nbsp;&nbsp;Stylometry Analysis&nbsp;&nbsp;
         </button>
-        <button type="button" (click)="compareStylometricStyle();" class="btn anonymize"
-          [disabled]="!stylometryForm.get('textAreaLeft').valid || stylometryForm.get('textAreaRight').value == ''">Compare
-          Texts
+        <button type="button" (click)="evaluate()" class="btn anonymize" [disabled]="!comparisonResult">
+          &nbsp;&nbsp;Evaluate Anonymization&nbsp;&nbsp;
+        </button>
+        <button type="button" (click)="copyAnonymousTextToClipboard()" class="btn anonymize"
+          [disabled]="!stylometryForm.get('anonymousTextArea').valid">
+          &nbsp;&nbsp;Copy To Clipboard&nbsp;&nbsp;
         </button>
       </div>
     </div>
 
   </form>
 
-  <div class="backdrop" [ngStyle]="{'display':display}"></div>
-  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':display}">
+
+
+  <div class="backdrop" [ngStyle]="{'display':displaySuccessModal}"></div>
+  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':displaySuccessModal}">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" aria-label="Close" (click)="closeDialog()"><span
+          <button type="button" class="close" aria-label="Close" (click)="closeDialog(1)"><span
               aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Stylometry analysis</h4>
+          <h4 class="modal-title">Most Probable Author</h4>
         </div>
         <div class="modal-body">
-          <p>{{ comparisonResult }}</p>
+          <p>{{ comparisonResult | titlecase}}</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" (click)="closeDialog()">Close</button>
+          <button type="button" class="btn btn-default" (click)="closeDialog(1)">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal !-->
+
+  <div class="backdrop" [ngStyle]="{'display':displayErrorModal}"></div>
+  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':displayErrorModal}">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" aria-label="Close" (click)="closeDialog(2)"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Request Unsuccessful</h4>
+        </div>
+        <div class="modal-body">
+          <p>{{ comparisonError }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" (click)="closeDialog(2)">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal !-->
+
+  <div class="backdrop" [ngStyle]="{'display':displayResetModal}"></div>
+  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':displayResetModal}">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" aria-label="Close" (click)="closeDialog(3)"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Start Analysis</h4>
+        </div>
+        <div class="modal-body">
+          <p>All changes will be lost! Are you sure you want to proceed?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" (click)="closeDialog(3)">Close</button>
+          <button type="button" class="btn btn-default" (click)="closeDialog(3);findAuthor()">Proceed</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal !-->
+
+  <div class="backdrop" [ngStyle]="{'display':displayChangedGroupModal}"></div>
+  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':displayChangedGroupModal}">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" aria-label="Close" (click)="closeDialog(4)"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Category Changed</h4>
+        </div>
+        <div class="modal-body">
+          <p>You have changed document category. Anonymization can be done only if the initial category of the analysis is selected. Revert to the initial category or restart the process click Stylometry Analysis. </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" (click)="closeDialog(4)">Close</button>
         </div>
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

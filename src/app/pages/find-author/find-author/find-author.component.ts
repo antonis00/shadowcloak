@@ -14,7 +14,7 @@ import { DocumentGroup } from 'src/app/models/document-group';
 })
 export class FindAuthorComponent implements OnInit {
 
-  @ViewChild('textAreaLeft', { static: false }) textAreaLeft: ElementRef;
+  @ViewChild('anonymousTextArea', { static: false }) anonymousTextArea: ElementRef;
   @ViewChild('textAreaRight', { static: false }) textAreaRight: ElementRef;
 
   stylometryForm: FormGroup;
@@ -29,7 +29,7 @@ export class FindAuthorComponent implements OnInit {
 
   ngOnInit(): void {
     this.stylometryForm = new FormGroup({
-      textAreaLeft: new FormControl(null, Validators.required),
+      anonymousTextArea: new FormControl(null, Validators.required),
       groupSelect: new FormControl(null, Validators.required)
     });
 
@@ -37,7 +37,6 @@ export class FindAuthorComponent implements OnInit {
       this.documentGroups = res;
       if (!this.selectedGroup) {
         this.selectedGroup = this.documentGroups[0].id;
-        console.log('set group select value to ' + this.selectedGroup);
         this.stylometryForm.controls.groupSelect.setValue(this.selectedGroup);
       }
     });
@@ -46,7 +45,7 @@ export class FindAuthorComponent implements OnInit {
   constructor(private apiService: ApiService) { }
 
   findAuthor(): void {
-    this.sendTextForAttribution(this.stylometryForm.get('textAreaLeft').value, this.stylometryForm.get('groupSelect').value);
+    this.sendTextForAttribution(this.stylometryForm.get('anonymousTextArea').value, this.stylometryForm.get('groupSelect').value);
   }
 
   sendTextForAttribution(text: string, group: number): void {

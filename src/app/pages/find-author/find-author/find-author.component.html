@@ -2,7 +2,7 @@
 
   <form [formGroup]="stylometryForm">
 
-    <div class="h-75 row first-row">
+    <div class="h-75 row second-row">
       <div class="col-md-12 mb-12 mb-md-0">
 
         <mat-form-field appearance="outline">
@@ -15,10 +15,10 @@
         </mat-form-field>
 
         <textarea class="form-control" rows="14" placeholder="Paste the disputed text here..."
-          id="textarea-left" formControlName="textAreaLeft" #textAreaLeft>
+          id="textarea-left" formControlName="anonymousTextArea" #anonymousTextArea>
         </textarea>
 
-        <small *ngIf="!stylometryForm.get('textAreaLeft').valid && stylometryForm.get('textAreaLeft').touched"
+        <small *ngIf="!stylometryForm.get('anonymousTextArea').valid && stylometryForm.get('anonymousTextArea').touched"
           class="form-text validation-message">* The above text is required</small>
 
       </div>
@@ -27,7 +27,7 @@
     <div class="h-35 mt-5 row">
       <div class="btn-container mb-4">
         <button type="button" (click)="findAuthor()" class="btn anonymize"
-          [disabled]="!stylometryForm.get('textAreaLeft').valid">Find Author
+          [disabled]="!stylometryForm.get('anonymousTextArea').valid">Find Author
         </button>
       </div>
 

@@ -19,6 +19,7 @@ import { MatCardModule } from '@angular/material';
 import { MatDatepickerModule } from '@angular/material';
 import { MatNativeDateModule  } from '@angular/material';
 import { FormsModule } from '@angular/forms';
+import { MatChipsModule } from '@angular/material';
 
 
 import { AppComponent } from './app.component';
@@ -75,7 +76,8 @@ import { UserService } from './services/user.service';
     MatCardModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    FormsModule
+    MatChipsModule,
+    FormsModule,
   ],
   providers: [
     ApiService,

@@ -2,36 +2,33 @@
   min-width: 80%;
 
   .first-row {
-    margin: 40px 0 0 0;
+    margin: 40px 15px 0 15px;
+    min-height: 100px;
+
+    .chips-container {
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      width: 100%;
+      min-height: 100px;
+      margin-top: 2px;
+    }
+
+    mat-chip {
+      margin: 10px;
+    }
+  }
+
+  .second-row {
+    margin: 20px 0 40px 0;
 
     textarea {
-      min-height: 60vh;
+      min-height: 50vh;
     }
 
     .validation-message {
       color: #b94b29;
       padding-left: 10px;
       position: absolute;
-    }
-
-    .alert-container {
-      height: 50px;
-
-      .alert {
-        padding: 0.53rem 1.25rem;
-
-        .alert-text {
-          text-align: center;
-          color: whitesmoke;
-          font-weight: 600;
-          letter-spacing: 1px;
-        }
-      }
-
-      .inside-textarea {
-        top: -43px;
-        background-color: #6dc796;
-      }
     }
   }
 
@@ -73,4 +70,8 @@
 
 .modal-content {
   border-radius: .4rem;
+}
+
+mat-form-field {
+  width: 100%;
 }

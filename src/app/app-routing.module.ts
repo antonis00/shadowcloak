@@ -17,7 +17,7 @@ const routes: Routes = [
   { path: 'home', component: HomepageComponent, canActivate: [AuthGuard] },
   { path: 'documents', component: StylometryComponent, canActivate: [AuthGuard]},
   { path: 'find-author', component: FindAuthorComponent, canActivate: [AuthGuard] },
-  { path: 'obfuscate', component: ObfuscateComponent, canActivate: [AuthGuard] },
+  { path: 'obfuscate', component: ObfuscateComponent },
   { path: '**', component: PageNotFoundComponent, canActivate: [AuthGuard] }
 ];
 
