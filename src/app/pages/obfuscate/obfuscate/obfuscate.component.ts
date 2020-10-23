@@ -13,6 +13,7 @@ import { MatSnackBar, MatSnackBarHorizontalPosition, MatSnackBarVerticalPosition
     fadeOutOnLeaveAnimation({ duration: 1000, delay: 100 })
   ]
 })
+
 export class ObfuscateComponent implements OnInit {
 
   @ViewChild('anonymousTextArea', { static: false }) anonymousTextArea: ElementRef;
@@ -60,7 +61,7 @@ export class ObfuscateComponent implements OnInit {
     if (this.comparisonResult) {
       this.showResetDialog();
     } else {
-      this.findAuthor();
+      this.analyse();
     }
   }
 
@@ -72,8 +73,23 @@ export class ObfuscateComponent implements OnInit {
     }
   }
 
+  analyse(): void {
+    this.sendTextForAnalysis(this.stylometryForm.get('anonymousTextArea').value, this.stylometryForm.get('groupSelect').value);
+  }
+
   findAuthor(): void {
     this.sendTextForAttribution(this.stylometryForm.get('anonymousTextArea').value, this.stylometryForm.get('groupSelect').value);
+  }
+
+  sendTextForAnalysis(text: string, group: number): void {
+    this.apiService.analyse(text, group).subscribe(
+      data => {
+        this.showResultAuthorDialog(data);
+      },
+      error => {
+        this.showErrorDialog(error.error.detail);
+      }
+    );
   }
 
   sendTextForAttribution(text: string, group: number): void {

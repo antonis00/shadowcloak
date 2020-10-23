@@ -28,6 +28,14 @@ export class ApiService {
     return this.http.post<AnonymousTextDTO>('findauthor/', anonymousText);
   }
 
+  analyse(text: string, documentGroup: number): Observable<any> {
+    const anonymousText: AnonymousTextDTO = {
+      group: documentGroup,
+      body: text
+    };
+    return this.http.post<AnonymousTextDTO>('analyse/', anonymousText);
+  }
+
 
   getDocuments(group?: number, authors?: number[]): Observable<DocumentsByAuthor[]> {
     if (group && authors.length > 0) {
