@@ -15,7 +15,8 @@ from stylometry.api.serializers import AuthorSerializer, DocumentSerializer, Gro
 from rest_auth.registration.views import RegisterView
 
 from stylometry.api.services.retrieve_documents import create_dictionary
-from stylometry.api.services.analysis import mendenhall_characteristic_curves_of_composition, john_burrows_delta_method
+from stylometry.api.services.analysis import analyse_with_burrows_delta
+from stylometry.api.services.attribution import find_author_with_burrows_delta
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -108,10 +109,19 @@ class FindAuthorView(views.APIView):
         group = self.request.data.get('group')
         body = self.request.data.get('body')
         documents_dictionary = create_dictionary(user, group)
-        # mendenhall_characteristic_curves_of_composition(documents_dictionary)
-        result = john_burrows_delta_method(documents_dictionary, body)
+        result = find_author_with_burrows_delta(documents_dictionary, body)
         return Response(result)
 
+class AnalyseView(views.APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, format=None):
+        user = self.request.user
+        group = self.request.data.get('group')
+        body = self.request.data.get('body')
+        documents_dictionary = create_dictionary(user, group)
+        result = analyse_with_burrows_delta(documents_dictionary, body)
+        return Response(result)
 
 
 class MyTokenObtainPairView(TokenObtainPairView):

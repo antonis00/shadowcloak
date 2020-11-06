@@ -10,15 +10,15 @@ def create_dictionary(user, group):
 
     for author in authors:
         documents = Document.objects.filter(author=author, group=group).values()
-        athor_text = ""
+        author_text = ""
 
         if len(documents) == 0:
             continue
 
         for document in documents:
-            athor_text += str(document.get('body')) + " "
+            author_text += str(document.get('body')) + " "
 
-        papers[str(author)] = athor_text.rstrip()
+        papers[str(author)] = author_text.rstrip()
 
     if len(papers) < 2:
         raise APIException("There must be known documents from more than one authors in the selected category in order to infer authorship! Add more known documents or try another category.")

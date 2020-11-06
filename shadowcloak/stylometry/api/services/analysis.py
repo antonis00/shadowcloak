@@ -1,4 +1,4 @@
-# ******************************************  Mendenhall’s Characteristic Curves of Composition  ********************************************
+# Mendenhall’s Characteristic Curves of Composition
 from stylometry.models import Author
 from rest_framework.exceptions import APIException
 
@@ -7,7 +7,7 @@ import matplotlib
 import math
 
 
-def mendenhall_characteristic_curves_of_composition(texts_by_author):
+def curves_of_composition(texts_by_author):
     
     word_tokens_by_author = {}
     length_distributions_by_author = {}
@@ -24,16 +24,16 @@ def mendenhall_characteristic_curves_of_composition(texts_by_author):
         # Get a distribution of token lengths
         token_lengths = [len(token) for token in word_tokens_by_author[author]]
         length_distributions_by_author[author] = nltk.FreqDist(token_lengths)
-        print("Word Tokens for Author " + author + ": " +  str(length_distributions_by_author[author]))
+        # print("Word Tokens for Author " + author + ": " +  str(length_distributions_by_author[author]))
         length_distributions_by_author[author].plot(15,title=author)
     return 0
 
 
 
-# ************************************************  John Burrows’ Delta Method  ******************************************************************
+# John Burrows’ Delta Method
 
 
-def john_burrows_delta_method(texts_by_author, anonymous_text):
+def analyse_with_burrows_delta(texts_by_author, anonymous_text):
     
     word_tokens_by_author = {}
     whole_corpus = []
@@ -55,13 +55,18 @@ def john_burrows_delta_method(texts_by_author, anonymous_text):
     
     # Get a frequency distribution
     whole_corpus_freq_dist = list(nltk.FreqDist(whole_corpus).most_common(50))
-    whole_corpus_freq_dist[ :10 ]  #assssssssssssssssssssssssssssssssssssssssssssssssssssssssssssassssssssssssssssssssssssssssssssss
 
     # The main data structure that holds features of the whole corpus
     features = [word for word,freq in whole_corpus_freq_dist]
+    # features_as_string = ' '.join([str(feature) for feature in features])
+    # print(features_as_string)
+    tagged_features = nltk.pos_tag(features)
+    # print(tagged_features)
+    # features_analysed = 
+    
+
     feature_freqs = {}
 
-    
     for author in texts_by_author:
         # Create a dictionary for each candidate's features
         feature_freqs[author] = {}
@@ -105,7 +110,7 @@ def john_burrows_delta_method(texts_by_author, anonymous_text):
         for feature in features:
 
             # Z-score definition = (value - mean) / stddev
-            # We use intermediate variables to make the code easier to read
+            # Using intermediate variables to make the code easier to read
             feature_val = feature_freqs[author][feature]
             feature_mean = corpus_features[feature]["Mean"]
             feature_stdev = corpus_features[feature]["StdDev"]
@@ -115,6 +120,11 @@ def john_burrows_delta_method(texts_by_author, anonymous_text):
 
     # Tokenize the test case
     tokens_of_anonymous_text = nltk.word_tokenize(anonymous_text)
+    tagged_tokens_of_anonymous_text = nltk.pos_tag(tokens_of_anonymous_text)
+
+    list_of_tokens, list_of_tags = zip(*tagged_tokens_of_anonymous_text)
+    dictionary_with_tagged_tokens_of_anonymous_text = [{'token': token, 'tag': tag} for token,tag in zip(list_of_tokens, list_of_tags)]
+    # print(dictionary_with_tagged_tokens_of_anonymous_text)
 
     # Filter out punctuation and lowercase the tokens
     tokens_of_anonymous_text = [token.lower() for token in tokens_of_anonymous_text
@@ -134,7 +144,7 @@ def john_burrows_delta_method(texts_by_author, anonymous_text):
         feature_mean = corpus_features[feature]["Mean"]
         feature_stdev = corpus_features[feature]["StdDev"]
         testcase_zscores[feature] = (feature_val - feature_mean) / feature_stdev
-        print("Anonymous text's z-score for feature", feature, "is", testcase_zscores[feature])
+        # print("Anonymous text's z-score for feature", feature, "is", testcase_zscores[feature])
 
 
     # Calculate Delta score between each author and unknown text z-scores
@@ -151,4 +161,11 @@ def john_burrows_delta_method(texts_by_author, anonymous_text):
 
     # Find author name with the lowest Delta score
     probable_author = min(delta_score_by_author, key=delta_score_by_author.get)
-    return probable_author
+
+
+    result = {}
+    result['mostProbableAuthor'] = probable_author
+    result['corpusTokens'] = tagged_features
+    result['anonymousTextTokens'] = dictionary_with_tagged_tokens_of_anonymous_text
+    result['rawUserText'] = anonymous_text
+    return result
