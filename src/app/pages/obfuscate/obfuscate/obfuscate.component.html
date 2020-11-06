@@ -1,36 +1,78 @@
 <div class="container">
   <form [formGroup]="stylometryForm">
 
-    <div class="row first-row">
-      <mat-label>Most Frequent Tokens:</mat-label>
+    <div class="toggle-menu-container" *ngIf="duringProcess">
+      <div class="toggle-button-cotainer">
+        <mat-button-toggle-group name="mode" aria-label="mode" value="edit">
+          <mat-button-toggle value="input" (click)="setMode(false)">Input Mode</mat-button-toggle>
+          <mat-button-toggle value="edit" (click)="setMode(true)">Edit Mode</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+      <div class="reset-button-container">
+        <button mat-fab color="warn" class="restart-button" aria-label="Restart">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="first-row" *ngIf="comparisonResult">
+      <mat-label>Most Probable Author:</mat-label>
+      <div class="author-container">
+        {{  comparisonResult | titlecase }}
+      </div>
+    </div>
+
+    <div class="row second-row" *ngIf="allTokens.length>0">
+      <div class="color-guide-chips">
+        <mat-label>Corpus Tokens:</mat-label>
+        <mat-chip-list class="guide-chip-list">
+          <mat-chip [removable]='false' class="mat-chip-blue" selected> Verbs </mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-grey" selected> Adjectives </mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-pink" selected> Nouns </mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-beige" selected> Adverbs </mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-cyan" selected> Pronouns </mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-red" selected> Other parts of speech </mat-chip>
+        </mat-chip-list>
+
+        <!-- <button type="button" class="btn btn-default reset-tokens" (click)="resetTokens()">Reset Tokens</button> -->
+      </div>
       <div class="chips-container">
         <mat-chip-list aria-label="Tokens">
-          <mat-chip *ngFor="let token of filteredTtokens" [removable]="true" (removed)="removeToken(token)" selected  [color]="getChipColor()">
-            {{ token }}
+          <mat-chip *ngFor="let tokenPair of filteredTokens" [removable]="true" (removed)="removeToken(tokenPair)" selected  [ngClass]="getChipColor(tokenPair)">
+            {{ tokenPair.token }}
             <mat-icon matChipRemove>cancel</mat-icon>
           </mat-chip>
         </mat-chip-list>
       </div>
     </div>
-    <!-- <button type="button" class="btn btn-default" (click)="applyTokens()">Apply</button>
-    <button type="button" class="btn btn-default" (click)="resetTokens()">Reset</button> -->
 
-    <div class="h-50 row second-row">
+    <div class="h-50 row third-row">
       <div class="col-md-12 mb-6 mb-md-0">
 
-        <mat-form-field appearance="outline">
-          <mat-label>Category</mat-label>
-          <mat-select panelClass="select-panel" formControlName="groupSelect">
-            <mat-option *ngFor="let group of documentGroups" [value]="group.id">
-              {{group.name | titlecase}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+          <mat-form-field appearance="outline" *ngIf="!editMode && !duringProcess">
+            <mat-label>Category</mat-label>
+            <mat-select panelClass="select-panel" formControlName="groupSelect">
+              <mat-option *ngFor="let group of documentGroups" [value]="group.id">
+                {{group.name | titlecase}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-        <textarea class="form-control" rows="14" placeholder="Write the text you want to anonymize here..."
+        <div *ngIf="editMode"  class="tokenized-text-container">
+          <div class="tokenized-text">
+            <span class="word-token" *ngFor="let tokenPair of anonymousTextTokens">
+              <p [ngClass]="underlineTokensInText(tokenPair)">
+                {{ tokenPair.token }}
+              </p>
+            </span>
+          </div>
+        </div>
+
+        <textarea *ngIf="!editMode" class="form-control" rows="14" placeholder="Write the text you want to anonymize here..."
           id="textarea-left" formControlName="anonymousTextArea" #anonymousTextArea>
+          <ng-template *ngFor="let tokenPair of anonymousTextTokens">
+            <li>  tokenPair </li>
         </textarea>
-
         <small *ngIf="!stylometryForm.get('anonymousTextArea').valid && stylometryForm.get('anonymousTextArea').touched"
           class="form-text validation-message">* The above text is required</small>
 
@@ -41,15 +83,15 @@
       <div class="btn-container mb-4">
         <button type="button" (click)="startAnalysis()" class="btn anonymize"
           [disabled]="!stylometryForm.get('anonymousTextArea').valid">
-          &nbsp;&nbsp;Stylometry Analysis&nbsp;&nbsp;
+          &nbsp;&nbsp;Start Analysis&nbsp;&nbsp;
         </button>
-        <button type="button" (click)="evaluate()" class="btn anonymize" [disabled]="!comparisonResult">
-          &nbsp;&nbsp;Evaluate Anonymization&nbsp;&nbsp;
+        <button type="button" (click)="evaluate()" class="btn anonymize" [disabled]="!comparisonResult || !stylometryForm.get('anonymousTextArea').valid">
+          &nbsp;&nbsp;Check Anonymization&nbsp;&nbsp;
         </button>
-        <button type="button" (click)="copyAnonymousTextToClipboard()" class="btn anonymize"
+        <!-- <button type="button" (click)="copyAnonymousTextToClipboard()" class="btn anonymize"
           [disabled]="!stylometryForm.get('anonymousTextArea').valid">
           &nbsp;&nbsp;Copy To Clipboard&nbsp;&nbsp;
-        </button>
+        </button> -->
       </div>
     </div>
 

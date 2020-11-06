@@ -4,6 +4,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animations';
 import { DocumentGroup } from 'src/app/models/document-group';
 import { MatSnackBar, MatSnackBarHorizontalPosition, MatSnackBarVerticalPosition } from '@angular/material';
+import { TokenPair } from 'src/app/models/token-pair';
 
 @Component({
   templateUrl: './obfuscate.component.html',
@@ -23,16 +24,19 @@ export class ObfuscateComponent implements OnInit {
   comparisonError = '';
   alertMessage = '';
   display = 'none';
-  allTokens = ['and', 'so', 'if'];
-  filteredTtokens = ['and', 'so', 'if', 'now', 'well'];
+  allTokens: TokenPair[] = [];
+  allTokenValues: string[] = [];
+  filteredTokens: TokenPair[] = [];
   displaySuccessModal = 'none';
   displayErrorModal = 'none';
   displayResetModal = 'none';
   displayChangedGroupModal = 'none';
-  colors = ['primary', 'accent', 'warn', 'default'];
   documentGroups: DocumentGroup[] = [];
   selectedGroup;
   randomColor;
+  anonymousTextTokens = [];
+  editMode = false;
+  duringProcess = false;
 
   horizontalPosition: MatSnackBarHorizontalPosition = 'end';
   verticalPosition: MatSnackBarVerticalPosition = 'top';
@@ -84,12 +88,29 @@ export class ObfuscateComponent implements OnInit {
   sendTextForAnalysis(text: string, group: number): void {
     this.apiService.analyse(text, group).subscribe(
       data => {
-        this.showResultAuthorDialog(data);
+        this.consumeCorpusTokens(data.corpusTokens);
+        this.consumeAnonymousTextTokens(data.anonymousTextTokens);
+
+
+        this.stylometryForm.get('anonymousTextArea').patchValue(data.rawUserText);
+        this.comparisonResult = data.mostProbableAuthor;
+        this.editMode = true;
+        this.duringProcess = true;
+        this.scrollToTop();
+        // this.showResultAuthorDialog(data.mostProbableAuthor);
       },
       error => {
         this.showErrorDialog(error.error.detail);
       }
     );
+  }
+
+  scrollToTop() {
+    window.scroll({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
   }
 
   sendTextForAttribution(text: string, group: number): void {
@@ -145,6 +166,66 @@ export class ObfuscateComponent implements OnInit {
     }
   }
 
+  consumeCorpusTokens(tokens) {
+    this.allTokens = [];
+    this.allTokenValues = [];
+
+    tokens.forEach(tokenPair => {
+      const pair: TokenPair = new TokenPair();
+
+      pair.token = tokenPair[0];
+      pair.partOfSpeech = tokenPair[1];
+
+      this.allTokens.push(pair);
+    });
+
+    this.allTokens.forEach(tokenPair => {
+      this.allTokenValues.push(tokenPair.token);
+    });
+
+    this.filteredTokens = this.allTokens;
+  }
+
+  consumeAnonymousTextTokens(tokens) {
+    this.anonymousTextTokens = [];
+
+    tokens.forEach(tokenPair => {
+      const pair: TokenPair = new TokenPair();
+
+      pair.token = tokenPair.token;
+      pair.partOfSpeech = tokenPair.tag;
+
+      this.anonymousTextTokens.push(pair);
+    });
+  }
+
+  underlineTokensInText(tokenPair: TokenPair) {
+    let styleClass = '';
+
+    if (this.allTokenValues.includes(tokenPair.token)) {
+
+      if (tokenPair.partOfSpeech.startsWith('V')) { // verb
+        styleClass = 'text-underline-blue';
+      } else if (tokenPair.partOfSpeech.startsWith('J')) {  // adjective
+        styleClass = 'text-underline-grey';
+      } else if (tokenPair.partOfSpeech.startsWith('N')) {   // noun
+        styleClass = 'text-underline-pink';
+      } else if (tokenPair.partOfSpeech.startsWith('RB')) {  // adverb
+        styleClass = 'text-underline-beige';
+      } else if (tokenPair.partOfSpeech.startsWith('WP') || tokenPair.partOfSpeech.startsWith('PR')) {  // pronoun
+        styleClass = 'text-underline-cyan';
+      } else {   // others
+        styleClass = 'text-underline-cyan';
+      }
+
+    }
+
+    return styleClass;
+
+
+
+  }
+
   copyAnonymousTextToClipboard(): void {
     const textArea: HTMLInputElement = this.anonymousTextArea.nativeElement;
     textArea.focus();
@@ -155,16 +236,19 @@ export class ObfuscateComponent implements OnInit {
     this.openSnackBar('Copied to Clipboard!');
   }
 
-  removeToken(token: string) {
-    const index = this.filteredTtokens.indexOf(token);
+  removeToken(token: TokenPair) {
+    const index = this.filteredTokens.indexOf(token);
 
     if (index >= 0) {
-      this.filteredTtokens.splice(index, 1);
+      this.filteredTokens.splice(index, 1);
     }
   }
 
   resetTokens() {
-    this.filteredTtokens = this.allTokens;
+    console.log('before ' + this.filteredTokens.length);
+    this.filteredTokens = this.allTokens;
+    console.log('after ' + this.filteredTokens.length);
+    console.log('all ' + this.allTokens.length);
   }
 
   openSnackBar(message: string) {
@@ -176,9 +260,26 @@ export class ObfuscateComponent implements OnInit {
     });
   }
 
-  getChipColor() {
-    this.randomColor = this.colors[Math.floor(Math.random() * this.colors.length)];
-    console.log('s', this.randomColor);
-    return this.randomColor;
+  getChipColor(token: TokenPair) {
+    const partOfSpeech = token.partOfSpeech;
+
+    if (partOfSpeech) {
+      if (partOfSpeech.startsWith('V')) { // verb
+        return 'mat-chip-blue';
+      } else if (partOfSpeech.startsWith('J')) {  // adjective
+        return 'mat-chip-grey';
+      } else if (partOfSpeech.startsWith('N')) {   // noun
+        return 'mat-chip-pink';
+      } else if (partOfSpeech.startsWith('RB')) {  // adverb
+        return 'mat-chip-beige';
+      } else if (partOfSpeech.startsWith('WP') || partOfSpeech.startsWith('PR')) {  // pronoun
+        return 'mat-chip-cyan';
+      }
+    }
+    return 'mat-chip-red';
+  }
+
+  setMode(value: boolean) {
+    this.editMode = value;
   }
 }

@@ -20,6 +20,8 @@ import { MatDatepickerModule } from '@angular/material';
 import { MatNativeDateModule  } from '@angular/material';
 import { FormsModule } from '@angular/forms';
 import { MatChipsModule } from '@angular/material';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatButtonModule} from '@angular/material/button';
 
 
 import { AppComponent } from './app.component';
@@ -74,9 +76,11 @@ import { UserService } from './services/user.service';
     ScrollingModule,
     MatSidenavModule,
     MatCardModule,
+    MatButtonModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatChipsModule,
+    MatButtonToggleModule,
     FormsModule,
   ],
   providers: [
