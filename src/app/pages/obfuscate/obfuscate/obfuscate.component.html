@@ -68,7 +68,7 @@
           </div>
         </div>
 
-        <textarea *ngIf="!editMode" class="form-control" rows="14" placeholder="Write the text you want to anonymize here..."
+        <textarea *ngIf="!editMode" class="form-control" rows="14" placeholder="The text you want to anonymize goes here..."
           id="textarea-left" formControlName="anonymousTextArea" #anonymousTextArea>
           <ng-template *ngFor="let tokenPair of anonymousTextTokens">
             <li>  tokenPair </li>

@@ -6,7 +6,7 @@ import { DocumentsByAuthor } from 'src/app/models/documents-by-author';
 import { DocumentAuthor } from 'src/app/models/document-author';
 import { SlidePanelsSharedService } from 'src/app/services/slide.panels.shared.service';
 import { SingleDocument } from 'src/app/models/single-document';
-import { MatSnackBar, MatSnackBarHorizontalPosition, MatSnackBarVerticalPosition } from '@angular/material';
+import { MatSnackBar, MatSnackBarHorizontalPosition, MatSnackBarVerticalPosition } from '@angular/material/snack-bar';
 
 
 @Component({
