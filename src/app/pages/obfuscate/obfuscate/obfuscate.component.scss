@@ -2,7 +2,7 @@
   min-width: 80%;
 
   .first-row {
-    margin: 10px 15px 0 15px;
+    margin: 20px 15px 0 10px;
     min-height: 100px;
   }
 
@@ -89,8 +89,12 @@
     padding: 10px;
 
     span {
-      margin-right: 10px;
+      margin-right: 5px;
       display: inline-block;
+    }
+
+    p {
+      margin: 0;
     }
   }
 
@@ -231,4 +235,13 @@ mat-form-field {
 .restart-button {
   outline: none;
   opacity: 0.8;
+}
+
+.hidden-add-option {
+  z-index: 9;
+  position: absolute;
+  background-color: white;
+  width: 200px;
+  border-radius: 6px;
+  margin-top: 6px;
 }

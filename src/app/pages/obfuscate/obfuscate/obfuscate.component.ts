@@ -6,6 +6,8 @@ import { DocumentGroup } from 'src/app/models/document-group';
 import { MatSnackBar, MatSnackBarHorizontalPosition, MatSnackBarVerticalPosition } from '@angular/material/snack-bar';
 import { TokenPair } from 'src/app/models/token-pair';
 
+import * as CKEditor from 'src/assets/ckeditor/ckeditor';
+
 @Component({
   templateUrl: './obfuscate.component.html',
   styleUrls: ['./obfuscate.component.scss'],
@@ -35,15 +37,64 @@ export class ObfuscateComponent implements OnInit {
   selectedGroup;
   randomColor;
   anonymousTextTokens = [];
+  anonymousText = '';
   editMode = false;
-  duringProcess = false;
+  showSynonymList = false;
+  synonymList = ['me', 'myself', 'Irene'];
+  synonymsOfCurrentWord = ['me', 'myself', 'Irene'];
+
 
   horizontalPosition: MatSnackBarHorizontalPosition = 'end';
   verticalPosition: MatSnackBarVerticalPosition = 'top';
 
+  public Editor = CKEditor;
+
+  public config = {
+    toolbar: {
+      items: [
+        'heading',
+        '|',
+        'bold',
+        'italic',
+        'underline',
+        '|',
+        'fontColor',
+        'fontBackgroundColor',
+        '|',
+        'indent',
+        'outdent',
+        '|',
+        'link',
+        '|',
+        'bulletedList',
+        'numberedList',
+        '|',
+        'undo',
+        'redo'
+      ]
+    },
+    language: 'en',
+    image: {
+      toolbar: [
+        'imageTextAlternative',
+        'imageStyle:full',
+        'imageStyle:side'
+      ]
+    },
+    table: {
+      contentToolbar: [
+        'tableColumn',
+        'tableRow',
+        'mergeTableCells'
+      ]
+    },
+    licenseKey: '',
+  };
+
+
   ngOnInit(): void {
     this.stylometryForm = new FormGroup({
-      anonymousTextArea: new FormControl(null, Validators.required),
+      anonymousTextArea: new FormControl('Write the text you want to anonymize here.', Validators.required),
       groupSelect: new FormControl(null, Validators.required)
     });
 
@@ -91,11 +142,10 @@ export class ObfuscateComponent implements OnInit {
         this.consumeCorpusTokens(data.corpusTokens);
         this.consumeAnonymousTextTokens(data.anonymousTextTokens);
 
-
-        this.stylometryForm.get('anonymousTextArea').patchValue(data.rawUserText);
+        this.anonymousText = this.underline(data.rawUserText);
+        this.stylometryForm.get('anonymousTextArea').patchValue(this.anonymousText);
         this.comparisonResult = data.mostProbableAuthor;
         this.editMode = true;
-        this.duringProcess = true;
         this.scrollToTop();
         // this.showResultAuthorDialog(data.mostProbableAuthor);
       },
@@ -222,8 +272,23 @@ export class ObfuscateComponent implements OnInit {
 
     return styleClass;
 
+  }
 
 
+
+  underline(text: string): string {
+    const words = text.split(' ');
+    const resultText: string[] = [];
+
+    words.forEach(word => {
+      let currentWord = word;
+      if (this.allTokenValues.includes(word)) {
+        currentWord = '<u style="text-decoration-color: red;">' + word + '</u>';
+      }
+      resultText.push(currentWord);
+    });
+    console.log(resultText.join(' '));
+    return resultText.join(' ');
   }
 
   copyAnonymousTextToClipboard(): void {
@@ -281,5 +346,20 @@ export class ObfuscateComponent implements OnInit {
 
   setMode(value: boolean) {
     this.editMode = value;
+  }
+
+  showSynonyms(event) {
+    const underlineClass = event.toElement.classList[1];
+    if (underlineClass) {
+      if (underlineClass.toString().startsWith('text-underline')) {
+        const word = event.srcElement.outerText;
+
+        if (this.synonymList[word]) {
+          this.synonymsOfCurrentWord = this.synonymList;  //  search for synonyms of word
+        }
+        this.showSynonymList = !this.showSynonymList;
+      }
+
+    }
   }
 }

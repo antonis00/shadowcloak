@@ -1,20 +1,5 @@
 <div class="container">
   <form [formGroup]="stylometryForm">
-
-    <div class="toggle-menu-container" *ngIf="duringProcess">
-      <div class="toggle-button-cotainer">
-        <mat-button-toggle-group name="mode" aria-label="mode" value="edit">
-          <mat-button-toggle value="input" (click)="setMode(false)">Input Mode</mat-button-toggle>
-          <mat-button-toggle value="edit" (click)="setMode(true)">Edit Mode</mat-button-toggle>
-        </mat-button-toggle-group>
-      </div>
-      <div class="reset-button-container">
-        <button mat-fab color="warn" class="restart-button" aria-label="Restart">
-          <mat-icon>refresh</mat-icon>
-        </button>
-      </div>
-    </div>
-
     <div class="first-row" *ngIf="comparisonResult">
       <mat-label>Most Probable Author:</mat-label>
       <div class="author-container">
@@ -38,7 +23,8 @@
       </div>
       <div class="chips-container">
         <mat-chip-list aria-label="Tokens">
-          <mat-chip *ngFor="let tokenPair of filteredTokens" [removable]="true" (removed)="removeToken(tokenPair)" selected  [ngClass]="getChipColor(tokenPair)">
+          <mat-chip *ngFor="let tokenPair of filteredTokens" [removable]="true" (removed)="removeToken(tokenPair)"
+            selected [ngClass]="getChipColor(tokenPair)">
             {{ tokenPair.token }}
             <mat-icon matChipRemove>cancel</mat-icon>
           </mat-chip>
@@ -49,30 +35,43 @@
     <div class="h-50 row third-row">
       <div class="col-md-12 mb-6 mb-md-0">
 
-          <mat-form-field appearance="outline" *ngIf="!editMode && !duringProcess">
-            <mat-label>Category</mat-label>
-            <mat-select panelClass="select-panel" formControlName="groupSelect">
-              <mat-option *ngFor="let group of documentGroups" [value]="group.id">
-                {{group.name | titlecase}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+        <mat-form-field style="border-radius:100px!important" appearance="outline" *ngIf="!editMode">
+          <mat-label>Category</mat-label>
+          <mat-select panelClass="select-panel" formControlName="groupSelect">
+            <mat-option *ngFor="let group of documentGroups" [value]="group.id">
+              {{group.name | titlecase}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
-        <div *ngIf="editMode"  class="tokenized-text-container">
+        <!-- <div *ngIf="editMode" class="tokenized-text-container">
           <div class="tokenized-text">
             <span class="word-token" *ngFor="let tokenPair of anonymousTextTokens">
-              <p [ngClass]="underlineTokensInText(tokenPair)">
+              <p [ngClass]="underlineTokensInText(tokenPair)" (click)="showSynonyms($event)">
                 {{ tokenPair.token }}
               </p>
             </span>
           </div>
-        </div>
+        </div> -->
 
-        <textarea *ngIf="!editMode" class="form-control" rows="14" placeholder="The text you want to anonymize goes here..."
-          id="textarea-left" formControlName="anonymousTextArea" #anonymousTextArea>
+        <!-- <div class="hidden-add-option" *ngIf="showSynonymList==true">
+          <mat-list role="list">
+            <mat-list-item role="listitem" *ngFor="let synonym of synonymsOfCurrentWord" value="synonym" (click)="true"> {{ synonym }}
+            </mat-list-item>
+          </mat-list>
+        </div> -->
+
+        <!-- <textarea *ngIf="!editMode" class="form-control" rows="14"
+          placeholder="The text you want to anonymize goes here..."
+          formControlName="anonymousTextArea" #anonymousTextArea>
           <ng-template *ngFor="let tokenPair of anonymousTextTokens">
             <li>  tokenPair </li>
-        </textarea>
+        </textarea> -->
+
+
+        <ckeditor [config]="config" [editor]="Editor" data='' formControlName="anonymousTextArea"></ckeditor>
+
+
         <small *ngIf="!stylometryForm.get('anonymousTextArea').valid && stylometryForm.get('anonymousTextArea').touched"
           class="form-text validation-message">* The above text is required</small>
 
@@ -82,10 +81,12 @@
     <div class="h-15 row">
       <div class="btn-container mb-4">
         <button type="button" (click)="startAnalysis()" class="btn anonymize"
-          [disabled]="!stylometryForm.get('anonymousTextArea').valid">
+          [disabled]="!stylometryForm.get('anonymousTextArea').valid"
+          >
           &nbsp;&nbsp;Start Analysis&nbsp;&nbsp;
         </button>
-        <button type="button" (click)="evaluate()" class="btn anonymize" [disabled]="!comparisonResult || !stylometryForm.get('anonymousTextArea').valid">
+        <button type="button" (click)="evaluate()" class="btn anonymize"
+          [disabled]="!comparisonResult || !stylometryForm.get('anonymousTextArea').valid">
           &nbsp;&nbsp;Check Anonymization&nbsp;&nbsp;
         </button>
         <!-- <button type="button" (click)="copyAnonymousTextToClipboard()" class="btn anonymize"
@@ -167,7 +168,8 @@
           <h4 class="modal-title">Category Changed</h4>
         </div>
         <div class="modal-body">
-          <p>You have changed document category. Anonymization can be done only if the initial category of the analysis is selected. Revert to the initial category or restart the process click Stylometry Analysis. </p>
+          <p>You have changed document category. Anonymization can be done only if the initial category of the analysis
+            is selected. Revert to the initial category or restart the process click Stylometry Analysis. </p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" (click)="closeDialog(4)">Close</button>

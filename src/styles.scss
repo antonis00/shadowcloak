@@ -45,3 +45,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   font-family: exo;
   src: url(assets/fonts/Exo-VariableFont_wght.ttf) format("opentype");
 }
+
+.ck-editor__editable_inline {
+  height: 30vh !important;
+}

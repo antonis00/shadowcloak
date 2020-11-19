@@ -15,7 +15,7 @@
         </mat-form-field>
 
         <textarea class="form-control" rows="14" placeholder="Paste the disputed text here..."
-          id="textarea-left" formControlName="anonymousTextArea" #anonymousTextArea>
+            formControlName="anonymousTextArea" #anonymousTextArea>
         </textarea>
 
         <small *ngIf="!stylometryForm.get('anonymousTextArea').valid && stylometryForm.get('anonymousTextArea').touched"

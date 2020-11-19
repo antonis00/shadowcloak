@@ -25,6 +25,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatButtonModule} from '@angular/material/button';
 
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+
 
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './navbar/navbar.component';
@@ -84,6 +86,7 @@ import { UserService } from './services/user.service';
     MatChipsModule,
     MatButtonToggleModule,
     FormsModule,
+    CKEditorModule,
   ],
   providers: [
     ApiService,
