@@ -5,7 +5,9 @@ import { CreateGroupDTO } from '../dtos/create-group-dto';
 import { DocumentAuthor } from '../models/document-author';
 import { DocumentGroup } from '../models/document-group';
 import { SingleDocument } from '../models/single-document';
+import { Injectable } from "@angular/core";
 
+@Injectable()
 export class SlidePanelsSharedService {
 
   documentData: CreateDocumentDTO[];
