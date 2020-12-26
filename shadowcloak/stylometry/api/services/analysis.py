@@ -2,6 +2,12 @@
 from stylometry.models import Author
 from rest_framework.exceptions import APIException
 
+from bs4 import BeautifulSoup
+
+import re
+import json
+import requests
+
 import nltk
 import matplotlib
 import math
@@ -62,7 +68,6 @@ def analyse_with_burrows_delta(texts_by_author, anonymous_text):
     # print(features_as_string)
     tagged_features = nltk.pos_tag(features)
     # print(tagged_features)
-    # features_analysed = 
     
 
     feature_freqs = {}
@@ -139,13 +144,23 @@ def analyse_with_burrows_delta(texts_by_author, anonymous_text):
 
     # Calculate the test case's feature z-scores
     testcase_zscores = {}
+    significant_features = []
+    significant_features_score = []
     for feature in features:
         feature_val = testcase_freqs[feature]
         feature_mean = corpus_features[feature]["Mean"]
         feature_stdev = corpus_features[feature]["StdDev"]
         testcase_zscores[feature] = (feature_val - feature_mean) / feature_stdev
-        # print("Anonymous text's z-score for feature", feature, "is", testcase_zscores[feature])
+        if (feature in list_of_tokens):
+            significant_features.append(feature)
+            significant_features_score.append(testcase_zscores[feature])
+            # print("Anonymous text's z-score for feature", feature, "is", testcase_zscores[feature])
 
+    tagged_significant_features = nltk.pos_tag(significant_features)
+    list_of_tokens, list_of_tags = zip(*tagged_significant_features)
+    dictionary_with_tagged_significant_features = [{'token': token, 'partOfSpeech': tag, 'score': score} for token,tag, score in zip(list_of_tokens, list_of_tags, significant_features_score)]
+
+    print(dictionary_with_tagged_significant_features)
 
     # Calculate Delta score between each author and unknown text z-scores
     delta_score_by_author = {}    
@@ -165,7 +180,65 @@ def analyse_with_burrows_delta(texts_by_author, anonymous_text):
 
     result = {}
     result['mostProbableAuthor'] = probable_author
-    result['corpusTokens'] = tagged_features
+    result['corpusTokens'] = tagged_features[:10]
     result['anonymousTextTokens'] = dictionary_with_tagged_tokens_of_anonymous_text
+    result['tokensSignificantToAttribution'] = dictionary_with_tagged_significant_features[:10]
     result['rawUserText'] = anonymous_text
+    # result['synonymsList'] = get_tokens_synonyms(features[:10])
+
     return result
+
+
+# def get_tokens_synonyms(corpusTokens):
+#     synonymsList = []
+
+#     for token in corpusTokens:
+#         result = {}
+#         result['token'] = token
+        
+#         # url = 'https://www.thesaurus.com/browse/{}'.format(token)
+#         # response = requests.get(url)
+#         # soup = BeautifulSoup(response.text, "html.parser")
+        
+#         soup = BeautifulSoup("response.text", "html.parser")
+#         scripts = soup.findAll('script')
+#         scriptTexts = []
+
+#         if not scripts or len(scripts) <= 0:
+#             result['synonyms'] = [None]
+#             synonymsList.append(result)
+#             continue
+
+#         for script in scripts:
+#             scriptTexts.append(str(script))
+
+#         if not scriptTexts[-2]:
+#             result['synonyms'] = [None]
+#             synonymsList.append(result)
+#             continue
+
+#         synonymsScript = scriptTexts[-2]
+
+#         if len(synonymsScript.split('window.INITIAL_STATE ='))<2 or len(synonymsScript.split('synonyms'))<2:
+#             result['synonyms'] = [None]
+#             synonymsList.append(result)
+#             continue
+
+#         jsonStr = synonymsScript.split('window.INITIAL_STATE =')[1].lstrip()
+#         jsonStr = jsonStr.split('};')[0].rstrip()
+#         jsonStr = '{"synonyms' + synonymsScript.split('synonyms')[1].lstrip()
+#         jsonStr = jsonStr.split(',"antonyms"')[0].rstrip() + '}'
+#         jsonStr = jsonStr.replace("'", '"')
+#         jsonObject = json.loads(jsonStr)
+
+
+#         bagOfSynonyms = []
+
+#         for synonymsJSON in jsonObject['synonyms']:
+#             bagOfSynonyms.append(synonymsJSON['term'])
+
+        
+#         result['synonyms'] = bagOfSynonyms
+#         synonymsList.append(result)
+
+#     return synonymsList
