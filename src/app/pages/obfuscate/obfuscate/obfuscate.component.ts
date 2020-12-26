@@ -139,7 +139,7 @@ export class ObfuscateComponent implements OnInit {
   sendTextForAnalysis(text: string, group: number): void {
     this.apiService.analyse(text, group).subscribe(
       data => {
-        this.consumeCorpusTokens(data.corpusTokens);
+        this.consumeCorpusTokens(data.tokensSignificantToAttribution);
         this.consumeAnonymousTextTokens(data.anonymousTextTokens);
 
         this.anonymousText = this.underline(data.rawUserText);
@@ -216,19 +216,11 @@ export class ObfuscateComponent implements OnInit {
     }
   }
 
-  consumeCorpusTokens(tokens) {
-    this.allTokens = [];
+  consumeCorpusTokens(tokens: TokenPair[]) {
+
+    this.allTokens = tokens;
     this.filteredTokensValues = [];
     this.filteredTokens = [];
-
-    tokens.forEach(tokenPair => {
-      const pair: TokenPair = new TokenPair();
-
-      pair.token = tokenPair[0];
-      pair.partOfSpeech = tokenPair[1];
-
-      this.allTokens.push(pair);
-    });
 
     this.allTokens.forEach(tokenPair => this.filteredTokens.push(Object.assign({}, tokenPair)));
 
@@ -281,6 +273,7 @@ export class ObfuscateComponent implements OnInit {
       this.filteredTokens.splice(index, 1);
       this.filteredTokensValues.splice(index, 1);
     }
+    this.underlineNewTokens();
   }
 
   resetTokens() {
@@ -291,10 +284,11 @@ export class ObfuscateComponent implements OnInit {
     this.filteredTokens.forEach(tokenPair => {
       this.filteredTokensValues.push(tokenPair.token);
     });
+    this.underlineNewTokens();
   }
 
   underlineNewTokens() {
-    const text:string = this.stylometryForm.get('anonymousTextArea').value.replace(/<.*?>/g, '');;
+    const text:string = this.stylometryForm.get('anonymousTextArea').value.replace(/<u>/g, '').replace(/<\/u>/g, '');
 
     this.anonymousText = this.underline(text);
     this.stylometryForm.get('anonymousTextArea').patchValue(this.anonymousText);
@@ -316,7 +310,7 @@ export class ObfuscateComponent implements OnInit {
       if (partOfSpeech.startsWith('V')) { // verb
         return 'mat-chip-blue';
       } else if (partOfSpeech.startsWith('J')) {  // adjective
-        return 'mat-chip-grey';
+        return 'mat-chip-red';
       } else if (partOfSpeech.startsWith('N')) {   // noun
         return 'mat-chip-pink';
       } else if (partOfSpeech.startsWith('RB')) {  // adverb
@@ -325,7 +319,7 @@ export class ObfuscateComponent implements OnInit {
         return 'mat-chip-cyan';
       }
     }
-    return 'mat-chip-red';
+    return 'mat-chip-grey';
   }
 
 }

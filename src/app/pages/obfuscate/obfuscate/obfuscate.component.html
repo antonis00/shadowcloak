@@ -12,11 +12,11 @@
         <mat-label>Most Relevant Tokens:</mat-label>
         <mat-chip-list class="guide-chip-list">
           <mat-chip [removable]='false' class="mat-chip-blue" selected> Verbs</mat-chip>
-          <mat-chip [removable]='false' class="mat-chip-grey" selected> Adjectives</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-red" selected> Adjectives</mat-chip>
           <mat-chip [removable]='false' class="mat-chip-pink" selected> Nouns</mat-chip>
           <mat-chip [removable]='false' class="mat-chip-beige" selected> Adverbs</mat-chip>
           <mat-chip [removable]='false' class="mat-chip-cyan" selected> Pronouns</mat-chip>
-          <mat-chip [removable]='false' class="mat-chip-red" selected> Other parts of speech</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-grey" selected> Other parts of speech</mat-chip>
         </mat-chip-list>
 
       </div>
@@ -31,7 +31,6 @@
         </mat-chip-list>
       </div>
       <div class="chips-action-buttons">
-        <a type="button" class="btn btn-default reset-tokens" (click)="underlineNewTokens()">Apply Changes</a>
         <a type="button" class="btn btn-default reset-tokens" (click)="resetTokens()">Reset Tokens</a>
       </div>
 
