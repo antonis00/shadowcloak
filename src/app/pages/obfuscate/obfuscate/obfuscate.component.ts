@@ -27,7 +27,7 @@ export class ObfuscateComponent implements OnInit {
   alertMessage = '';
   display = 'none';
   allTokens: TokenPair[] = [];
-  allTokenValues: string[] = [];
+  filteredTokensValues: string[] = [];
   filteredTokens: TokenPair[] = [];
   displaySuccessModal = 'none';
   displayErrorModal = 'none';
@@ -218,7 +218,8 @@ export class ObfuscateComponent implements OnInit {
 
   consumeCorpusTokens(tokens) {
     this.allTokens = [];
-    this.allTokenValues = [];
+    this.filteredTokensValues = [];
+    this.filteredTokens = [];
 
     tokens.forEach(tokenPair => {
       const pair: TokenPair = new TokenPair();
@@ -229,11 +230,11 @@ export class ObfuscateComponent implements OnInit {
       this.allTokens.push(pair);
     });
 
-    this.allTokens.forEach(tokenPair => {
-      this.allTokenValues.push(tokenPair.token);
-    });
+    this.allTokens.forEach(tokenPair => this.filteredTokens.push(Object.assign({}, tokenPair)));
 
-    this.filteredTokens = this.allTokens;
+    this.filteredTokens.forEach(tokenPair => {
+      this.filteredTokensValues.push(tokenPair.token);
+    });
   }
 
   consumeAnonymousTextTokens(tokens) {
@@ -249,45 +250,17 @@ export class ObfuscateComponent implements OnInit {
     });
   }
 
-  underlineTokensInText(tokenPair: TokenPair) {
-    let styleClass = '';
-
-    if (this.allTokenValues.includes(tokenPair.token)) {
-
-      if (tokenPair.partOfSpeech.startsWith('V')) { // verb
-        styleClass = 'text-underline-blue';
-      } else if (tokenPair.partOfSpeech.startsWith('J')) {  // adjective
-        styleClass = 'text-underline-grey';
-      } else if (tokenPair.partOfSpeech.startsWith('N')) {   // noun
-        styleClass = 'text-underline-pink';
-      } else if (tokenPair.partOfSpeech.startsWith('RB')) {  // adverb
-        styleClass = 'text-underline-beige';
-      } else if (tokenPair.partOfSpeech.startsWith('WP') || tokenPair.partOfSpeech.startsWith('PR')) {  // pronoun
-        styleClass = 'text-underline-cyan';
-      } else {   // others
-        styleClass = 'text-underline-cyan';
-      }
-
-    }
-
-    return styleClass;
-
-  }
-
-
-
   underline(text: string): string {
     const words = text.split(' ');
     const resultText: string[] = [];
 
     words.forEach(word => {
       let currentWord = word;
-      if (this.allTokenValues.includes(word)) {
-        currentWord = '<u style="text-decoration-color: red;">' + word + '</u>';
+      if (this.filteredTokensValues.includes(word)) {
+        currentWord = '<u>' + word + '</u>';
       }
       resultText.push(currentWord);
     });
-    console.log(resultText.join(' '));
     return resultText.join(' ');
   }
 
@@ -306,14 +279,25 @@ export class ObfuscateComponent implements OnInit {
 
     if (index >= 0) {
       this.filteredTokens.splice(index, 1);
+      this.filteredTokensValues.splice(index, 1);
     }
   }
 
   resetTokens() {
-    console.log('before ' + this.filteredTokens.length);
-    this.filteredTokens = this.allTokens;
-    console.log('after ' + this.filteredTokens.length);
-    console.log('all ' + this.allTokens.length);
+    this.filteredTokens.length = 0;
+    this.allTokens.forEach(tokenPair => this.filteredTokens.push(Object.assign({}, tokenPair)));
+
+    this.filteredTokensValues.length = 0;
+    this.filteredTokens.forEach(tokenPair => {
+      this.filteredTokensValues.push(tokenPair.token);
+    });
+  }
+
+  underlineNewTokens() {
+    const text:string = this.stylometryForm.get('anonymousTextArea').value.replace(/<.*?>/g, '');;
+
+    this.anonymousText = this.underline(text);
+    this.stylometryForm.get('anonymousTextArea').patchValue(this.anonymousText);
   }
 
   openSnackBar(message: string) {
@@ -344,22 +328,30 @@ export class ObfuscateComponent implements OnInit {
     return 'mat-chip-red';
   }
 
-  setMode(value: boolean) {
-    this.editMode = value;
-  }
-
-  showSynonyms(event) {
-    const underlineClass = event.toElement.classList[1];
-    if (underlineClass) {
-      if (underlineClass.toString().startsWith('text-underline')) {
-        const word = event.srcElement.outerText;
-
-        if (this.synonymList[word]) {
-          this.synonymsOfCurrentWord = this.synonymList;  //  search for synonyms of word
-        }
-        this.showSynonymList = !this.showSynonymList;
-      }
-
-    }
-  }
 }
+
+
+  // underlineTokensInText(tokenPair: TokenPair) {
+  //   let styleClass = '';
+
+  //   if (this.allTokenValues.includes(tokenPair.token)) {
+
+  //     if (tokenPair.partOfSpeech.startsWith('V')) { // verb
+  //       styleClass = 'text-underline-blue';
+  //     } else if (tokenPair.partOfSpeech.startsWith('J')) {  // adjective
+  //       styleClass = 'text-underline-grey';
+  //     } else if (tokenPair.partOfSpeech.startsWith('N')) {   // noun
+  //       styleClass = 'text-underline-pink';
+  //     } else if (tokenPair.partOfSpeech.startsWith('RB')) {  // adverb
+  //       styleClass = 'text-underline-beige';
+  //     } else if (tokenPair.partOfSpeech.startsWith('WP') || tokenPair.partOfSpeech.startsWith('PR')) {  // pronoun
+  //       styleClass = 'text-underline-cyan';
+  //     } else {   // others
+  //       styleClass = 'text-underline-cyan';
+  //     }
+
+  //   }
+
+  //   return styleClass;
+
+  // }

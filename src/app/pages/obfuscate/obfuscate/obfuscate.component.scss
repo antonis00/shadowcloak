@@ -2,7 +2,7 @@
   min-width: 80%;
 
   .first-row {
-    margin: 20px 15px 0 10px;
+    margin: 30px 15px 0 10px;
     min-height: 100px;
   }
 
@@ -36,11 +36,6 @@
 
     mat-chip-list {
       margin-left: auto;
-    }
-
-    .guide-chip-list {
-      text-decoration: underline;
-      text-decoration-color: white;
     }
 
     .mat-chip-blue {
@@ -105,10 +100,8 @@
     align-items: flex-end;
   }
 
-  .reset-tokens {
-    float: right;
-    top: -41px;
-    position: relative;
+  .guide-chip-list {
+    margin-bottom: -4px;
   }
 
   .third-row {
@@ -123,22 +116,6 @@
       padding-left: 10px;
       position: absolute;
     }
-  }
-
-  .toggle-menu-container {
-    display: flex;
-    margin: 10px;
-  }
-
-  .toggle-button-cotainer {
-    margin-bottom: 20px;
-    margin-top: 10px;
-  }
-
-  .reset-button-container {
-    margin-left: auto;
-    margin-top: 7px;
-    margin-right: 10px;
   }
 
   .btn-container {
@@ -187,61 +164,64 @@ mat-form-field {
   width: 100%;
 }
 
+.chips-action-buttons {
+  width: 100%;
+  display: flex;
 
+  &>a {
+    margin:2px;
 
-
-.text-underline-blue {
-  text-decoration: none;
-  cursor: pointer;
-  border-bottom: 3px solid #3f51b5;
+    &:first-of-type {
+      margin-left: auto;
+    }
+  }
 }
 
-.text-underline-red {
-  text-decoration: none;
-  cursor: pointer;
-  border-bottom: 3px solid #b2200a;
+mat-label {
+  font-size: 18px;
 }
 
-.text-underline-pink {
-  text-decoration: none;
-  cursor: pointer;
-  border-bottom: 3px solid #ff4081;
-}
 
-.text-underline-beige {
-  text-decoration: none;
-  cursor: pointer;
-  border-bottom: 3px solid #a68051;
-}
 
-.text-underline-cyan {
-  text-decoration: none;
-  cursor: pointer;
-  border-bottom: 3px solid #17a2b8;
-}
 
-.text-underline-orange {
-  text-decoration: none;
-  cursor: pointer;
-  border-bottom: 3px solid #ec975b;
-}
+// .text-underline-blue {
+//   text-decoration: none;
+//   cursor: pointer;
+//   border-bottom: 3px solid #3f51b5;
+// }
 
-.text-underline-grey {
-  text-decoration: none;
-  cursor: pointer;
-  border-bottom: 3px solid #6d6d6d;
-}
+// .text-underline-red {
+//   text-decoration: none;
+//   cursor: pointer;
+//   border-bottom: 3px solid #b2200a;
+// }
 
-.restart-button {
-  outline: none;
-  opacity: 0.8;
-}
+// .text-underline-pink {
+//   text-decoration: none;
+//   cursor: pointer;
+//   border-bottom: 3px solid #ff4081;
+// }
 
-.hidden-add-option {
-  z-index: 9;
-  position: absolute;
-  background-color: white;
-  width: 200px;
-  border-radius: 6px;
-  margin-top: 6px;
-}
+// .text-underline-beige {
+//   text-decoration: none;
+//   cursor: pointer;
+//   border-bottom: 3px solid #a68051;
+// }
+
+// .text-underline-cyan {
+//   text-decoration: none;
+//   cursor: pointer;
+//   border-bottom: 3px solid #17a2b8;
+// }
+
+// .text-underline-orange {
+//   text-decoration: none;
+//   cursor: pointer;
+//   border-bottom: 3px solid #ec975b;
+// }
+
+// .text-underline-grey {
+//   text-decoration: none;
+//   cursor: pointer;
+//   border-bottom: 3px solid #6d6d6d;
+// }

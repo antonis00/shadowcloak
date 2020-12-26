@@ -1,7 +1,7 @@
 <div class="container">
   <form [formGroup]="stylometryForm">
     <div class="first-row" *ngIf="comparisonResult">
-      <mat-label>Most Probable Author:</mat-label>
+      <mat-label>Suggested Author:</mat-label>
       <div class="author-container">
         {{  comparisonResult | titlecase }}
       </div>
@@ -9,18 +9,18 @@
 
     <div class="row second-row" *ngIf="allTokens.length>0">
       <div class="color-guide-chips">
-        <mat-label>Corpus Tokens:</mat-label>
+        <mat-label>Most Relevant Tokens:</mat-label>
         <mat-chip-list class="guide-chip-list">
-          <mat-chip [removable]='false' class="mat-chip-blue" selected> Verbs </mat-chip>
-          <mat-chip [removable]='false' class="mat-chip-grey" selected> Adjectives </mat-chip>
-          <mat-chip [removable]='false' class="mat-chip-pink" selected> Nouns </mat-chip>
-          <mat-chip [removable]='false' class="mat-chip-beige" selected> Adverbs </mat-chip>
-          <mat-chip [removable]='false' class="mat-chip-cyan" selected> Pronouns </mat-chip>
-          <mat-chip [removable]='false' class="mat-chip-red" selected> Other parts of speech </mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-blue" selected> Verbs</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-grey" selected> Adjectives</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-pink" selected> Nouns</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-beige" selected> Adverbs</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-cyan" selected> Pronouns</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-red" selected> Other parts of speech</mat-chip>
         </mat-chip-list>
 
-        <!-- <button type="button" class="btn btn-default reset-tokens" (click)="resetTokens()">Reset Tokens</button> -->
       </div>
+
       <div class="chips-container">
         <mat-chip-list aria-label="Tokens">
           <mat-chip *ngFor="let tokenPair of filteredTokens" [removable]="true" (removed)="removeToken(tokenPair)"
@@ -30,7 +30,13 @@
           </mat-chip>
         </mat-chip-list>
       </div>
+      <div class="chips-action-buttons">
+        <a type="button" class="btn btn-default reset-tokens" (click)="underlineNewTokens()">Apply Changes</a>
+        <a type="button" class="btn btn-default reset-tokens" (click)="resetTokens()">Reset Tokens</a>
+      </div>
+
     </div>
+
 
     <div class="h-50 row third-row">
       <div class="col-md-12 mb-6 mb-md-0">
@@ -44,33 +50,7 @@
           </mat-select>
         </mat-form-field>
 
-        <!-- <div *ngIf="editMode" class="tokenized-text-container">
-          <div class="tokenized-text">
-            <span class="word-token" *ngFor="let tokenPair of anonymousTextTokens">
-              <p [ngClass]="underlineTokensInText(tokenPair)" (click)="showSynonyms($event)">
-                {{ tokenPair.token }}
-              </p>
-            </span>
-          </div>
-        </div> -->
-
-        <!-- <div class="hidden-add-option" *ngIf="showSynonymList==true">
-          <mat-list role="list">
-            <mat-list-item role="listitem" *ngFor="let synonym of synonymsOfCurrentWord" value="synonym" (click)="true"> {{ synonym }}
-            </mat-list-item>
-          </mat-list>
-        </div> -->
-
-        <!-- <textarea *ngIf="!editMode" class="form-control" rows="14"
-          placeholder="The text you want to anonymize goes here..."
-          formControlName="anonymousTextArea" #anonymousTextArea>
-          <ng-template *ngFor="let tokenPair of anonymousTextTokens">
-            <li>  tokenPair </li>
-        </textarea> -->
-
-
         <ckeditor [config]="config" [editor]="Editor" data='' formControlName="anonymousTextArea"></ckeditor>
-
 
         <small *ngIf="!stylometryForm.get('anonymousTextArea').valid && stylometryForm.get('anonymousTextArea').touched"
           class="form-text validation-message">* The above text is required</small>
@@ -81,13 +61,12 @@
     <div class="h-15 row">
       <div class="btn-container mb-4">
         <button type="button" (click)="startAnalysis()" class="btn anonymize"
-          [disabled]="!stylometryForm.get('anonymousTextArea').valid"
-          >
-          &nbsp;&nbsp;Start Analysis&nbsp;&nbsp;
+          [disabled]="!stylometryForm.get('anonymousTextArea').valid">
+          &nbsp;&nbsp;Analyse Style&nbsp;&nbsp;
         </button>
         <button type="button" (click)="evaluate()" class="btn anonymize"
           [disabled]="!comparisonResult || !stylometryForm.get('anonymousTextArea').valid">
-          &nbsp;&nbsp;Check Anonymization&nbsp;&nbsp;
+          &nbsp;&nbsp;Attribute to author&nbsp;&nbsp;
         </button>
         <!-- <button type="button" (click)="copyAnonymousTextToClipboard()" class="btn anonymize"
           [disabled]="!stylometryForm.get('anonymousTextArea').valid">
