@@ -160,7 +160,7 @@ def analyse_with_burrows_delta(texts_by_author, anonymous_text):
     list_of_tokens, list_of_tags = zip(*tagged_significant_features)
     dictionary_with_tagged_significant_features = [{'token': token, 'partOfSpeech': tag, 'score': score} for token,tag, score in zip(list_of_tokens, list_of_tags, significant_features_score)]
 
-    print(dictionary_with_tagged_significant_features)
+    # print(dictionary_with_tagged_significant_features)
 
     # Calculate Delta score between each author and unknown text z-scores
     delta_score_by_author = {}    
@@ -182,7 +182,7 @@ def analyse_with_burrows_delta(texts_by_author, anonymous_text):
     result['mostProbableAuthor'] = probable_author
     result['corpusTokens'] = tagged_features[:10]
     result['anonymousTextTokens'] = dictionary_with_tagged_tokens_of_anonymous_text
-    result['tokensSignificantToAttribution'] = dictionary_with_tagged_significant_features[:10]
+    result['tokensSignificantToAttribution'] = dictionary_with_tagged_significant_features[:30]
     result['rawUserText'] = anonymous_text
     # result['synonymsList'] = get_tokens_synonyms(features[:10])
 
