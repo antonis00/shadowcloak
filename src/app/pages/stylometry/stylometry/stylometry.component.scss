@@ -92,9 +92,8 @@
 
   .accordion-author-container {
     margin-top: 40px;
-    background-color: #e0c9ad;
+    background-color: #dbe0a6;
     margin-bottom: -5px;
-    width: 400px;
     border-radius: 6px;
   }
 
@@ -105,10 +104,20 @@
     padding-top: 12px;
     height: 50px;
     display: flex;
+    line-height: 120px;
 
     &:hover {
       .edit-delete-author-icons {
         visibility: visible;
+
+        &>mat-icon {
+          margin: 15px 8px 0 8px;
+          opacity: 0.6;
+
+          &:hover {
+            opacity: 0.8;
+          }
+        }
       }
     }
   }
@@ -188,6 +197,9 @@ mat-list-item {
 .edit-author-icon {
   margin-right: 12px;
   cursor: pointer;
+  position: relative;
+  right: 10px;
+  top: 6px;
   opacity: 0.7;
 
   &:hover {
@@ -198,6 +210,9 @@ mat-list-item {
 .delete-author-icon {
   margin-right: 6px;
   cursor: pointer;
+  position: relative;
+  right: 10px;
+  top: 6px;
   opacity: 0.7;
 
   &:hover {
@@ -223,8 +238,11 @@ mat-list-item {
   font-weight: 500;
 }
 
-.mat-expansion-panel {
-  width: 91vw;
+.mat-expansion-panel .nested-panel{
+    width: 100%;
+    .mat-expansion-panel-body {
+      padding-left: 0;
+    }
 }
 
 .backdrop {
@@ -258,4 +276,13 @@ mat-list-item {
 
 .mat-expansion-panel-header-title {
   font-weight: 500;
+}
+
+.mat-expansion-panel-body {
+  padding-left: 0px!important;
+}
+
+.mat-expansion-panel-content {
+  background-color: red!important;
+  padding-left: 0!important;
 }

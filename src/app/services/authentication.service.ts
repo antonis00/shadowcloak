@@ -9,6 +9,7 @@ import { User } from '../models';
 import { environment } from 'src/environments/environment';
 import { CredentialsDTO } from '../dtos/credentials-dto';
 import { TokensDTO } from '../dtos/tokens-dto';
+import { TokenDTO } from '../dtos/token-dto';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
@@ -39,7 +40,7 @@ export class AuthenticationService {
               map(token => {
                 if (token.access) {
                   localStorage.setItem('stylometryUserToken', token.access);
-                  user = jwt_decode(token.access).name;
+                  user = jwt_decode<TokenDTO>(token.access).name;
                   this.currentUserSubject.next(user);
                 }
               }));

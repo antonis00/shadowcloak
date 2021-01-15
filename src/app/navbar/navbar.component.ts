@@ -6,6 +6,7 @@ import { User } from '../models';
 // @ts-ignore
 import jwt_decode from 'jwt-decode';
 import { AuthGuard } from '../helpers/auth.guard';
+import { TokenDTO } from '../dtos/token-dto';
 
 @Component({
   selector: 'app-navbar',
@@ -22,8 +23,8 @@ export class NavbarComponent implements OnInit {
     public authGuard: AuthGuard
   ) {
     this.authenticationService.currentUser.subscribe(x => this.currentUser = x);
-    this.currentUser = localStorage.getItem('stylometryToken') == null ?
-      '' :  this.currentUser = jwt_decode(localStorage.getItem('stylometryToken')).name;
+    this.currentUser = localStorage.getItem('stylometryUserToken') == null ?
+      '' :  this.currentUser = jwt_decode<TokenDTO>(localStorage.getItem('stylometryUserToken')).name;
   }
 
   toggleNavbar() {

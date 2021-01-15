@@ -54,21 +54,23 @@
 
   <ng-container *ngFor="let documentByAuthor of documentsByAuthor; let j = index">
 
-    <div class="accordion-author-container">
-      <span class="group-text"> Author: {{ documentByAuthor.name | titlecase }}
+    <mat-expansion-panel class="accordion-author-container">
+      <mat-expansion-panel-header  class="group-text">
+        Author: {{ documentByAuthor.name | titlecase }}
         <span class="edit-delete-author-icons">
           <mat-icon class="edit-author-icon" *ngIf="!slidePanelsSharedService.showPanelContainer"
-            (click)="accordion.closeAll();openAuthorSlidePanel(2, documentByAuthor.id)">edit
+            (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();openAuthorSlidePanel(2, documentByAuthor.id)">edit
           </mat-icon>
           <mat-icon class="delete-author-icon" *ngIf="!slidePanelsSharedService.showPanelContainer"
-            (click)="accordion.closeAll();showDeleteDialog(2, documentByAuthor.name, documentByAuthor.id)">
+            (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();showDeleteDialog(2, documentByAuthor.name, documentByAuthor.id)">
             delete_outline
           </mat-icon>
         </span>
-      </span>
-    </div>
+      </mat-expansion-panel-header>
 
-      <mat-expansion-panel *ngFor="let document of documentByAuthor.documents; let i = index">
+      <ng-template matExpansionPanelContent>
+
+      <mat-expansion-panel *ngFor="let document of documentByAuthor.documents; let i = index" class="nested-panel">
         <mat-expansion-panel-header (mouseover)="rowIndex = i; rowAuthor = documentByAuthor.id" (mouseleave)="rowIndex = null">
           <mat-panel-title>
             {{document.title | titlecase}}
@@ -92,6 +94,11 @@
         </ng-template>
 
       </mat-expansion-panel>
+
+      </ng-template>
+
+    </mat-expansion-panel>
+
 
   </ng-container>
 </mat-accordion>
