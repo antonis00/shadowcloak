@@ -34,11 +34,21 @@ html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .green-snackbar {
-  background: #36b147;
+  background: #17c254;
+  color: white;
+  font-size: 17px!important;
+  padding: 0px 12px 0px 10px;
   & > * {
-    font-size: 17px;
     color: white;
+    font-size: 17px!important;
+    padding: 0px 12px 0px 10px;
   }
+}
+
+.mat-simple-snackbar {
+  color: white;
+  font-size: 17px!important;
+  padding: 0px 12px 0px 10px;
 }
 
 @font-face {
@@ -48,4 +58,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .ck-editor__editable_inline {
   height: 55vh !important;
+}
+
+.modal-body {
+  font-size: 20px;
+}
+
+.modal-footer {
+  padding: 6px 20px 10px 6px!important;
 }

@@ -90,4 +90,10 @@ export class FindAuthorComponent implements OnInit {
   selectGroup(grouId: number) {
     this.selectedGroup = grouId;
   }
+
+  isValid() {
+    if(!this.stylometryForm.get('anonymousTextArea').valid || this.stylometryForm.get('anonymousTextArea').value?.trim() === '')
+      return false;
+    return true;
+  }
 }

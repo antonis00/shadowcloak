@@ -16,7 +16,7 @@
           <mat-chip [removable]='false' class="mat-chip-pink" selected> Nouns</mat-chip>
           <mat-chip [removable]='false' class="mat-chip-beige" selected> Adverbs</mat-chip>
           <mat-chip [removable]='false' class="mat-chip-cyan" selected> Pronouns</mat-chip>
-          <mat-chip [removable]='false' class="mat-chip-grey" selected> Other parts of speech</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-grey" selected> Others</mat-chip>
         </mat-chip-list>
 
       </div>
@@ -59,13 +59,16 @@
 
     <div class="h-15 row">
       <div class="btn-container mb-4">
-        <button type="button" (click)="startAnalysis()" class="btn anonymize"
-          [disabled]="!stylometryForm.get('anonymousTextArea').valid">
+        <button type="button" *ngIf="!analysisResult" (click)="startAnalysis()" class="btn anonymize"
+          [disabled]="!isValid()">
           &nbsp;&nbsp;Analyse Style&nbsp;&nbsp;
         </button>
-        <button type="button" (click)="evaluate()" class="btn anonymize"
-          [disabled]="!analysisResult || !stylometryForm.get('anonymousTextArea').valid">
-          &nbsp;&nbsp;Attribute to author&nbsp;&nbsp;
+        <button type="button" *ngIf="analysisResult" (click)="resetProcess()" class="btn reset-obfuscation">
+          &nbsp;&nbsp;Reset Process&nbsp;&nbsp;
+        </button>
+        <button type="button"*ngIf="analysisResult" (click)="evaluate()" class="btn anonymize"
+          [disabled]="!stylometryForm.get('anonymousTextArea').valid">
+          &nbsp;&nbsp;Detect author&nbsp;&nbsp;
         </button>
         <!-- <button type="button" (click)="copyAnonymousTextToClipboard()" class="btn anonymize"
           [disabled]="!stylometryForm.get('anonymousTextArea').valid">
@@ -85,11 +88,11 @@
         <div class="modal-header">
           <button type="button" class="close" aria-label="Close" (click)="closeDialog(1)"><span
               aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title"> Obfuscation {{ anonymizationStatus }} </h4>
+          <h4 class="modal-title"> Anonymization {{ anonymizationStatus }} </h4>
         </div>
         <div class="modal-body">
-          <p>Initial author: {{ analysisResult | titlecase}}</p>
-          <p>Current author: {{ comparisonResult | titlecase}}</p>
+          <p *ngIf="anonymizationStatus !== 'Unsuccessful'">The initial author "{{ analysisResult | titlecase }}" is different from the current author "{{ comparisonResult | titlecase }}"!</p>
+          <p *ngIf="anonymizationStatus === 'Unsuccessful'">The initial author "{{ analysisResult | titlecase }}" hasn't changed.</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" (click)="closeDialog(1)">Close</button>
@@ -124,14 +127,14 @@
         <div class="modal-header">
           <button type="button" class="close" aria-label="Close" (click)="closeDialog(3)"><span
               aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Start Analysis</h4>
+          <h4 class="modal-title">Reset Process</h4>
         </div>
         <div class="modal-body">
           <p>All changes will be lost! Are you sure you want to proceed?</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" (click)="closeDialog(3)">Close</button>
-          <button type="button" class="btn btn-default" (click)="closeDialog(3);analyse()">Proceed</button>
+          <button type="button" class="btn btn-default" (click)="closeDialog(3);redirectTo('obfuscate')">Proceed</button>
         </div>
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

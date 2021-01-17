@@ -24,10 +24,10 @@
       </div>
     </div>
 
-    <div class="h-35 mt-5 row">
+    <div class="h-35 row">
       <div class="btn-container mb-4">
         <button type="button" (click)="findAuthor()" class="btn anonymize"
-          [disabled]="!stylometryForm.get('anonymousTextArea').valid">Find Author
+          [disabled]="!isValid()">&nbsp;&nbsp;Detect Author&nbsp;&nbsp;
         </button>
       </div>
 

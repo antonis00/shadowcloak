@@ -7,6 +7,7 @@ import { MatSnackBar, MatSnackBarHorizontalPosition, MatSnackBarVerticalPosition
 import { TokenPair } from 'src/app/models/token-pair';
 
 import * as CKEditor from 'src/assets/ckeditor/ckeditor';
+import { Router } from '@angular/router';
 
 @Component({
   templateUrl: './obfuscate.component.html',
@@ -96,7 +97,7 @@ export class ObfuscateComponent implements OnInit {
 
   ngOnInit(): void {
     this.stylometryForm = new FormGroup({
-      anonymousTextArea: new FormControl('Write the text you want to anonymize here.', Validators.required),
+      anonymousTextArea: new FormControl('Put the text you want to anonymize here.', Validators.required),
       groupSelect: new FormControl(null, Validators.required)
     });
 
@@ -111,7 +112,8 @@ export class ObfuscateComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) { }
 
   startAnalysis() {
@@ -305,7 +307,7 @@ export class ObfuscateComponent implements OnInit {
   }
 
   underlineNewTokens() {
-    const text:string = this.stylometryForm.get('anonymousTextArea').value
+    const text: string = this.stylometryForm.get('anonymousTextArea').value
       .replace(/<span[^>]*>/g, '').replace(/<\/span>/g, '')
       .replace(/<b>/g, '').replace(/<\/b>/g, '');
 
@@ -339,6 +341,21 @@ export class ObfuscateComponent implements OnInit {
       }
     }
     return 'mat-chip-grey';
+  }
+
+  resetProcess() {
+    this.showResetDialog();
+  }
+
+  redirectTo(uri: string) {
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() =>
+      this.router.navigate([uri]));
+  }
+
+  isValid() {
+    if(!this.stylometryForm.get('anonymousTextArea').valid || this.stylometryForm.get('anonymousTextArea').value?.trim() === '')
+      return false;
+    return true;
   }
 
 }
