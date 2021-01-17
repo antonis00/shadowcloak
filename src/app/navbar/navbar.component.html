@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
-  <img height="60" alt="ShadowCloak" [src]="currentUser != null ? '../assets/shadow-cloak-awake.png' : '../assets/shadow-cloak.png'" ondragstart="return false;" (click)="this.router.navigate(['./'])" />
+  <img height="60" alt="ShadowCloak" [src]="currentUser != null && currentUser != ''? '../assets/shadow-cloak-awake.png' : '../assets/shadow-cloak.png'" ondragstart="return false;" (click)="this.router.navigate(['./'])" />
   <span class="shadow-cloak-logo-text" ondragstart="return false;" (click)="this.router.navigate(['./'])">
     <p>
       Shadow <br>

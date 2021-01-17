@@ -107,10 +107,6 @@
   .third-row {
     margin: 40px 0 40px 0;
 
-    textarea {
-      min-height: 50vh;
-    }
-
     .validation-message {
       color: #b94b29;
       padding-left: 10px;
@@ -168,8 +164,8 @@ mat-form-field {
   width: 100%;
   display: flex;
 
-  &>a {
-    margin:2px;
+  &>button {
+    margin:10px;
 
     &:first-of-type {
       margin-left: auto;
@@ -181,6 +177,14 @@ mat-label {
   font-size: 18px;
 }
 
+.reset-tokens {
+  background-color: #007bff;
+  border-color: #007bff;
+  padding: 6px 10px;
+  color: white!important;
+  font-size: 16px;
+  margin: 10px 10px 0 0;
+}
 
 
 

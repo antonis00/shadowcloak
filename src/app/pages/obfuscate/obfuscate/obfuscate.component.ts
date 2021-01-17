@@ -23,6 +23,7 @@ export class ObfuscateComponent implements OnInit {
 
   stylometryForm: FormGroup;
   comparisonResult: string;
+  analysisResult: string;
   comparisonError = '';
   alertMessage = '';
   display = 'none';
@@ -42,6 +43,7 @@ export class ObfuscateComponent implements OnInit {
   showSynonymList = false;
   synonymList = ['me', 'myself', 'Irene'];
   synonymsOfCurrentWord = ['me', 'myself', 'Irene'];
+  anonymizationStatus = 'Unsuccessful';
 
 
   horizontalPosition: MatSnackBarHorizontalPosition = 'end';
@@ -113,7 +115,7 @@ export class ObfuscateComponent implements OnInit {
   ) { }
 
   startAnalysis() {
-    if (this.comparisonResult) {
+    if (this.analysisResult) {
       this.showResetDialog();
     } else {
       this.analyse();
@@ -121,7 +123,7 @@ export class ObfuscateComponent implements OnInit {
   }
 
   evaluate(): void {
-    if (this.comparisonResult && this.selectedGroup !== this.stylometryForm.get('groupSelect').value) {
+    if (this.analysisResult && this.selectedGroup !== this.stylometryForm.get('groupSelect').value) {
       this.showChangedGroupDialog();
     } else {
       this.findAuthor();
@@ -129,11 +131,12 @@ export class ObfuscateComponent implements OnInit {
   }
 
   analyse(): void {
-    this.sendTextForAnalysis(this.stylometryForm.get('anonymousTextArea').value, this.stylometryForm.get('groupSelect').value);
+    this.selectedGroup = this.stylometryForm.get('groupSelect').value;
+    this.sendTextForAnalysis(this.stylometryForm.get('anonymousTextArea').value, this.selectedGroup);
   }
 
   findAuthor(): void {
-    this.sendTextForAttribution(this.stylometryForm.get('anonymousTextArea').value, this.stylometryForm.get('groupSelect').value);
+    this.sendTextForAttribution(this.stylometryForm.get('anonymousTextArea').value, this.selectedGroup == null ? this.stylometryForm.get('groupSelect').value : this.selectedGroup);
   }
 
   sendTextForAnalysis(text: string, group: number): void {
@@ -144,7 +147,7 @@ export class ObfuscateComponent implements OnInit {
 
         this.anonymousText = this.underline(data.rawUserText);
         this.stylometryForm.get('anonymousTextArea').patchValue(this.anonymousText);
-        this.comparisonResult = data.mostProbableAuthor;
+        this.analysisResult = data.mostProbableAuthor;
         this.editMode = true;
         this.scrollToTop();
         // this.showResultAuthorDialog(data.mostProbableAuthor);
@@ -175,6 +178,7 @@ export class ObfuscateComponent implements OnInit {
   }
 
   showResultAuthorDialog(author: string): void {
+    this.analysisResult === author ? this.anonymizationStatus = 'Unsuccessful' : this.anonymizationStatus = 'Successful!';
     this.comparisonResult = author;
     this.openDialog(1);
   }
@@ -249,7 +253,20 @@ export class ObfuscateComponent implements OnInit {
     words.forEach(word => {
       let currentWord = word;
       if (this.filteredTokensValues.includes(word)) {
-        currentWord = '<u>' + word + '</u>';
+        const partOfSpeech = this.filteredTokens.find(x => x.token === word).partOfSpeech;
+        if (partOfSpeech.startsWith('V')) { // verb
+          currentWord = '<span style="color:#3f51b5;"><b>' + word + '</b></span>';
+        } else if (partOfSpeech.startsWith('J')) {  // adjective
+          currentWord = '<span style="color:#b2200a;"><b>' + word + '</b></span>';
+        } else if (partOfSpeech.startsWith('N')) {   // noun
+          currentWord = '<span style="color:#ff4081;"><b>' + word + '</b></span>';
+        } else if (partOfSpeech.startsWith('RB')) {  // adverb
+          currentWord = '<span style="color:#a68051;"><b>' + word + '</b></span>';
+        } else if (partOfSpeech.startsWith('WP') || partOfSpeech.startsWith('PR')) {  // pronoun
+          currentWord = '<span style="color:#17a2b8;"><b>' + word + '</b></span>';
+        } else {
+          currentWord = '<span style="color:#6d6d6d;"><b>' + word + '</b></span>';
+        }
       }
       resultText.push(currentWord);
     });
@@ -288,7 +305,9 @@ export class ObfuscateComponent implements OnInit {
   }
 
   underlineNewTokens() {
-    const text:string = this.stylometryForm.get('anonymousTextArea').value.replace(/<u>/g, '').replace(/<\/u>/g, '');
+    const text:string = this.stylometryForm.get('anonymousTextArea').value
+      .replace(/<span[^>]*>/g, '').replace(/<\/span>/g, '')
+      .replace(/<b>/g, '').replace(/<\/b>/g, '');
 
     this.anonymousText = this.underline(text);
     this.stylometryForm.get('anonymousTextArea').patchValue(this.anonymousText);

@@ -1,9 +1,9 @@
 <div class="container">
   <form [formGroup]="stylometryForm">
-    <div class="first-row" *ngIf="comparisonResult">
+    <div class="first-row" *ngIf="analysisResult">
       <mat-label>Suggested Author:</mat-label>
       <div class="author-container">
-        {{  comparisonResult | titlecase }}
+        {{  analysisResult | titlecase }}
       </div>
     </div>
 
@@ -31,7 +31,7 @@
         </mat-chip-list>
       </div>
       <div class="chips-action-buttons">
-        <a type="button" class="btn btn-default reset-tokens" (click)="resetTokens()">Reset Tokens</a>
+        <button type="button" class="btn btn-default reset-tokens" [disabled]="allTokens?.length==filteredTokens?.length" (click)="resetTokens()">Reset Tokens</button>
       </div>
 
     </div>
@@ -64,7 +64,7 @@
           &nbsp;&nbsp;Analyse Style&nbsp;&nbsp;
         </button>
         <button type="button" (click)="evaluate()" class="btn anonymize"
-          [disabled]="!comparisonResult || !stylometryForm.get('anonymousTextArea').valid">
+          [disabled]="!analysisResult || !stylometryForm.get('anonymousTextArea').valid">
           &nbsp;&nbsp;Attribute to author&nbsp;&nbsp;
         </button>
         <!-- <button type="button" (click)="copyAnonymousTextToClipboard()" class="btn anonymize"
@@ -85,10 +85,11 @@
         <div class="modal-header">
           <button type="button" class="close" aria-label="Close" (click)="closeDialog(1)"><span
               aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Most Probable Author</h4>
+          <h4 class="modal-title"> Obfuscation {{ anonymizationStatus }} </h4>
         </div>
         <div class="modal-body">
-          <p>{{ comparisonResult | titlecase}}</p>
+          <p>Initial author: {{ analysisResult | titlecase}}</p>
+          <p>Current author: {{ comparisonResult | titlecase}}</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" (click)="closeDialog(1)">Close</button>
