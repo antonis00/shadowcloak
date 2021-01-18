@@ -45,7 +45,7 @@ export class ApiService {
     } else if (authors.length > 0) {
       return this.http.get<DocumentsByAuthor[]>('docsbyauthor/?author=' + authors);
     }
-    return this.http.get<DocumentsByAuthor[]>('docsbyauthor/?group=12');
+    return this.http.get<DocumentsByAuthor[]>('docsbyauthor/');
 
   }
 
