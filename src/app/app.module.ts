@@ -45,6 +45,7 @@ import { InterceptorService } from './services/interceptor.service';
 import { ApiService } from './services/api.service';
 import { UserService } from './services/user.service';
 
+import { LocationStrategy, PathLocationStrategy } from '@angular/common';
 
 
 @NgModule({
@@ -90,7 +91,8 @@ import { UserService } from './services/user.service';
   ],
   providers: [
     ApiService,
-    UserService, { provide: HTTP_INTERCEPTORS, useClass: InterceptorService, multi: true }
+    UserService, { provide: HTTP_INTERCEPTORS, useClass: InterceptorService, multi: true },
+    { provide: LocationStrategy, useClass: PathLocationStrategy }
   ],
   bootstrap: [
     AppComponent

@@ -8,7 +8,7 @@
 
   </span>
 
-  <button class="navbar-toggler" type="button" (click)="toggleNavbar()" data-toggle="collapse"
+  <button *ngIf="currentUser" class="navbar-toggler" type="button" (click)="toggleNavbar()" data-toggle="collapse"
     data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
     aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
