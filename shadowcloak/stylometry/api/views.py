@@ -82,8 +82,8 @@ class DocumentsByAuthorView(views.APIView):
             return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, id__in=authors), many=True).distinct().data)
         elif group is not None:
             return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, documents__group=group).distinct(), many=True).data)
-        
-        return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user).distinct(), many=True).data)
+        firstGroup = Group.objects.filter(user=self.request.user).first()
+        return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, documents__group=firstGroup).distinct(), many=True).data)
 
 
     
