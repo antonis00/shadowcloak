@@ -80,6 +80,16 @@ npx ng serve
 
 The app runs at `http://localhost:4200/`. The dev server forwards `/api` to the backend, so run both together. See the [frontend README](frontend/README.md) for builds and tests.
 
+## Tests
+
+| What | How to run it |
+| --- | --- |
+| Backend | `python manage.py test`, from `backend/shadowcloak` |
+| Frontend | `npx ng test --watch=false`, from `frontend` |
+| The whole app in Chrome | `npm test`, from [`e2e`](e2e) |
+
+GitHub Actions runs all of these on every push and pull request. It also audits the Python and npm packages, and repeats that every Monday, because new advisories appear even when the code doesn't change.
+
 ## License
 
 [MIT](LICENSE). The CKEditor build in `frontend/src/assets/ckeditor` is third-party code under its own terms.

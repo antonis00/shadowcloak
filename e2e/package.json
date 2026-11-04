@@ -1,0 +1,10 @@
+{
+  "name": "shadow-cloak-e2e",
+  "private": true,
+  "scripts": {
+    "test": "node run.js"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}

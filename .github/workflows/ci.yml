@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # New advisories appear even when the code doesn't change.
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: '3.14'
+  NODE_VERSION: '26'
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r backend/requirements.txt
+      - run: python -m nltk.downloader punkt_tab averaged_perceptron_tagger_eng
+      - name: Check that models and migrations agree
+        working-directory: backend/shadowcloak
+        env:
+          DJANGO_SECRET_KEY: only-for-ci
+        run: python manage.py makemigrations --check --dry-run
+      - name: Run the tests
+        working-directory: backend/shadowcloak
+        env:
+          DJANGO_SECRET_KEY: only-for-ci
+        run: python manage.py test
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npx ng test --watch=false
+      - run: npx ng build
+
+  browser:
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: pip install -r backend/requirements.txt
+      - run: python -m nltk.downloader punkt_tab averaged_perceptron_tagger_eng
+      - run: npm ci
+        working-directory: frontend
+      - run: npm ci
+        working-directory: e2e
+      - name: Run the browser tests
+        working-directory: e2e
+        env:
+          PYTHON: python
+        run: npm test
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: pip install pip-audit
+      - name: Audit the Python packages
+        run: pip-audit -r backend/requirements.txt --no-deps --disable-pip
+      - name: Audit the npm packages
+        working-directory: frontend
+        run: npm audit
