@@ -27,6 +27,16 @@ class DocumentSerializer(serializers.ModelSerializer):
         model = Document
         fields = "__all__"
 
+    def get_fields(self):
+        # Scoping the choices makes another user's ID look exactly like a missing one.
+        # Without a request user, for example when nested read-only, nothing can be chosen.
+        fields = super().get_fields()
+        request = self.context.get('request')
+        user = request.user if request else None
+        fields['author'].queryset = Author.objects.filter(user=user)
+        fields['group'].queryset = Group.objects.filter(user=user)
+        return fields
+
 
 
 class DocumentsByAuthorSerializer(serializers.ModelSerializer):

@@ -4,7 +4,6 @@ from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework import mixins
@@ -40,17 +39,6 @@ class DocumentViewset(ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
     permission_classes = [IsAuthenticated]
-
-
-    def perform_create(self, serializer):
-        author_id = self.request.data.get('author')
-        author = Author.objects.filter(pk=author_id).first()
-        user = self.request.user
-
-        if author.user != user: 
-            raise NotFound('Author ' + str(author) + ' not found!')
-        else:
-            serializer.save(author=author)
 
 
     def get_queryset(self):

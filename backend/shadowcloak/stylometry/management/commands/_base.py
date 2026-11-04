@@ -13,7 +13,8 @@ class ImportCommand(BaseCommand):
     """Shared options and database handling for the dataset imports.
 
     Each import runs in one transaction, so a failure leaves the database unchanged.
-    Authors must already exist. Documents from unknown authors are skipped.
+    Authors must already exist and belong to the group's owner. Names match regardless
+    of case. Documents from unknown authors are skipped.
     """
 
     source_help = ''
@@ -45,7 +46,7 @@ class ImportCommand(BaseCommand):
         raise NotImplementedError
 
     def find_author(self, name):
-        return Author.objects.filter(name=name).first()
+        return Author.objects.filter(user=self.group.user, name__iexact=name).first()
 
     def add_document(self, author, title, body):
         Document.objects.create(
