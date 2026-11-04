@@ -13,7 +13,7 @@
         <mat-label>Authors</mat-label>
         <mat-select multiple [value]="selectedAuthors()" (selectionChange)="selectedAuthors.set($event.value)" (closed)="loadDocuments()">
           @for (author of authors(); track author.id) {
-            <mat-option [value]="author.id">{{ author.name | titlecase }}</mat-option>
+            <mat-option [value]="author.id">{{ author.name }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -21,7 +21,7 @@
         <mat-label>Group</mat-label>
         <mat-select [value]="selectedGroup()" (selectionChange)="chooseGroup($event.value)">
           @for (group of groups(); track group.id) {
-            <mat-option [value]="group.id">{{ group.name | titlecase }}</mat-option>
+            <mat-option [value]="group.id">{{ group.name }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -44,7 +44,7 @@
     @for (author of documents(); track author.id) {
       <mat-expansion-panel class="author-panel">
         <mat-expansion-panel-header>
-          <mat-panel-title>Author: {{ author.name | titlecase }}</mat-panel-title>
+          <mat-panel-title>Author: {{ author.name }}</mat-panel-title>
           <span class="row-actions">
             <button matIconButton type="button" [attr.aria-label]="'Edit author ' + author.name"
               (click)="$event.stopPropagation(); editAuthor(authorRecord(author.id))"><mat-icon>edit</mat-icon></button>
@@ -57,7 +57,7 @@
           @for (document of author.documents; track document.id) {
             <mat-expansion-panel class="document-panel">
               <mat-expansion-panel-header>
-                <mat-panel-title>{{ document.title | titlecase }}</mat-panel-title>
+                <mat-panel-title>{{ document.title }}</mat-panel-title>
                 <mat-panel-description>{{ document.description }}</mat-panel-description>
                 <span class="row-actions">
                   <button matIconButton type="button" [attr.aria-label]="'Edit document ' + document.title"

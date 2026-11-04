@@ -1,12 +1,7 @@
-from datetime import date
-
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError, transaction
 
 from stylometry.models import Author, Document, Group
-
-# The datasets have no usable publication dates, so every document gets this one.
-PUBLICATION_DATE = date(2002, 2, 20)
 
 
 class ImportCommand(BaseCommand):
@@ -54,5 +49,4 @@ class ImportCommand(BaseCommand):
             group=self.group,
             title=title,
             body=body,
-            publication_date=PUBLICATION_DATE,
         )

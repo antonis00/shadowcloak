@@ -1,4 +1,3 @@
-import { TitleCasePipe } from '@angular/common';
 import { Component, input } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,13 +9,13 @@ import { Group } from '../core/api.types';
 /** Picks the category to analyse against, and says what to do when there are none yet. */
 @Component({
   selector: 'app-category-select',
-  imports: [MatFormFieldModule, MatSelectModule, ReactiveFormsModule, RouterLink, TitleCasePipe],
+  imports: [MatFormFieldModule, MatSelectModule, ReactiveFormsModule, RouterLink],
   template: `
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Category</mat-label>
       <mat-select [formControl]="control()">
         @for (group of groups(); track group.id) {
-          <mat-option [value]="group.id">{{ group.name | titlecase }}</mat-option>
+          <mat-option [value]="group.id">{{ group.name }}</mat-option>
         }
       </mat-select>
     </mat-form-field>

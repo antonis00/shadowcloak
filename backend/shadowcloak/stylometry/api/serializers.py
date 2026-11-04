@@ -11,16 +11,15 @@ MAX_PASSWORD_LENGTH = 128
 
 
 class OwnedNameMixin:
-    """Names are stored in lowercase and are unique per user, however they were typed."""
+    """Names are kept as typed, and are unique per user whatever their case."""
 
     def validate_name(self, value):
-        name = value.lower()
-        same_name = self.Meta.model.objects.filter(user=self.context['request'].user, name=name)
+        same_name = self.Meta.model.objects.filter(user=self.context['request'].user, name__iexact=value)
         if self.instance:
             same_name = same_name.exclude(pk=self.instance.pk)
         if same_name.exists():
             raise serializers.ValidationError('You already have one with this name.')
-        return name
+        return value
 
 
 class AuthorSerializer(OwnedNameMixin, serializers.ModelSerializer):
@@ -32,7 +31,6 @@ class AuthorSerializer(OwnedNameMixin, serializers.ModelSerializer):
 
 
 class DocumentSerializer(serializers.ModelSerializer):
-    active = serializers.BooleanField(initial=True)
     author_name = serializers.StringRelatedField(read_only=True, source='author')
 
     class Meta:

@@ -2,7 +2,7 @@
   @if (analysis(); as result) {
     <section class="result">
       <h2>Suggested Author</h2>
-      <div class="box author">{{ result.mostProbableAuthor | titlecase }}</div>
+      <div class="box author">{{ result.mostProbableAuthor }}</div>
       <p class="ranking">{{ result | ranking }}</p>
       @for (warning of result.warnings; track warning) {
         <p class="warning">{{ warning }}</p>

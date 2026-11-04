@@ -17,8 +17,7 @@ export interface DocumentRecord {
   title: string;
   description: string;
   body: string;
-  active: boolean;
-  publication_date: string;
+  publication_date: string | null;
 }
 
 export type DocumentInput = Omit<DocumentRecord, 'id'>;

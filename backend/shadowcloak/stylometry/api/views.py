@@ -50,9 +50,9 @@ class DocumentViewset(ModelViewSet):
         author = self.request.query_params.get('author')
         group = self.request.query_params.get('group')
         if author is not None:
-            documents = documents.filter(author__name=author.lower())
+            documents = documents.filter(author__name__iexact=author)
         if group is not None:
-            documents = documents.filter(group__name=group.lower())
+            documents = documents.filter(group__name__iexact=group)
         return documents
 
 

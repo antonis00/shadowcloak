@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.management import call_command
+from django.db import IntegrityError, transaction
 from django.test import SimpleTestCase, TestCase as DjangoTestCase, override_settings
 from rest_framework.test import APIClient
 
@@ -710,14 +711,25 @@ class NameTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(self.user)
 
-    def test_names_are_stored_in_lowercase_on_create_and_update(self):
+    def test_names_are_kept_as_typed_on_create_and_update(self):
         for url in ['/api/authors/', '/api/groups/']:
             created = self.client.post(url, {'name': 'MiXeD'}, format='json')
             self.assertEqual(created.status_code, 201)
-            self.assertEqual(created.data['name'], 'mixed')
+            self.assertEqual(created.data['name'], 'MiXeD')
             updated = self.client.put(f"{url}{created.data['id']}/", {'name': 'OtHeR'}, format='json')
             self.assertEqual(updated.status_code, 200)
-            self.assertEqual(updated.data['name'], 'other')
+            self.assertEqual(updated.data['name'], 'OtHeR')
+
+    def test_changing_only_the_case_of_a_name_works(self):
+        created = self.client.post('/api/authors/', {'name': 'jane austen'}, format='json')
+        response = self.client.put(f"/api/authors/{created.data['id']}/", {'name': 'Jane Austen'}, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['name'], 'Jane Austen')
+
+    def test_the_database_also_refuses_a_name_differing_only_in_case(self):
+        Author.objects.create(user=self.user, name='Sarah')
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Author.objects.create(user=self.user, name='sarah')
 
     def test_a_duplicate_name_gets_a_400_not_a_crash(self):
         for url in ['/api/authors/', '/api/groups/']:
@@ -858,3 +870,57 @@ class TokenCountTests(TestCase):
         self.assertEqual(codes[:60], [201] * 60)
         self.assertEqual(codes[60], 429)
         self.assertEqual(self.client.get('/api/documents/').status_code, 200)
+
+
+class DocumentFieldTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('alice', password=PASSWORD)
+        self.author = Author.objects.create(user=self.user, name='Sarah')
+        self.group = Group.objects.create(user=self.user, name='Books')
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+
+    def create(self, **fields):
+        payload = {'author': self.author.id, 'group': self.group.id, 'title': 'one', 'body': 'the cat', **fields}
+        return self.client.post('/api/documents/', payload, format='json')
+
+    def test_the_date_is_optional(self):
+        response = self.create()
+        self.assertEqual(response.status_code, 201)
+        self.assertIsNone(response.data['publication_date'])
+
+    def test_the_date_can_be_cleared(self):
+        created = self.create(publication_date='1815-12-23')
+        self.assertEqual(created.data['publication_date'], '1815-12-23')
+        response = self.client.patch(f"/api/documents/{created.data['id']}/", {'publication_date': None}, format='json')
+        self.assertIsNone(response.data['publication_date'])
+
+    def test_a_bad_date_is_rejected(self):
+        self.assertEqual(self.create(publication_date='not a date').status_code, 400)
+
+    def test_active_is_gone(self):
+        self.assertNotIn('active', self.create().data)
+
+    def test_filters_ignore_case(self):
+        self.create()
+        self.assertEqual(len(self.client.get('/api/documents/?author=SARAH&group=books').data), 1)
+
+    def test_imports_do_not_invent_a_date(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'blogs.csv')
+            with open(path, 'w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                writer.writerow(['id', 'gender', 'age', 'topic', 'sign', 'date', 'text'])
+                writer.writerow(['sarah', 'f', '20', 'x', 'y', '1,1,2004', 'the cat sat'])
+            call_command('import_blogs', path, group=self.group.id, stdout=StringIO())
+        self.assertIsNone(Document.objects.get().publication_date)
+
+    def test_the_migration_clears_only_the_placeholder_date(self):
+        placeholder = Document.objects.create(author=self.author, group=self.group, title='a', body='x', publication_date='2002-02-20')
+        real = Document.objects.create(author=self.author, group=self.group, title='b', body='x', publication_date='1815-12-23')
+        migration = importlib.import_module('stylometry.migrations.0027_optional_date_and_names')
+        migration.clear_placeholder_dates(django_apps, None)
+        placeholder.refresh_from_db()
+        real.refresh_from_db()
+        self.assertIsNone(placeholder.publication_date)
+        self.assertEqual(str(real.publication_date), '1815-12-23')

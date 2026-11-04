@@ -1,4 +1,3 @@
-import { TitleCasePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -8,7 +7,7 @@ import { Feedback } from './shared/feedback';
 
 @Component({
   selector: 'app-root',
-  imports: [MatIconModule, RouterLink, RouterLinkActive, RouterOutlet, TitleCasePipe],
+  imports: [MatIconModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

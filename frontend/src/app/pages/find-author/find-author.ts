@@ -1,4 +1,3 @@
-import { TitleCasePipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -15,7 +14,7 @@ import { RankingPipe } from '../../shared/ranking';
 
 @Component({
   imports: [CategorySelect, MatButtonModule, MatFormFieldModule, MatInputModule, ReactiveFormsModule],
-  providers: [RankingPipe, TitleCasePipe],
+  providers: [RankingPipe],
   template: `
     <main class="page">
       <app-category-select [control]="group" [groups]="groups()" />
@@ -33,7 +32,6 @@ import { RankingPipe } from '../../shared/ranking';
 export class FindAuthor {
   private readonly api = inject(ApiService);
   private readonly feedback = inject(Feedback);
-  private readonly titleCase = inject(TitleCasePipe);
   private readonly rankingPipe = inject(RankingPipe);
 
   readonly group = new FormControl<number | null>(null, Validators.required);
@@ -50,7 +48,7 @@ export class FindAuthor {
     this.api.findAuthor(this.text.value, this.group.value!).subscribe({
       next: result => this.feedback.message(
         'Most Probable Author',
-        this.titleCase.transform(result.mostProbableAuthor),
+        result.mostProbableAuthor,
         this.rankingPipe.transform(result),
         ...result.warnings,
       ),

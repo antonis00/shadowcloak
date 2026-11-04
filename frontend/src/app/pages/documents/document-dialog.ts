@@ -11,9 +11,6 @@ import { ApiService } from '../../core/api.service';
 import { Author, DocumentInput, DocumentRecord, Group } from '../../core/api.types';
 import { Feedback } from '../../shared/feedback';
 
-// The API requires a date that nothing uses. See F9 in the review.
-const PLACEHOLDER_DATE = '2002-02-20';
-
 export interface DocumentDialogData {
   document?: DocumentRecord;
   authors: Author[];
@@ -39,7 +36,7 @@ export interface DocumentDialogData {
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Publication date</mat-label>
           <input matInput type="date" formControlName="publication_date" />
-          <mat-error>The date is required</mat-error>
+          <mat-hint>Optional</mat-hint>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Author</mat-label>
@@ -86,7 +83,7 @@ export class DocumentDialog {
   readonly form = inject(FormBuilder).group({
     title: [this.document?.title ?? '', Validators.required],
     description: [this.document?.description ?? ''],
-    publication_date: [this.document?.publication_date ?? PLACEHOLDER_DATE, Validators.required],
+    publication_date: [this.document?.publication_date ?? ''],
     author: [this.document?.author ?? null, Validators.required],
     group: [this.document?.group ?? this.data.group, Validators.required],
     body: [this.document?.body ?? '', Validators.required],
@@ -101,7 +98,8 @@ export class DocumentDialog {
     }
     this.loading.set(true);
     this.error.set('');
-    const input = { ...this.form.getRawValue(), active: this.document?.active ?? true } as DocumentInput;
+    const values = this.form.getRawValue();
+    const input = { ...values, publication_date: values.publication_date || null } as DocumentInput;
     this.api.saveDocument(input, this.document?.id).subscribe({
       next: () => {
         this.feedback.success('Document saved.');

@@ -1,4 +1,3 @@
-import { TitleCasePipe } from '@angular/common';
 import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -20,7 +19,7 @@ import { NamedDialog, NamedDialogData } from './named-dialog';
 @Component({
   imports: [
     MatButtonModule, MatDividerModule, MatExpansionModule, MatFormFieldModule,
-    MatIconModule, MatMenuModule, MatSelectModule, TitleCasePipe,
+    MatIconModule, MatMenuModule, MatSelectModule,
   ],
   templateUrl: './documents.html',
   styleUrl: './documents.scss',

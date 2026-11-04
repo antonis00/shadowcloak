@@ -1,4 +1,3 @@
-import { TitleCasePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -18,15 +17,13 @@ import { RichTextEditor } from './rich-text-editor';
 const STARTING_TEXT = 'Put the text you want to anonymize here.';
 
 @Component({
-  imports: [CategorySelect, MatButtonModule, MatIconModule, RankingPipe, ReactiveFormsModule, RichTextEditor, TitleCasePipe],
-  providers: [TitleCasePipe],
+  imports: [CategorySelect, MatButtonModule, MatIconModule, RankingPipe, ReactiveFormsModule, RichTextEditor],
   templateUrl: './obfuscate.html',
   styleUrl: './obfuscate.scss',
 })
 export class Obfuscate {
   private readonly api = inject(ApiService);
   private readonly feedback = inject(Feedback);
-  private readonly titleCase = inject(TitleCasePipe);
 
   readonly group = new FormControl<number | null>(null, Validators.required);
   readonly text = new FormControl(STARTING_TEXT, { nonNullable: true, validators: Validators.required });
@@ -71,11 +68,11 @@ export class Obfuscate {
   detectAuthor(): void {
     this.api.findAuthor(this.plainText(), this.group.value!).subscribe({
       next: result => {
-        const initial = this.titleCase.transform(this.analysis()?.mostProbableAuthor ?? '');
+        const initial = this.analysis()?.mostProbableAuthor;
         if (result.mostProbableAuthor === this.analysis()?.mostProbableAuthor) {
           this.feedback.message('Anonymization Unsuccessful', `The initial author "${initial}" hasn't changed.`, ...result.warnings);
         } else {
-          const current = this.titleCase.transform(result.mostProbableAuthor);
+          const current = result.mostProbableAuthor;
           this.feedback.message('Anonymization Successful!',
             `The initial author "${initial}" is different from the current author "${current}"!`, ...result.warnings);
         }
