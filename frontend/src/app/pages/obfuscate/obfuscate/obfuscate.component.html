@@ -1,0 +1,163 @@
+<div class="container">
+  <form [formGroup]="stylometryForm">
+    <div class="first-row" *ngIf="analysisResult">
+      <mat-label>Suggested Author:</mat-label>
+      <div class="author-container">
+        {{  analysisResult | titlecase }}
+      </div>
+    </div>
+
+    <div class="row second-row" *ngIf="allTokens.length>0">
+      <div class="color-guide-chips">
+        <mat-label>Most Relevant Tokens:</mat-label>
+        <mat-chip-list class="guide-chip-list">
+          <mat-chip [removable]='false' class="mat-chip-blue" selected> Verbs</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-red" selected> Adjectives</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-pink" selected> Nouns</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-beige" selected> Adverbs</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-cyan" selected> Pronouns</mat-chip>
+          <mat-chip [removable]='false' class="mat-chip-grey" selected> Others</mat-chip>
+        </mat-chip-list>
+
+      </div>
+
+      <div class="chips-container">
+        <mat-chip-list aria-label="Tokens">
+          <mat-chip *ngFor="let tokenPair of filteredTokens" [removable]="true" (removed)="removeToken(tokenPair)"
+            selected [ngClass]="getChipColor(tokenPair)">
+            {{ tokenPair.token }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+        </mat-chip-list>
+      </div>
+      <div class="chips-action-buttons">
+        <button type="button" class="btn btn-default reset-tokens" [disabled]="allTokens?.length==filteredTokens?.length" (click)="resetTokens()">Reset Tokens</button>
+      </div>
+
+    </div>
+
+
+    <div class="h-50 row third-row">
+      <div class="col-md-12 mb-6 mb-md-0">
+
+        <mat-form-field style="border-radius:100px!important" appearance="outline" *ngIf="!editMode">
+          <mat-label>Category</mat-label>
+          <mat-select panelClass="select-panel" formControlName="groupSelect">
+            <mat-option *ngFor="let group of documentGroups" [value]="group.id">
+              {{group.name | titlecase}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <ckeditor [config]="config" [editor]="Editor" data='' formControlName="anonymousTextArea"></ckeditor>
+
+        <small *ngIf="!stylometryForm.get('anonymousTextArea').valid && stylometryForm.get('anonymousTextArea').touched"
+          class="form-text validation-message">* The above text is required</small>
+
+      </div>
+    </div>
+
+    <div class="h-15 row">
+      <div class="btn-container mb-4">
+        <button type="button" *ngIf="!analysisResult" (click)="startAnalysis()" class="btn anonymize"
+          [disabled]="!isValid()">
+          &nbsp;&nbsp;Analyse Style&nbsp;&nbsp;
+        </button>
+        <button type="button" *ngIf="analysisResult" (click)="resetProcess()" class="btn reset-obfuscation">
+          &nbsp;&nbsp;Reset Process&nbsp;&nbsp;
+        </button>
+        <button type="button"*ngIf="analysisResult" (click)="evaluate()" class="btn anonymize"
+          [disabled]="!stylometryForm.get('anonymousTextArea').valid">
+          &nbsp;&nbsp;Detect author&nbsp;&nbsp;
+        </button>
+        <!-- <button type="button" (click)="copyAnonymousTextToClipboard()" class="btn anonymize"
+          [disabled]="!stylometryForm.get('anonymousTextArea').valid">
+          &nbsp;&nbsp;Copy To Clipboard&nbsp;&nbsp;
+        </button> -->
+      </div>
+    </div>
+
+  </form>
+
+
+
+  <div class="backdrop" [ngStyle]="{'display':displaySuccessModal}"></div>
+  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':displaySuccessModal}">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" aria-label="Close" (click)="closeDialog(1)"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"> Anonymization {{ anonymizationStatus }} </h4>
+        </div>
+        <div class="modal-body">
+          <p *ngIf="anonymizationStatus !== 'Unsuccessful'">The initial author "{{ analysisResult | titlecase }}" is different from the current author "{{ comparisonResult | titlecase }}"!</p>
+          <p *ngIf="anonymizationStatus === 'Unsuccessful'">The initial author "{{ analysisResult | titlecase }}" hasn't changed.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" (click)="closeDialog(1)">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal !-->
+
+  <div class="backdrop" [ngStyle]="{'display':displayErrorModal}"></div>
+  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':displayErrorModal}">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" aria-label="Close" (click)="closeDialog(2)"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Request Unsuccessful</h4>
+        </div>
+        <div class="modal-body">
+          <p>{{ comparisonError }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" (click)="closeDialog(2)">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal !-->
+
+  <div class="backdrop" [ngStyle]="{'display':displayResetModal}"></div>
+  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':displayResetModal}">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" aria-label="Close" (click)="closeDialog(3)"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Reset Process</h4>
+        </div>
+        <div class="modal-body">
+          <p>All changes will be lost! Are you sure you want to proceed?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" (click)="closeDialog(3)">Close</button>
+          <button type="button" class="btn btn-default" (click)="closeDialog(3);redirectTo('obfuscate')">Proceed</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal !-->
+
+  <div class="backdrop" [ngStyle]="{'display':displayChangedGroupModal}"></div>
+  <div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':displayChangedGroupModal}">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" aria-label="Close" (click)="closeDialog(4)"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Category Changed</h4>
+        </div>
+        <div class="modal-body">
+          <p>You have changed document category. Anonymization can be done only if the initial category of the analysis
+            is selected. Revert to the initial category or restart the process click Stylometry Analysis. </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" (click)="closeDialog(4)">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal !-->
+
+</div>

@@ -1,0 +1,40 @@
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <img height="60" alt="ShadowCloak" [src]="currentUser != null && currentUser != ''? '../assets/shadow-cloak-awake.png' : '../assets/shadow-cloak.png'" ondragstart="return false;" (click)="this.router.navigate(['./'])" />
+  <span class="shadow-cloak-logo-text" ondragstart="return false;" (click)="this.router.navigate(['./'])">
+    <p>
+      Shadow <br>
+      &nbsp;&nbsp;Cloak
+    </p>
+
+  </span>
+
+  <button *ngIf="currentUser" class="navbar-toggler" type="button" (click)="toggleNavbar()" data-toggle="collapse"
+    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+    aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" [ngClass]="{ 'show': navbarOpen }" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li *ngIf="currentUser" class="nav-item first-list-item" routerLinkActive="active">
+        <a class="nav-link" routerLink="/home"> Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li *ngIf="currentUser"  class="nav-item" routerLinkActive="active">
+        <a class="nav-link" routerLink="/documents">Documents</a>
+      </li>
+      <li *ngIf="currentUser" class="nav-item" routerLinkActive="active">
+        <a class="nav-link" routerLink="/find-author">Find Author</a>
+      </li>
+      <li *ngIf="currentUser" class="nav-item" routerLinkActive="active">
+              <a class="nav-link" routerLink="/obfuscate">Obfuscate</a>
+          </li>
+
+    </ul>
+
+    <ul class="nav navbar-nav navbar-right">
+      <li class="logout-list-row">
+        <a *ngIf="currentUser" class="nav-link logout-username" (click)="logout()"> {{currentUser | titlecase }}   <mat-icon class="exit-icon">exit_to_app</mat-icon> </a>
+      </li>
+    </ul>
+  </div>
+</nav>

@@ -1,0 +1,136 @@
+<div class="container">
+
+  <div class="documents-header">
+    <span>
+      <!-- <button mat-button class="expand-button" (click)="accordion.openAll()">Expand All</button> -->
+    </span>
+    <span>
+      <button mat-button class="expand-button" (click)="accordion.closeAll()">Collapse All</button>
+    </span>
+    <span class="add-new">
+      <span class="add-text"> Add New <mat-icon>add</mat-icon> </span>
+
+      <div class="hidden-add-option" *ngIf="!slidePanelsSharedService.showPanelContainer">
+        <mat-list role="list">
+          <mat-list-item role="listitem" value="document" (click)="accordion.closeAll();openDocumentSlidePanel(1);">
+            Document</mat-list-item>
+          <mat-list-item role="listitem" value="author" (click)="accordion.closeAll();openAuthorSlidePanel(1);">Author
+          </mat-list-item>
+          <mat-list-item role="listitem" value="group" (click)="accordion.closeAll();openGroupSlidePanel(1);">Group
+          </mat-list-item>
+        </mat-list>
+      </div>
+    </span>
+    <span class="filter-container">
+      <mat-form-field appearance="legacy">
+        <mat-label>Authors</mat-label>
+        <mat-select multiple panelClass="select-panel" (onSelectionChange)="getSelectedAuthors($event)"
+          (openedChange)="sendSelectedAuthors($event)">
+          <mat-option *ngFor="let author of documentAuthors" [value]="author.id"
+            (onSelectionChange)="getSelectedAuthors($event)">
+            {{author.name | titlecase}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="legacy">
+        <mat-label>Group</mat-label>
+        <mat-select panelClass="select-panel" [value]="selectedGroup">
+          <mat-option *ngFor="let group of documentGroups" [value]="group.id" (click)="getSelectedGroup(group.id)">
+            {{group.name | titlecase}}
+          </mat-option>
+          <mat-option (click)="openGroupSlidePanel(2,selectedGroup)" class="group-edit-selected"> Edit Current
+            Group </mat-option>
+          <mat-option (click)="showDeleteDialog(3,CurrentGroup, selectedGroup)" class="group-delete-selected"> Delete Current
+            Group </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+    </span>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <mat-accordion class="headers-align" multi=true>
+
+  <ng-container *ngFor="let documentByAuthor of documentsByAuthor; let j = index">
+
+    <mat-expansion-panel class="accordion-author-container">
+      <mat-expansion-panel-header  class="group-text">
+        Author: {{ documentByAuthor.name | titlecase }}
+        <span class="edit-delete-author-icons">
+          <mat-icon class="edit-author-icon" *ngIf="!slidePanelsSharedService.showPanelContainer"
+            (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();openAuthorSlidePanel(2, documentByAuthor.id)">edit
+          </mat-icon>
+          <mat-icon class="delete-author-icon" *ngIf="!slidePanelsSharedService.showPanelContainer"
+            (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();showDeleteDialog(2, documentByAuthor.name, documentByAuthor.id)">
+            delete_outline
+          </mat-icon>
+        </span>
+      </mat-expansion-panel-header>
+
+      <ng-template matExpansionPanelContent>
+
+      <mat-expansion-panel *ngFor="let document of documentByAuthor.documents; let i = index" class="nested-panel">
+        <mat-expansion-panel-header (mouseover)="rowIndex = i; rowAuthor = documentByAuthor.id" (mouseleave)="rowIndex = null">
+          <mat-panel-title>
+            {{document.title | titlecase}}
+          </mat-panel-title>
+          <mat-panel-description>
+            {{document.description}}
+          </mat-panel-description>
+          <div class="edit-delete-icons-container"
+            [ngClass]="rowIndex == i &&  rowAuthor === documentByAuthor.id? 'visible-icons': 'hidden-icons'">
+            <mat-icon
+              (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();openDocumentSlidePanel(2, document)">
+              edit</mat-icon>
+            <mat-icon
+              (click)="$event.stopPropagation();$event.preventDefault();accordion.closeAll();showDeleteDialog(1, document.title, document.id)">
+              delete_outline</mat-icon>
+          </div>
+        </mat-expansion-panel-header>
+
+        <ng-template matExpansionPanelContent>
+          {{document.body}}
+        </ng-template>
+
+      </mat-expansion-panel>
+
+      </ng-template>
+
+    </mat-expansion-panel>
+
+
+  </ng-container>
+</mat-accordion>
+</div>
+
+
+<div class="slide-panel-container" *ngIf="slidePanelsSharedService.showPanelContainer">
+  <app-document-slide-panel *ngIf="slidePanelsSharedService.showDocumentPanel"></app-document-slide-panel>
+  <app-author-slide-panel *ngIf="slidePanelsSharedService.showAuthorPanel"></app-author-slide-panel>
+  <app-group-slide-panel *ngIf="slidePanelsSharedService.showGroupPanel"></app-group-slide-panel>
+</div>
+
+<div class="backdrop" *ngIf="slidePanelsSharedService.showPanelContainer"></div>
+
+<div class="backdrop" [ngStyle]="{'display':display}"></div>
+<div class="modal" tabindex="-1" role="dialog" [ngStyle]="{'display':display}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" (click)="closeDialog()"><span
+            aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Delete {{ modalType }} </h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete: "{{ modalMessage | titlecase }}"?</p>
+        <p *ngIf="this.modalType==='Author' || this.modalType==='Group'">All documents of that
+          {{ modalType | lowercase }} will also be deleted!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" (click)="closeDialog()">Cancel</button>
+        <button type="button" class="btn btn-default" (click)="deleteByType(this.modalIdToDelete)">Confirm</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal !-->

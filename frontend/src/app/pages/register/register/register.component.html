@@ -1,0 +1,52 @@
+<div class="container">
+  <h3>User Registration</h3>
+  <form [formGroup]="registerForm" (ngSubmit)="onFormSubmit()">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" formControlName="username" class="form-control"
+        [ngClass]="{ 'is-invalid': submitted && fval.username.errors }" placeholder="Enter Username here" />
+      <div *ngIf="submitted && fval.username.errors" class="invalid-feedback">
+        <div *ngIf="fval.username.errors.required">Username is required</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="text" formControlName="email" class="form-control"
+        [ngClass]="{ 'is-invalid': submitted && fval.email.errors }" placeholder="Enter email here" />
+      <div *ngIf="submitted && fval.email.errors" class="invalid-feedback">
+        <div *ngIf="fval.email.errors.required">Email is required</div>
+        <div *ngIf="fval.email.errors.email">Enter valid email address</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Password</label>
+      <input type="password" formControlName="password1" class="form-control"
+        [ngClass]="{ 'is-invalid': submitted && fval.password1.errors }" placeholder="Enter Password here" />
+      <div *ngIf="submitted && fval.password1.errors" class="invalid-feedback">
+        <div *ngIf="fval.password1.errors.required">Password is required</div>
+        <div *ngIf="fval.password1.errors.minlength">Password must be at least 4 characters</div>
+      </div>
+
+    </div>
+
+    <div class="form-group">
+      <label for="email">Repeat Password</label>
+      <input type="password" formControlName="password2" class="form-control"
+        [ngClass]="{ 'is-invalid': submitted && fval.password2.errors }" placeholder="Repeat Password here" />
+      <div *ngIf="submitted && fval.password2.errors" class="invalid-feedback">
+        <div *ngIf="fval.password2.errors.required">Password repetetion is required</div>
+        <div *ngIf="fval.password2.errors.minlength">Password must be at least 4 characters</div>
+      </div>
+
+    </div>
+
+    <div class="form-group">
+      <button [disabled]="loading" class="btn btn-primary">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+        Register
+      </button>
+      <a routerLink="/login" class="btn btn-link">Login to continue</a>
+    </div>
+  </form>
+</div>

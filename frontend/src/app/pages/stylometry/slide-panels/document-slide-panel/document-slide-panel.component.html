@@ -1,0 +1,66 @@
+
+
+<form [formGroup]="documentForm" (ngSubmit)="onFormSubmit()" class="document-form">
+<mat-card class="card">
+  <mat-card-header>
+    <mat-card-title> {{ headerText }} </mat-card-title>
+    <mat-icon class="close-icon" (click)="closeSlidePanel()">close</mat-icon>
+  </mat-card-header>
+  <mat-divider> </mat-divider>
+  <mat-card-content>
+    <div class="form-container">
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Title*</mat-label>
+          <input matInput formControlName="title">
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <input matInput formControlName="description">
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Publication Date</mat-label>
+          <input matInput [matDatepicker]="datePicker" formControlName="publication_date">
+          <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+          <mat-datepicker #datePicker
+          startView="multi-year"></mat-datepicker>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Author*</mat-label>
+          <mat-select formControlName="author">
+            <mat-option *ngFor="let author of authorOptions" [value]="author.id"> {{ author.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Group*</mat-label>
+          <mat-select formControlName="group">
+            <mat-option *ngFor="let group of groupOptions" [value]="group.id"> {{ group.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field appearance="outline">
+          <mat-label>Text*</mat-label>
+          <textarea matInput rows="10" cols="40" formControlName="body"></textarea>
+        </mat-form-field>
+      </p>
+    </div>
+  </mat-card-content>
+  <mat-divider> </mat-divider>
+  <mat-card-actions>
+    <span class="buttons-container">
+      <button type="button" class="btn btn-default s-button"  (click)="closeSlidePanel()">Cancel</button>
+      <button type="submit" class="btn btn-default s-button">{{ buttonText }}</button>
+    </span>
+  </mat-card-actions>
+</mat-card>
+
+</form>
