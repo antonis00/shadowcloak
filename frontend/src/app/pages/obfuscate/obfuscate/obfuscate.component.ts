@@ -9,6 +9,8 @@ import { TokenPair } from 'src/app/models/token-pair';
 import * as CKEditor from 'src/assets/ckeditor/ckeditor';
 import { Router } from '@angular/router';
 
+import { editorHtmlToPlainText, HIGHLIGHT_COLORS, highlightWords, removeHighlights } from './editor-text';
+
 @Component({
   templateUrl: './obfuscate.component.html',
   styleUrls: ['./obfuscate.component.scss'],
@@ -134,11 +136,11 @@ export class ObfuscateComponent implements OnInit {
 
   analyse(): void {
     this.selectedGroup = this.stylometryForm.get('groupSelect').value;
-    this.sendTextForAnalysis(this.stylometryForm.get('anonymousTextArea').value, this.selectedGroup);
+    this.sendTextForAnalysis(this.editorText(), this.selectedGroup);
   }
 
   findAuthor(): void {
-    this.sendTextForAttribution(this.stylometryForm.get('anonymousTextArea').value, this.selectedGroup == null ? this.stylometryForm.get('groupSelect').value : this.selectedGroup);
+    this.sendTextForAttribution(this.editorText(), this.selectedGroup == null ? this.stylometryForm.get('groupSelect').value : this.selectedGroup);
   }
 
   sendTextForAnalysis(text: string, group: number): void {
@@ -147,7 +149,7 @@ export class ObfuscateComponent implements OnInit {
         this.consumeCorpusTokens(data.tokensSignificantToAttribution);
         this.consumeAnonymousTextTokens(data.anonymousTextTokens);
 
-        this.anonymousText = this.underline(data.rawUserText);
+        this.anonymousText = this.underline();
         this.stylometryForm.get('anonymousTextArea').patchValue(this.anonymousText);
         this.analysisResult = data.mostProbableAuthor;
         this.editMode = true;
@@ -248,31 +250,29 @@ export class ObfuscateComponent implements OnInit {
     });
   }
 
-  underline(text: string): string {
-    const words = text.split(' ');
-    const resultText: string[] = [];
+  underline(): string {
+    const html = removeHighlights(this.stylometryForm.get('anonymousTextArea').value);
+    return highlightWords(html, word => this.highlightColor(word));
+  }
 
-    words.forEach(word => {
-      let currentWord = word;
-      if (this.filteredTokensValues.includes(word)) {
-        const partOfSpeech = this.filteredTokens.find(x => x.token === word).partOfSpeech;
-        if (partOfSpeech.startsWith('V')) { // verb
-          currentWord = '<span style="color:#3f51b5;"><b>' + word + '</b></span>';
-        } else if (partOfSpeech.startsWith('J')) {  // adjective
-          currentWord = '<span style="color:#b2200a;"><b>' + word + '</b></span>';
-        } else if (partOfSpeech.startsWith('N')) {   // noun
-          currentWord = '<span style="color:#ff4081;"><b>' + word + '</b></span>';
-        } else if (partOfSpeech.startsWith('RB')) {  // adverb
-          currentWord = '<span style="color:#a68051;"><b>' + word + '</b></span>';
-        } else if (partOfSpeech.startsWith('WP') || partOfSpeech.startsWith('PR')) {  // pronoun
-          currentWord = '<span style="color:#17a2b8;"><b>' + word + '</b></span>';
-        } else {
-          currentWord = '<span style="color:#6d6d6d;"><b>' + word + '</b></span>';
-        }
-      }
-      resultText.push(currentWord);
-    });
-    return resultText.join(' ');
+  private highlightColor(word: string): string | null {
+    if (!this.filteredTokensValues.includes(word)) {
+      return null;
+    }
+
+    const partOfSpeech = this.filteredTokens.find(x => x.token === word).partOfSpeech;
+    if (partOfSpeech.startsWith('V')) {
+      return HIGHLIGHT_COLORS.verb;
+    } else if (partOfSpeech.startsWith('J')) {
+      return HIGHLIGHT_COLORS.adjective;
+    } else if (partOfSpeech.startsWith('N')) {
+      return HIGHLIGHT_COLORS.noun;
+    } else if (partOfSpeech.startsWith('RB')) {
+      return HIGHLIGHT_COLORS.adverb;
+    } else if (partOfSpeech.startsWith('WP') || partOfSpeech.startsWith('PR')) {
+      return HIGHLIGHT_COLORS.pronoun;
+    }
+    return HIGHLIGHT_COLORS.other;
   }
 
   copyAnonymousTextToClipboard(): void {
@@ -307,11 +307,7 @@ export class ObfuscateComponent implements OnInit {
   }
 
   underlineNewTokens() {
-    const text: string = this.stylometryForm.get('anonymousTextArea').value
-      .replace(/<span[^>]*>/g, '').replace(/<\/span>/g, '')
-      .replace(/<b>/g, '').replace(/<\/b>/g, '');
-
-    this.anonymousText = this.underline(text);
+    this.anonymousText = this.underline();
     this.stylometryForm.get('anonymousTextArea').patchValue(this.anonymousText);
   }
 
@@ -352,10 +348,12 @@ export class ObfuscateComponent implements OnInit {
       this.router.navigate([uri]));
   }
 
+  private editorText(): string {
+    return editorHtmlToPlainText(this.stylometryForm.get('anonymousTextArea').value);
+  }
+
   isValid() {
-    if(!this.stylometryForm.get('anonymousTextArea').valid || this.stylometryForm.get('anonymousTextArea').value?.trim() === '')
-      return false;
-    return true;
+    return this.stylometryForm.get('anonymousTextArea').valid && this.editorText() !== '';
   }
 
 }

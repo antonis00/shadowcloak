@@ -67,7 +67,7 @@
           &nbsp;&nbsp;Reset Process&nbsp;&nbsp;
         </button>
         <button type="button"*ngIf="analysisResult" (click)="evaluate()" class="btn anonymize"
-          [disabled]="!stylometryForm.get('anonymousTextArea').valid">
+          [disabled]="!isValid()">
           &nbsp;&nbsp;Detect author&nbsp;&nbsp;
         </button>
         <!-- <button type="button" (click)="copyAnonymousTextToClipboard()" class="btn anonymize"
