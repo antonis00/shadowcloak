@@ -1,0 +1,20 @@
+<nav class="navbar">
+  <a class="brand" routerLink="/">
+    <img height="60" width="60" alt="" draggable="false"
+      [src]="currentUser() ? 'assets/shadow-cloak-awake.png' : 'assets/shadow-cloak.png'" />
+    <span class="brand-name">Shadow<br>&nbsp;&nbsp;Cloak</span>
+  </a>
+
+  @if (currentUser(); as user) {
+    <div class="links">
+      @for (link of links; track link.path) {
+        <a [routerLink]="link.path" routerLinkActive="active">{{ link.label }}</a>
+      }
+    </div>
+    <button type="button" class="logout" (click)="logout()">
+      {{ user | titlecase }} <mat-icon>exit_to_app</mat-icon>
+    </button>
+  }
+</nav>
+
+<router-outlet />

@@ -1,69 +1,81 @@
+@use '@angular/material' as mat;
 
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
-@import '~@angular/material/theming';
-// Plus imports for other components in your app.
+@font-face {
+  font-family: Exo;
+  src: url('/assets/fonts/Exo-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+}
 
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
-@include mat-core();
+:root {
+  --brand: #478cc3;
+  --danger: #b00020;
+  --border: #ced4da;
+}
 
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
-$shadow-cloak-fe-primary: mat-palette($mat-indigo);
-$shadow-cloak-fe-accent: mat-palette($mat-pink, A200, A100, A400);
+html {
+  height: 100%;
+  color-scheme: light;
+  @include mat.theme((
+    color: (primary: mat.$azure-palette, tertiary: mat.$blue-palette),
+    typography: Roboto,
+    density: 0,
+  ));
+}
 
-// The warn palette is optional (defaults to red).
-$shadow-cloak-fe-warn: mat-palette($mat-red);
+body {
+  height: 100%;
+  margin: 0;
+  background: white;
+  color: #212529;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
 
-// Create the theme object (a Sass map containing all of the palettes).
-$shadow-cloak-fe-theme: mat-light-theme($shadow-cloak-fe-primary, $shadow-cloak-fe-accent, $shadow-cloak-fe-warn);
+.page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 32px clamp(16px, 4vw, 48px);
+}
 
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include angular-material-theme($shadow-cloak-fe-theme);
+.narrow-page {
+  box-sizing: border-box;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 64px 16px;
 
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
-
-.green-snackbar {
-  background: #17c254;
-  color: white;
-  font-size: 17px!important;
-  padding: 0px 12px 0px 10px;
-  & > * {
-    color: white;
-    font-size: 17px!important;
-    padding: 0px 12px 0px 10px;
+  form {
+    display: flex;
+    flex-direction: column;
   }
 }
 
-.mat-simple-snackbar {
-  color: white;
-  font-size: 17px!important;
-  padding: 0px 12px 0px 10px;
+.full-width {
+  width: 100%;
 }
 
-@font-face {
-  font-family: exo;
-  src: url(assets/fonts/Exo-VariableFont_wght.ttf) format("opentype");
+.form-error {
+  color: var(--danger);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.success-snackbar {
+  --mat-snack-bar-container-color: #137a3a;
+  --mat-snack-bar-supporting-text-color: white;
+}
+
+// Room for the floating label of a dialog's first field, which would otherwise be clipped.
+mat-dialog-content > mat-form-field:first-child {
+  margin-top: 8px;
 }
 
 .ck-editor__editable_inline {
-  height: 55vh !important;
-}
-
-.modal-body {
-  font-size: 20px;
-}
-
-.modal-footer {
-  padding: 6px 20px 10px 6px!important;
+  height: 55vh;
 }

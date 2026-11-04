@@ -70,7 +70,7 @@ Use `--limit` to change how many rows are read, or how many sent messages per se
 
 ## Frontend
 
-Run these from `frontend/`, using Node 14. This version of Angular doesn't work on current Node: `ng serve` crashes on Node 24, and `ng build` needs `NODE_OPTIONS=--openssl-legacy-provider`.
+Run these from `frontend/`, using Node 22.22.3, 24.15 or newer.
 
 ```
 npm install

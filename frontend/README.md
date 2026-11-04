@@ -1,27 +1,22 @@
-# ShadowCloakFe
+# ShadowCloak frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.16.
+An Angular 22 app. It needs Node 22.22.3, 24.15 or newer.
 
-## Development server
+| Command | What it does |
+| --- | --- |
+| `npm install` | Installs the packages |
+| `npx ng serve` | Runs the app at `http://localhost:4200/`, forwarding `/api` to the backend on port 8000 |
+| `npx ng test --watch=false` | Runs the unit tests |
+| `npx ng build` | Writes a production build to `dist/` |
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Layout
 
-## Code scaffolding
+| Folder | Holds |
+| --- | --- |
+| `src/app/core` | The API, the session and the types the API returns |
+| `src/app/shared` | Messages, confirmations and the category picker |
+| `src/app/pages` | One folder per page |
+| `src/assets/ckeditor` | The vendored CKEditor build, which is third-party code under its own terms |
+| `public/assets` | Images and the Exo font |
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+Fonts and icons are served from the app itself, so pages make no requests to other sites.

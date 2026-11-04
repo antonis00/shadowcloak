@@ -1,0 +1,78 @@
+<main class="page">
+  <div class="toolbar">
+    <button matButton type="button" (click)="collapseAll()">Collapse All</button>
+    <button matButton type="button" [matMenuTriggerFor]="addMenu">Add New <mat-icon iconPositionEnd>add</mat-icon></button>
+    <mat-menu #addMenu="matMenu">
+      <button mat-menu-item type="button" [disabled]="groups().length === 0 || authors().length === 0" (click)="editDocument()">Document</button>
+      <button mat-menu-item type="button" (click)="editAuthor()">Author</button>
+      <button mat-menu-item type="button" (click)="editGroup()">Group</button>
+    </mat-menu>
+
+    <div class="filters">
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>Authors</mat-label>
+        <mat-select multiple [value]="selectedAuthors()" (selectionChange)="selectedAuthors.set($event.value)" (closed)="loadDocuments()">
+          @for (author of authors(); track author.id) {
+            <mat-option [value]="author.id">{{ author.name | titlecase }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>Group</mat-label>
+        <mat-select [value]="selectedGroup()" (selectionChange)="chooseGroup($event.value)">
+          @for (group of groups(); track group.id) {
+            <mat-option [value]="group.id">{{ group.name | titlecase }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      @if (currentGroup(); as group) {
+        <button matIconButton type="button" aria-label="Edit current group" (click)="editGroup(group)"><mat-icon>edit</mat-icon></button>
+        <button matIconButton type="button" aria-label="Delete current group" (click)="deleteGroup(group)"><mat-icon>delete_outline</mat-icon></button>
+      }
+    </div>
+  </div>
+
+  <mat-divider />
+
+  @if (groups().length === 0) {
+    <p class="empty">You don't have any groups yet. Use Add New to create one, then add authors and documents.</p>
+  } @else if (documents().length === 0) {
+    <p class="empty">There are no documents here yet.</p>
+  }
+
+  <mat-accordion multi>
+    @for (author of documents(); track author.id) {
+      <mat-expansion-panel class="author-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>Author: {{ author.name | titlecase }}</mat-panel-title>
+          <span class="row-actions">
+            <button matIconButton type="button" [attr.aria-label]="'Edit author ' + author.name"
+              (click)="$event.stopPropagation(); editAuthor(authorRecord(author.id))"><mat-icon>edit</mat-icon></button>
+            <button matIconButton type="button" [attr.aria-label]="'Delete author ' + author.name"
+              (click)="$event.stopPropagation(); deleteAuthor(author)"><mat-icon>delete_outline</mat-icon></button>
+          </span>
+        </mat-expansion-panel-header>
+
+        <ng-template matExpansionPanelContent>
+          @for (document of author.documents; track document.id) {
+            <mat-expansion-panel class="document-panel">
+              <mat-expansion-panel-header>
+                <mat-panel-title>{{ document.title | titlecase }}</mat-panel-title>
+                <mat-panel-description>{{ document.description }}</mat-panel-description>
+                <span class="row-actions">
+                  <button matIconButton type="button" [attr.aria-label]="'Edit document ' + document.title"
+                    (click)="$event.stopPropagation(); editDocument(document)"><mat-icon>edit</mat-icon></button>
+                  <button matIconButton type="button" [attr.aria-label]="'Delete document ' + document.title"
+                    (click)="$event.stopPropagation(); deleteDocument(document)"><mat-icon>delete_outline</mat-icon></button>
+                </span>
+              </mat-expansion-panel-header>
+              <ng-template matExpansionPanelContent>
+                <p class="document-body">{{ document.body }}</p>
+              </ng-template>
+            </mat-expansion-panel>
+          }
+        </ng-template>
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+</main>

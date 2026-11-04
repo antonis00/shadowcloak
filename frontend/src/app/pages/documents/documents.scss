@@ -1,0 +1,77 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding-bottom: 16px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-left: auto;
+
+  mat-form-field {
+    width: 200px;
+  }
+}
+
+.empty {
+  margin: 32px 0;
+  text-align: center;
+}
+
+mat-accordion {
+  display: block;
+  margin-top: 16px;
+}
+
+.author-panel {
+  margin-bottom: 16px;
+  --mat-expansion-container-background-color: #f6f7e7;
+}
+
+.document-panel {
+  --mat-expansion-container-background-color: white;
+}
+
+mat-panel-title {
+  font-weight: 500;
+}
+
+mat-panel-description {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  @media (max-width: 980px) {
+    display: none;
+  }
+}
+
+// Stays reachable by keyboard, because focus reveals it too.
+.row-actions {
+  flex-shrink: 0;
+  margin-right: 8px;
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+mat-expansion-panel-header:hover > * > .row-actions,
+mat-expansion-panel-header:hover .row-actions,
+.row-actions:focus-within {
+  opacity: 1;
+}
+
+// A touch screen has no hover to reveal them with.
+@media (hover: none) {
+  .row-actions {
+    opacity: 1;
+  }
+}
+
+.document-body {
+  white-space: pre-wrap;
+}

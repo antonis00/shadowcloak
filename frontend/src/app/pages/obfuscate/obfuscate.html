@@ -1,0 +1,45 @@
+<main class="page">
+  @if (analysis(); as result) {
+    <section class="result">
+      <h2>Suggested Author</h2>
+      <div class="box author">{{ result.mostProbableAuthor | titlecase }}</div>
+    </section>
+
+    <section class="result">
+      <div class="tokens-heading">
+        <h2>Most Relevant Tokens</h2>
+        <ul class="legend">
+          @for (entry of legend; track entry.label) {
+            <li class="chip" [style.background-color]="entry.color">{{ entry.label }}</li>
+          }
+        </ul>
+      </div>
+      <ul class="box tokens">
+        @for (token of tokens(); track token.token) {
+          <li class="chip" [style.background-color]="chipColor(token.partOfSpeech)">
+            {{ token.token }}
+            <button type="button" [attr.aria-label]="'Stop highlighting ' + token.token" (click)="removeToken(token)">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </li>
+        }
+      </ul>
+      <div class="reset-tokens">
+        <button matButton="outlined" type="button" [disabled]="allTokensShown()" (click)="resetTokens()">Reset Tokens</button>
+      </div>
+    </section>
+  } @else {
+    <app-category-select [control]="group" [groups]="groups()" />
+  }
+
+  <app-rich-text-editor [formControl]="text" />
+
+  <div class="actions">
+    @if (analysis()) {
+      <button matButton="outlined" type="button" (click)="resetProcess()">Reset Process</button>
+      <button matButton="filled" type="button" [disabled]="!canSubmit()" (click)="detectAuthor()">Detect author</button>
+    } @else {
+      <button matButton="filled" type="button" [disabled]="!canSubmit()" (click)="analyse()">Analyse Style</button>
+    }
+  </div>
+</main>
