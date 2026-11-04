@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
+import { apiErrorMessage } from '../../../helpers/api-error';
 import { UserService } from '../../../services/user.service';
 
 import {
@@ -18,6 +19,7 @@ export class RegisterComponent implements OnInit {
   registerForm: FormGroup;
   loading = false;
   submitted = false;
+  serverError = '';
   horizontalPosition: MatSnackBarHorizontalPosition = 'end';
   verticalPosition: MatSnackBarVerticalPosition = 'top';
 
@@ -31,8 +33,8 @@ export class RegisterComponent implements OnInit {
   ngOnInit() {
     this.registerForm = this.formBuilder.group({
       username: ['', Validators.required],
-      password1: ['', [Validators.required, Validators.minLength(4)]],
-      password2: ['', [Validators.required, Validators.minLength(4)]]
+      password1: ['', [Validators.required, Validators.minLength(8)]],
+      password2: ['', [Validators.required, Validators.minLength(8)]]
     });
   }
 
@@ -40,6 +42,7 @@ export class RegisterComponent implements OnInit {
 
   onFormSubmit() {
     this.submitted = true;
+    this.serverError = '';
     // return for here if form is invalid
     if (this.registerForm.invalid) {
       return;
@@ -54,6 +57,7 @@ export class RegisterComponent implements OnInit {
       },
       (error) => {
         this.loading = false;
+        this.serverError = apiErrorMessage(error);
       }
     );
   }

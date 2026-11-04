@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { apiErrorMessage } from 'src/app/helpers/api-error';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarHorizontalPosition, MatSnackBarVerticalPosition } from '@angular/material/snack-bar';
 import { DocumentAuthor } from 'src/app/models/document-author';
@@ -18,6 +19,7 @@ export class DocumentSlidePanelComponent implements OnInit {
   documentForm: FormGroup;
   loading = false;
   submitted = false;
+  serverError = '';
   horizontalPosition: MatSnackBarHorizontalPosition = 'end';
   verticalPosition: MatSnackBarVerticalPosition = 'top';
   groupOptions: DocumentGroup[];
@@ -67,6 +69,7 @@ export class DocumentSlidePanelComponent implements OnInit {
 
   onFormSubmit() {
     this.submitted = true;
+    this.serverError = '';
     if (this.documentForm.invalid) {
       return;
     }
@@ -83,6 +86,7 @@ export class DocumentSlidePanelComponent implements OnInit {
         },
         (error) => {
           this.loading = false;
+          this.serverError = apiErrorMessage(error);
         }
       );
     } else {
@@ -94,6 +98,7 @@ export class DocumentSlidePanelComponent implements OnInit {
         },
         (error) => {
           this.loading = false;
+          this.serverError = apiErrorMessage(error);
         }
       );
     }

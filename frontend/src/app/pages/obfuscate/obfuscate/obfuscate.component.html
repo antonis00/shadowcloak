@@ -49,6 +49,10 @@
           </mat-select>
         </mat-form-field>
 
+        <small *ngIf="groupsLoaded && documentGroups.length === 0" class="form-text validation-message">
+          You don't have any categories yet. <a routerLink="/documents">Add one on the Documents page.</a>
+        </small>
+
         <ckeditor [config]="config" [editor]="Editor" data='' formControlName="anonymousTextArea"></ckeditor>
 
         <small *ngIf="!stylometryForm.get('anonymousTextArea').valid && stylometryForm.get('anonymousTextArea').touched"

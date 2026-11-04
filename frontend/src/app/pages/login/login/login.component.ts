@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 
+import { apiErrorMessage } from '../../../helpers/api-error';
 import { AuthenticationService } from '../../../services/authentication.service';
 
 @Component({
@@ -14,7 +15,6 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   loading = false;
   submitted = false;
-  returnUrl: string;
   credentialsAreValid = true;
   credentialsValidityError: string;
 
@@ -46,11 +46,12 @@ export class LoginComponent implements OnInit {
     this.authenticationService.login(this.fval.username.value, this.fval.password.value)
       .subscribe(
         data => {
-          this.router.navigate(['/']);
+          // navigateByUrl stays inside the app, so this can't send anyone to another site.
+          this.router.navigateByUrl(this.route.snapshot.queryParamMap.get('returnUrl') || '/');
         },
         response => {
           this.credentialsAreValid = false;
-          this.credentialsValidityError = response.error.detail;
+          this.credentialsValidityError = apiErrorMessage(response);
           this.loading = false;
         });
   }

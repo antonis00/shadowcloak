@@ -1,5 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { apiErrorMessage } from 'src/app/helpers/api-error';
 import { ApiService } from 'src/app/services/api.service';
 import { fadeInOnEnterAnimation, fadeOutOnLeaveAnimation } from 'angular-animations';
 import { DocumentGroup } from 'src/app/models/document-group';
@@ -38,6 +39,7 @@ export class ObfuscateComponent implements OnInit {
   displayResetModal = 'none';
   displayChangedGroupModal = 'none';
   documentGroups: DocumentGroup[] = [];
+  groupsLoaded = false;
   selectedGroup;
   randomColor;
   anonymousTextTokens = [];
@@ -105,7 +107,8 @@ export class ObfuscateComponent implements OnInit {
 
     this.apiService.getDocumentsGroups().subscribe(res => {
       this.documentGroups = res;
-      if (!this.selectedGroup) {
+      this.groupsLoaded = true;
+      if (!this.selectedGroup && res.length > 0) {
         this.selectedGroup = this.documentGroups[0].id;
         this.stylometryForm.controls.groupSelect.setValue(this.selectedGroup);
       }
@@ -157,7 +160,7 @@ export class ObfuscateComponent implements OnInit {
         // this.showResultAuthorDialog(data.mostProbableAuthor);
       },
       error => {
-        this.showErrorDialog(error.error.detail);
+        this.showErrorDialog(apiErrorMessage(error));
       }
     );
   }
@@ -176,7 +179,7 @@ export class ObfuscateComponent implements OnInit {
         this.showResultAuthorDialog(data);
       },
       error => {
-        this.showErrorDialog(error.error.detail);
+        this.showErrorDialog(apiErrorMessage(error));
       }
     );
   }
@@ -353,7 +356,7 @@ export class ObfuscateComponent implements OnInit {
   }
 
   isValid() {
-    return this.stylometryForm.get('anonymousTextArea').valid && this.editorText() !== '';
+    return this.stylometryForm.valid && this.editorText() !== '';
   }
 
 }

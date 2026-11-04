@@ -14,6 +14,10 @@
           </mat-select>
         </mat-form-field>
 
+        <small *ngIf="groupsLoaded && documentGroups.length === 0" class="form-text validation-message">
+          You don't have any categories yet. <a routerLink="/documents">Add one on the Documents page.</a>
+        </small>
+
         <textarea class="form-control" rows="14" placeholder="Paste the disputed text here..."
             formControlName="anonymousTextArea" #anonymousTextArea>
         </textarea>

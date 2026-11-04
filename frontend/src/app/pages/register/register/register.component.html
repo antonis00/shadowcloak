@@ -15,7 +15,7 @@
         [ngClass]="{ 'is-invalid': submitted && fval.password1.errors }" placeholder="Enter Password here" />
       <div *ngIf="submitted && fval.password1.errors" class="invalid-feedback">
         <div *ngIf="fval.password1.errors.required">Password is required</div>
-        <div *ngIf="fval.password1.errors.minlength">Password must be at least 4 characters</div>
+        <div *ngIf="fval.password1.errors.minlength">Password must be at least 8 characters</div>
       </div>
 
     </div>
@@ -26,10 +26,12 @@
         [ngClass]="{ 'is-invalid': submitted && fval.password2.errors }" placeholder="Repeat Password here" />
       <div *ngIf="submitted && fval.password2.errors" class="invalid-feedback">
         <div *ngIf="fval.password2.errors.required">Password repetetion is required</div>
-        <div *ngIf="fval.password2.errors.minlength">Password must be at least 4 characters</div>
+        <div *ngIf="fval.password2.errors.minlength">Password must be at least 8 characters</div>
       </div>
 
     </div>
+
+    <p *ngIf="serverError" class="text-danger">{{ serverError }}</p>
 
     <div class="form-group">
       <button [disabled]="loading" class="btn btn-primary">

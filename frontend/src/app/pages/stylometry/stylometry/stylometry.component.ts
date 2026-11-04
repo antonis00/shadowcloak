@@ -146,7 +146,7 @@ export class StylometryComponent implements OnInit {
         this.apiService.getDocumentsGroups().subscribe(res => {
           this.documentGroups = res;
           this.newGroups();
-          if (this.selectedGroup === 0) {
+          if (this.selectedGroup === 0 && res.length > 0) {
             this.selectedGroup = this.documentGroups[0].id;
           }
         });
