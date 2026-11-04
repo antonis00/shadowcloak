@@ -26,3 +26,4 @@ sqlparse==0.3.1
 toml==0.10.1
 urllib3==1.25.10
 wrapt==1.12.1
+python-dotenv==0.21.1
