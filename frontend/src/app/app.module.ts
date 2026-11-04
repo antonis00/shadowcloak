@@ -1,7 +1,7 @@
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
@@ -44,9 +44,15 @@ import { DocumentSlidePanelComponent } from './pages/stylometry/slide-panels/doc
 import { InterceptorService } from './services/interceptor.service';
 import { ApiService } from './services/api.service';
 import { UserService } from './services/user.service';
+import { AuthenticationService } from './services/authentication.service';
 
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
 
+
+// Finds out who is logged in before routing starts, so the guard has an answer on first load.
+export function loadCurrentUser(authenticationService: AuthenticationService) {
+  return () => authenticationService.loadCurrentUser().toPromise();
+}
 
 @NgModule({
   declarations: [
@@ -67,6 +73,7 @@ import { LocationStrategy, PathLocationStrategy } from '@angular/common';
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    HttpClientXsrfModule.withOptions({ cookieName: 'csrftoken', headerName: 'X-CSRFToken' }),
     ReactiveFormsModule,
     BrowserAnimationsModule,
     MatExpansionModule,
@@ -92,6 +99,7 @@ import { LocationStrategy, PathLocationStrategy } from '@angular/common';
   providers: [
     ApiService,
     UserService, { provide: HTTP_INTERCEPTORS, useClass: InterceptorService, multi: true },
+    { provide: APP_INITIALIZER, useFactory: loadCurrentUser, deps: [AuthenticationService], multi: true },
     { provide: LocationStrategy, useClass: PathLocationStrategy }
   ],
   bootstrap: [

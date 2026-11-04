@@ -1,7 +1,8 @@
+from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from stylometry.models import Author, Document, Group
-
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -55,9 +56,27 @@ class FindAuthor(serializers.Serializer):
     body = serializers.CharField ()
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token['name'] = user.username
-        return token
+class RegisterSerializer(serializers.ModelSerializer):
+    password1 = serializers.CharField(write_only=True, trim_whitespace=False)
+    password2 = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password1', 'password2']
+
+    def validate(self, data):
+        if data['password1'] != data['password2']:
+            raise serializers.ValidationError({'password2': ['The two passwords do not match.']})
+        try:
+            validate_password(data['password1'], user=User(username=data['username']))
+        except DjangoValidationError as error:
+            raise serializers.ValidationError({'password1': error.messages})
+        return data
+
+    def create(self, validated_data):
+        return User.objects.create_user(username=validated_data['username'], password=validated_data['password1'])
+
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(trim_whitespace=False)

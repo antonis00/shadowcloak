@@ -1,12 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { MatSnackBar } from '@angular/material/snack-bar';
+
 import { AuthenticationService } from '../services';
-import { User } from '../models';
-// @ts-ignore
-import jwt_decode from 'jwt-decode';
-import { AuthGuard } from '../helpers/auth.guard';
-import { TokenDTO } from '../dtos/token-dto';
 
 @Component({
   selector: 'app-navbar',
@@ -20,11 +17,9 @@ export class NavbarComponent implements OnInit {
   constructor(
     public router: Router,
     private authenticationService: AuthenticationService,
-    public authGuard: AuthGuard
+    private snackBar: MatSnackBar
   ) {
     this.authenticationService.currentUser.subscribe(x => this.currentUser = x);
-    this.currentUser = localStorage.getItem('stylometryUserToken') == null ?
-      '' :  this.currentUser = jwt_decode<TokenDTO>(localStorage.getItem('stylometryUserToken')).name;
   }
 
   toggleNavbar() {
@@ -32,8 +27,10 @@ export class NavbarComponent implements OnInit {
   }
 
   logout() {
-    this.authenticationService.logout();
-    this.router.navigate(['/login']);
+    this.authenticationService.logout().subscribe(
+      () => this.router.navigate(['/login']),
+      () => this.snackBar.open('Could not log out. You are still logged in, please try again.', '', { duration: 5000 })
+    );
   }
 
   ngOnInit() {
