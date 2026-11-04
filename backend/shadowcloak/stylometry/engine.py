@@ -11,6 +11,8 @@ import nltk
 
 FEATURE_COUNT = 50
 SIGNIFICANT_TOKEN_COUNT = 30
+# Below this, tests on real books got the author right less than about 60% of the time.
+MIN_RELIABLE_WORDS = 500
 
 
 class EngineError(ValueError):
@@ -67,30 +69,65 @@ def score_text(tokens, statistics):
     return {word: (count[word] / len(tokens) - mean) / spread for word, (mean, spread) in statistics.items()}
 
 
-def closest_author(text_zscores, author_zscores):
+def rank_authors(text_zscores, author_zscores):
+    """Every author and their Delta, closest first."""
     def delta(author):
         scores = author_zscores[author]
         return sum(abs(text_zscores[word] - scores[word]) for word in text_zscores) / len(text_zscores)
-    return min(author_zscores, key=delta)
+    deltas = {author: delta(author) for author in author_zscores}
+    return [{'author': author, 'delta': deltas[author]} for author in sorted(deltas, key=deltas.get)]
+
+
+def reliability_warnings(word_count, author_count):
+    warnings = []
+    if word_count < MIN_RELIABLE_WORDS:
+        warnings.append(f'This text has only {word_count} words. Attribution is unreliable below about '
+                        f'{MIN_RELIABLE_WORDS}, so treat this result as a rough guess.')
+    if author_count == 2:
+        warnings.append('With only two authors, the method can\'t weight words by how much authors differ '
+                        'on them, which makes this result less reliable.')
+    return warnings
+
+
+def attribution(tokens, statistics, author_zscores):
+    text_zscores = score_text(tokens, statistics)
+    ranking = rank_authors(text_zscores, author_zscores)
+    return text_zscores, {
+        'mostProbableAuthor': ranking[0]['author'],
+        'ranking': ranking,
+        'wordCount': len(tokens),
+        'warnings': reliability_warnings(len(tokens), len(ranking)),
+    }
 
 
 def find_author(counts_by_author, text):
     statistics, author_zscores = build_profile(counts_by_author)
-    return closest_author(score_text(tokenize(text), statistics), author_zscores)
+    return attribution(tokenize(text), statistics, author_zscores)[1]
 
 
 def analyse(counts_by_author, text):
     statistics, author_zscores = build_profile(counts_by_author)
     raw_tokens = nltk.word_tokenize(text)
     tokens = [token.lower() for token in raw_tokens if any(c.isalpha() for c in token)]
-    text_zscores = score_text(tokens, statistics)
+    text_zscores, result = attribution(tokens, statistics, author_zscores)
 
-    present = set(raw_tokens)
-    significant = [word for word in statistics if word in present]
+    # What separates the verdict from its closest rival is what an edit has to change.
+    # Each word's score is how far it moves the text toward the top author and away from that rival.
+    top = author_zscores[result['ranking'][0]['author']]
+    rival = author_zscores[result['ranking'][1]['author']]
+    scores = {word: (abs(zscore - rival[word]) - abs(zscore - top[word])) / len(text_zscores)
+              for word, zscore in text_zscores.items()}
+    relevant = sorted((word for word in set(tokens) & set(scores) if scores[word] > 0),
+                      key=lambda word: (-scores[word], word))[:SIGNIFICANT_TOKEN_COUNT]
+
+    # A word gets one colour, so it takes the part of speech it has most often in this text.
+    tags = {}
+    for token, tag in nltk.pos_tag(raw_tokens):
+        tags.setdefault(token.lower(), Counter())[tag] += 1
     return {
-        'mostProbableAuthor': closest_author(text_zscores, author_zscores),
+        **result,
         'tokensSignificantToAttribution': [
-            {'token': word, 'partOfSpeech': tag, 'score': text_zscores[word]}
-            for word, tag in nltk.pos_tag(significant)
-        ][:SIGNIFICANT_TOKEN_COUNT],
+            {'token': word, 'partOfSpeech': tags[word].most_common(1)[0][0], 'score': scores[word]}
+            for word in relevant
+        ],
     }

@@ -20,6 +20,15 @@
   font-weight: 500;
 }
 
+.ranking,
+.warning {
+  margin: 6px 0 0;
+}
+
+.warning {
+  color: var(--danger);
+}
+
 .tokens-heading {
   display: flex;
   flex-wrap: wrap;

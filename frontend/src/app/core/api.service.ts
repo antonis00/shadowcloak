@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Analysis, Author, AuthorDocuments, DocumentInput, DocumentRecord, Group, NamedInput } from './api.types';
+import { Analysis, Attribution, Author, AuthorDocuments, DocumentInput, DocumentRecord, Group, NamedInput } from './api.types';
 
 /** Writes to `path`, as an update when there is an ID and as a new record when there isn't. */
 function save<T>(http: HttpClient, path: string, data: unknown, id?: number): Observable<T> {
@@ -53,8 +53,8 @@ export class ApiService {
     return this.http.delete<void>(`documents/${id}/`);
   }
 
-  findAuthor(body: string, group: number): Observable<string> {
-    return this.http.post<string>('findauthor/', { body, group });
+  findAuthor(body: string, group: number): Observable<Attribution> {
+    return this.http.post<Attribution>('findauthor/', { body, group });
   }
 
   analyse(body: string, group: number): Observable<Analysis> {

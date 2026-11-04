@@ -11,13 +11,14 @@ import { ApiService } from '../../core/api.service';
 import { Analysis, SignificantToken } from '../../core/api.types';
 import { CategorySelect } from '../../shared/category-select';
 import { Feedback } from '../../shared/feedback';
-import { editorHtmlToPlainText, highlightColor, HIGHLIGHT_COLORS, highlightWords, removeHighlights } from './editor-text';
+import { RankingPipe } from '../../shared/ranking';
+import { editorHtmlToPlainText, highlightColor, HIGHLIGHT_COLORS, highlightWords, lettersOnly, removeHighlights } from './editor-text';
 import { RichTextEditor } from './rich-text-editor';
 
 const STARTING_TEXT = 'Put the text you want to anonymize here.';
 
 @Component({
-  imports: [CategorySelect, MatButtonModule, MatIconModule, ReactiveFormsModule, RichTextEditor, TitleCasePipe],
+  imports: [CategorySelect, MatButtonModule, MatIconModule, RankingPipe, ReactiveFormsModule, RichTextEditor, TitleCasePipe],
   providers: [TitleCasePipe],
   templateUrl: './obfuscate.html',
   styleUrl: './obfuscate.scss',
@@ -69,14 +70,14 @@ export class Obfuscate {
 
   detectAuthor(): void {
     this.api.findAuthor(this.plainText(), this.group.value!).subscribe({
-      next: author => {
+      next: result => {
         const initial = this.titleCase.transform(this.analysis()?.mostProbableAuthor ?? '');
-        if (author === this.analysis()?.mostProbableAuthor) {
-          this.feedback.message('Anonymization Unsuccessful', `The initial author "${initial}" hasn't changed.`);
+        if (result.mostProbableAuthor === this.analysis()?.mostProbableAuthor) {
+          this.feedback.message('Anonymization Unsuccessful', `The initial author "${initial}" hasn't changed.`, ...result.warnings);
         } else {
-          const current = this.titleCase.transform(author);
+          const current = this.titleCase.transform(result.mostProbableAuthor);
           this.feedback.message('Anonymization Successful!',
-            `The initial author "${initial}" is different from the current author "${current}"!`);
+            `The initial author "${initial}" is different from the current author "${current}"!`, ...result.warnings);
         }
       },
       error: response => this.showError(response),
@@ -104,9 +105,9 @@ export class Obfuscate {
 
   private showTokens(tokens: SignificantToken[]): void {
     this.tokens.set(tokens);
-    const tags = new Map(tokens.map(token => [token.token, token.partOfSpeech]));
+    const tags = new Map(tokens.map(token => [lettersOnly(token.token), token.partOfSpeech]));
     this.text.setValue(highlightWords(removeHighlights(this.text.value), word => {
-      const tag = tags.get(word);
+      const tag = tags.get(word.toLowerCase());
       return tag ? highlightColor(tag) : null;
     }));
   }

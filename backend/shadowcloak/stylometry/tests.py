@@ -336,7 +336,7 @@ def counts_of(texts):
 
 
 def find_author(texts, text):
-    return engine.find_author(counts_of(texts), text)
+    return engine.find_author(counts_of(texts), text)['mostProbableAuthor']
 
 
 def analyse(texts, text):
@@ -390,8 +390,81 @@ class EngineTests(SimpleTestCase):
 
     def test_analysis_response_has_what_the_page_uses(self):
         result = analyse({'sarah': self.SARAH, 'john': self.JOHN}, 'The cat and the dog.')
-        self.assertEqual(set(result), {'mostProbableAuthor', 'tokensSignificantToAttribution'})
+        self.assertEqual(set(result), {'mostProbableAuthor', 'ranking', 'wordCount', 'warnings',
+                                       'tokensSignificantToAttribution'})
         self.assertEqual(set(result['tokensSignificantToAttribution'][0]), {'token', 'partOfSpeech', 'score'})
+
+    THREE = {
+        'sarah': 'the cat sat on the mat and the dog ran home ' * 20,
+        'john': 'a bird flew over a hill and a fox hid there ' * 20,
+        'mary': 'my horse ate some hay and my goat ran away ' * 20,
+    }
+
+    def test_ranking_lists_every_author_closest_first(self):
+        result = engine.find_author(counts_of(self.THREE), 'the cat and the dog ran home')
+        ranking = result['ranking']
+        self.assertEqual(ranking[0]['author'], result['mostProbableAuthor'])
+        self.assertEqual({entry['author'] for entry in ranking}, {'sarah', 'john', 'mary'})
+        self.assertEqual([e['delta'] for e in ranking], sorted(e['delta'] for e in ranking))
+
+    def test_word_count_counts_words_only(self):
+        self.assertEqual(engine.find_author(counts_of(self.THREE), 'The cat, the dog. 123')['wordCount'], 4)
+
+    def test_short_text_gets_a_warning(self):
+        warnings = engine.find_author(counts_of(self.THREE), 'the cat')['warnings']
+        self.assertEqual(len(warnings), 1)
+        self.assertIn('only 2 words', warnings[0])
+
+    def test_long_enough_text_gets_no_warning(self):
+        text = 'the cat sat on the mat ' * 100
+        self.assertEqual(engine.find_author(counts_of(self.THREE), text)['warnings'], [])
+
+    def test_two_authors_get_a_warning(self):
+        text = 'the cat sat on the mat ' * 100
+        warnings = engine.find_author(counts_of({'sarah': self.SARAH, 'john': self.JOHN}), text)['warnings']
+        self.assertEqual(len(warnings), 1)
+        self.assertIn('two authors', warnings[0])
+
+    def significant(self, text, texts=None):
+        return engine.analyse(counts_of(texts or self.THREE), text)['tokensSignificantToAttribution']
+
+    def test_tokens_are_ranked_by_how_much_they_matter(self):
+        tokens = self.significant('the cat and the dog ran home on the mat')
+        scores = [token['score'] for token in tokens]
+        self.assertTrue(tokens)
+        self.assertEqual(scores, sorted(scores, reverse=True))
+        self.assertTrue(all(score > 0 for score in scores))
+
+    def test_a_token_score_matches_its_effect_on_the_verdict(self):
+        counts = counts_of(self.THREE)
+        text = 'the cat and the dog ran home on the mat'
+        result = engine.analyse(counts, text)
+        statistics, author_zscores = engine.build_profile(counts)
+        text_zscores = engine.score_text(engine.tokenize(text), statistics)
+        top, rival = result['ranking'][0], result['ranking'][1]
+        total = sum((abs(z - author_zscores[rival['author']][w]) - abs(z - author_zscores[top['author']][w]))
+                    for w, z in text_zscores.items()) / len(text_zscores)
+        self.assertAlmostEqual(total, rival['delta'] - top['delta'])
+
+    def test_a_token_pushing_toward_the_rival_is_not_listed(self):
+        for token in self.significant('the cat and the dog ran home on the mat a'):
+            self.assertNotEqual(token['token'], 'a')
+
+    def test_capitalised_words_count_as_the_same_word(self):
+        tokens = [token['token'] for token in self.significant('The Cat and The Dog ran home')]
+        self.assertIn('the', tokens)
+        self.assertNotIn('The', tokens)
+
+    def test_only_words_in_the_text_are_listed(self):
+        tokens = {token['token'] for token in self.significant('the cat sat')}
+        self.assertTrue(tokens <= {'the', 'cat', 'sat'}, tokens)
+
+    def test_parts_of_speech_are_tagged_in_context(self):
+        texts = {'sarah': 'the run was long and the run was hard ' * 20,
+                 'john': 'we walk to town and we talk a lot ' * 20,
+                 'mary': 'my horse ate some hay and my goat left ' * 20}
+        tags = {token['token']: token['partOfSpeech'] for token in self.significant('the run was long', texts)}
+        self.assertTrue(tags['run'].startswith('N'), tags)
 
     def test_ties_between_words_do_not_depend_on_stored_order(self):
         forwards = {'sarah': {'red': 2, 'blue': 2, 'pink': 1}, 'john': {'red': 1, 'blue': 1, 'pink': 3}}
@@ -428,7 +501,7 @@ class AttributionApiTests(TestCase):
         self.add_two_authors()
         find, analyse = self.both(group=self.group.id, body='the cat and the dog ran to the old house')
         self.assertEqual(find.status_code, 200)
-        self.assertEqual(find.data, 'sarah')
+        self.assertEqual(find.data['mostProbableAuthor'], 'sarah')
         self.assertEqual(analyse.data['mostProbableAuthor'], 'sarah')
 
     def test_bad_input_gets_a_400_not_a_crash(self):
@@ -732,7 +805,7 @@ class TokenCountTests(TestCase):
         self.document(self.john, EngineTests.JOHN)
         with patch.object(engine, 'tokenize', wraps=engine.tokenize) as tokenize:
             response = self.client.post('/api/findauthor/', {'group': self.group.id, 'body': 'the cat sat'}, format='json')
-        self.assertEqual(response.data, 'sarah')
+        self.assertEqual(response.data['mostProbableAuthor'], 'sarah')
         tokenize.assert_called_once_with('the cat sat')
 
     def test_an_authors_documents_are_added_together(self):

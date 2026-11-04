@@ -26,6 +26,11 @@ export function highlightColor(tag: string): string {
   return HIGHLIGHT_COLORS.other;
 }
 
+/** How a word in the text is matched to a token from the analysis, which may hold punctuation ('s). */
+export function lettersOnly(token: string): string {
+  return token.toLowerCase().replace(/[^\p{L}]/gu, '');
+}
+
 // DOMParser builds an inert document, so scripts and images in the HTML never run or load.
 function parse(html: string | null): Document {
   return new DOMParser().parseFromString(html || '', 'text/html');
@@ -65,7 +70,8 @@ export function highlightWords(html: string | null, colorFor: (word: string) => 
 
   textNodes.forEach(node => {
     const pieces = page.createDocumentFragment();
-    node.textContent!.split(/(\s+)/).forEach(piece => {
+    // Splitting on runs of letters keeps punctuation out of the match: "dog," colours "dog".
+    node.textContent!.split(/(\p{L}+)/u).forEach(piece => {
       const color = colorFor(piece);
       if (color) {
         const span = page.createElement('span');

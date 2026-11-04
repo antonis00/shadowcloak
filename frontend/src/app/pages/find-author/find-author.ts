@@ -11,10 +11,11 @@ import { apiErrorMessage } from '../../core/api-error';
 import { ApiService } from '../../core/api.service';
 import { CategorySelect } from '../../shared/category-select';
 import { Feedback } from '../../shared/feedback';
+import { RankingPipe } from '../../shared/ranking';
 
 @Component({
   imports: [CategorySelect, MatButtonModule, MatFormFieldModule, MatInputModule, ReactiveFormsModule],
-  providers: [TitleCasePipe],
+  providers: [RankingPipe, TitleCasePipe],
   template: `
     <main class="page">
       <app-category-select [control]="group" [groups]="groups()" />
@@ -33,6 +34,7 @@ export class FindAuthor {
   private readonly api = inject(ApiService);
   private readonly feedback = inject(Feedback);
   private readonly titleCase = inject(TitleCasePipe);
+  private readonly rankingPipe = inject(RankingPipe);
 
   readonly group = new FormControl<number | null>(null, Validators.required);
   readonly text = new FormControl('', { nonNullable: true, validators: Validators.required });
@@ -46,7 +48,12 @@ export class FindAuthor {
 
   findAuthor(): void {
     this.api.findAuthor(this.text.value, this.group.value!).subscribe({
-      next: author => this.feedback.message('Most Probable Author', this.titleCase.transform(author)),
+      next: result => this.feedback.message(
+        'Most Probable Author',
+        this.titleCase.transform(result.mostProbableAuthor),
+        this.rankingPipe.transform(result),
+        ...result.warnings,
+      ),
       error: response => this.feedback.message('Request Unsuccessful', apiErrorMessage(response)),
     });
   }

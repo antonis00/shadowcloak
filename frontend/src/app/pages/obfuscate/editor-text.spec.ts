@@ -1,4 +1,4 @@
-import { HIGHLIGHT_COLORS, editorHtmlToPlainText, highlightColor, highlightWords, removeHighlights } from './editor-text';
+import { HIGHLIGHT_COLORS, editorHtmlToPlainText, highlightColor, highlightWords, lettersOnly, removeHighlights } from './editor-text';
 
 const FORMATTED = '<h2>A heading</h2><p>The <strong>quick</strong> fox <i>runs</i> over the dog, '
   + 'and <a href="https://example.com/">the link</a>.</p><ul><li>the first</li></ul>';
@@ -44,6 +44,24 @@ describe('highlightWords', () => {
     const html = highlightWords('<p>the dog and the cat</p>', colorThe);
     expect(html.match(/<span style="color: [^"]+">the<\/span>/g)!.length).toBe(2);
     expect(html).toContain('dog and');
+  });
+
+  it('colours a word next to punctuation, and leaves the punctuation alone', () => {
+    const html = highlightWords('<p>"the, dog</p>', colorThe);
+    expect(html).toMatch(/"<span[^>]*>the<\/span>, dog/);
+  });
+
+  it('hands over the word as written, so the caller decides about case', () => {
+    const seen: string[] = [];
+    highlightWords('<p>The dog</p>', word => {
+      seen.push(word);
+      return null;
+    });
+    expect(seen).toContain('The');
+  });
+
+  it('does not colour part of a longer word', () => {
+    expect(highlightWords('<p>then other</p>', colorThe)).not.toContain('<span');
   });
 
   it('keeps all other formatting', () => {
@@ -110,5 +128,13 @@ describe('highlightColor', () => {
     for (const [tag, color] of cases) {
       expect(highlightColor(tag)).toBe(color);
     }
+  });
+});
+
+describe('lettersOnly', () => {
+  it('matches tokens to words as they appear in the text', () => {
+    expect(lettersOnly('The')).toBe('the');
+    expect(lettersOnly("'s")).toBe('s');
+    expect(lettersOnly('étude')).toBe('étude');
   });
 });

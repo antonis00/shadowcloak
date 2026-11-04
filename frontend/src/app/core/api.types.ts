@@ -40,8 +40,15 @@ export interface SignificantToken {
   score: number;
 }
 
-export interface Analysis {
+export interface Attribution {
   mostProbableAuthor: string;
+  /** Every author, closest first. A lower delta means a closer match. */
+  ranking: { author: string; delta: number }[];
+  wordCount: number;
+  warnings: string[];
+}
+
+export interface Analysis extends Attribution {
   tokensSignificantToAttribution: SignificantToken[];
 }
 

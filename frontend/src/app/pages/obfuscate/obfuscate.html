@@ -3,6 +3,10 @@
     <section class="result">
       <h2>Suggested Author</h2>
       <div class="box author">{{ result.mostProbableAuthor | titlecase }}</div>
+      <p class="ranking">{{ result | ranking }}</p>
+      @for (warning of result.warnings; track warning) {
+        <p class="warning">{{ warning }}</p>
+      }
     </section>
 
     <section class="result">
@@ -14,6 +18,7 @@
           }
         </ul>
       </div>
+      <p class="ranking">Most important first. These are the words pushing this text toward the suggested author.</p>
       <ul class="box tokens">
         @for (token of tokens(); track token.token) {
           <li class="chip" [style.background-color]="chipColor(token.partOfSpeech)">
