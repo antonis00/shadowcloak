@@ -1,6 +1,6 @@
 // Drives the real pages for this round of fixes: new users, form errors, filters, returnUrl, limits.
 const { launch } = require('./browser');
-const BASE = 'http://localhost:4200';
+const BASE = process.env.E2E_BASE_URL || 'http://localhost:4200';
 let failed = 0;
 const ok = (label, cond, extra = '') => { console.log(`${cond ? 'PASS' : 'FAIL'}  ${label} ${extra}`); if (!cond) failed++; };
 const sleep = ms => new Promise(r => setTimeout(r, ms));

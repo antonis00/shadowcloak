@@ -80,6 +80,20 @@ npx ng serve
 
 The app runs at `http://localhost:4200/`. The dev server forwards `/api` to the backend, so run both together. See the [frontend README](frontend/README.md) for builds and tests.
 
+## Docker
+
+One container serves the app and the API from a single address, and keeps its database in a volume.
+
+```
+docker build -t shadowcloak .
+docker run -p 8000:8000 -v shadowcloak-data:/data \
+  -e DJANGO_SECRET_KEY=<a long random key> \
+  -e DJANGO_REQUIRE_HTTPS=false \
+  shadowcloak
+```
+
+That runs it at `http://localhost:8000/` to try it out. To deploy it, put it behind a proxy that handles HTTPS, and replace `DJANGO_REQUIRE_HTTPS=false` with `DJANGO_ALLOWED_HOSTS=<your hostname>` and `DJANGO_BEHIND_PROXY=true`.
+
 ## Tests
 
 | What | How to run it |

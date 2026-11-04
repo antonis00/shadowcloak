@@ -18,5 +18,6 @@ If `backend/.venv` isn't your Python environment, point `PYTHON` at the right in
 | `login.js` | Registering, logging in, sessions and CSRF |
 | `documents.js` | Form errors, new users, the Documents page, filters and limits |
 | `obfuscate.js` | Attribution on real books, formatting, highlighting and warnings |
+| `image.js` | The Docker image: one address for everything, and the editor bundled in. Run it with `node image.js` against a running container |
 
 `books.json` holds excerpts of public-domain books from Project Gutenberg, taken from NLTK's Gutenberg corpus. The Obfuscate tests use them to check that analysing a text and changing nothing leaves the suggested author the same.

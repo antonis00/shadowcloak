@@ -1,0 +1,11 @@
+.git
+.github
+e2e
+**/.env
+**/.venv
+**/__pycache__
+**/db.sqlite3
+backend/uploads
+frontend/.angular
+frontend/dist
+frontend/node_modules

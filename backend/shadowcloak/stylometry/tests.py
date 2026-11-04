@@ -13,8 +13,10 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.management import call_command
 from django.db import IntegrityError, transaction
-from django.test import SimpleTestCase, TestCase as DjangoTestCase, override_settings
+from django.test import RequestFactory, SimpleTestCase, TestCase as DjangoTestCase, override_settings
 from rest_framework.test import APIClient
+
+from shadowcloak.urls import frontend_page
 
 from stylometry import engine
 from stylometry.api import serializers, views
@@ -924,3 +926,19 @@ class DocumentFieldTests(TestCase):
         real.refresh_from_db()
         self.assertIsNone(placeholder.publication_date)
         self.assertEqual(str(real.publication_date), '1815-12-23')
+
+
+class FrontendPageTests(SimpleTestCase):
+    def test_serves_the_built_app(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with open(os.path.join(folder, 'index.html'), 'w', encoding='utf-8') as file:
+                file.write('<app-root></app-root>')
+            with self.settings(FRONTEND_DIR=folder):
+                response = frontend_page(RequestFactory().get('/documents'))
+                self.assertEqual(response['Content-Type'], 'text/html')
+                self.assertEqual(b''.join(response.streaming_content), b'<app-root></app-root>')
+                response.close()
+
+    def test_the_route_only_exists_when_there_is_a_built_app(self):
+        self.assertIsNone(settings.FRONTEND_DIR)
+        self.assertEqual(self.client.get('/documents').status_code, 404)

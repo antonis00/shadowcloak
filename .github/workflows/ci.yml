@@ -79,6 +79,37 @@ jobs:
           PYTHON: python
         run: npm test
 
+  image:
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: docker build -t shadowcloak .
+      - name: Start the image without HTTPS, to test it
+        run: docker run -d --name app -p 8000:8000 -e DJANGO_SECRET_KEY=only-for-ci -e DJANGO_REQUIRE_HTTPS=false shadowcloak
+      - run: npm ci
+        working-directory: e2e
+      - name: Run the browser tests against the image
+        working-directory: e2e
+        env:
+          E2E_BASE_URL: http://localhost:8000
+        run: |
+          for i in $(seq 1 30); do curl -sf http://localhost:8000/api/auth/me/ > /dev/null && break; sleep 1; done
+          node image.js
+          node login.js
+          node documents.js
+      - name: Check that the image requires HTTPS by default
+        run: |
+          docker run -d --name secure -p 8001:8000 -e DJANGO_SECRET_KEY=only-for-ci shadowcloak
+          for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:8001/ && break; sleep 1; done
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8001/)" = 301
+      - name: Show the server's log if something failed
+        if: failure()
+        run: docker logs app
+
   audit:
     runs-on: ubuntu-latest
     steps:

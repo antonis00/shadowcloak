@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'shadowcloak.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.environ.get('DJANGO_DATABASE', BASE_DIR / 'db.sqlite3'),
     }
 }
 
@@ -132,6 +132,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Set in the Docker image, where this one process also serves the built frontend.
+FRONTEND_DIR = os.environ.get('DJANGO_FRONTEND_DIR')
+if FRONTEND_DIR:
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    WHITENOISE_ROOT = FRONTEND_DIR
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = "uploads"
@@ -175,11 +182,12 @@ REST_FRAMEWORK = {
 # The session cookie is HttpOnly by default, so scripts can't read it. The CSRF cookie
 # has to stay readable because Angular copies it into the X-CSRFToken header.
 SESSION_COOKIE_AGE = 60 * 60 * 24
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+REQUIRE_HTTPS = os.environ.get('DJANGO_REQUIRE_HTTPS', str(not DEBUG)).lower() == 'true'
+SESSION_COOKIE_SECURE = REQUIRE_HTTPS
+CSRF_COOKIE_SECURE = REQUIRE_HTTPS
 
-SECURE_SSL_REDIRECT = not DEBUG
-SECURE_HSTS_SECONDS = 0 if DEBUG else 60 * 60 * 24 * 365
+SECURE_SSL_REDIRECT = REQUIRE_HTTPS
+SECURE_HSTS_SECONDS = 60 * 60 * 24 * 365 if REQUIRE_HTTPS else 0
 
 # Asking browsers to apply HTTPS to every subdomain, or to preload it, commits the whole
 # domain, so that stays a decision for whoever owns the domain.
