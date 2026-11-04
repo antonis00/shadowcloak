@@ -1,16 +1,33 @@
 import csv
 import os
+import subprocess
+import sys
 import tempfile
 from io import StringIO
+from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase as DjangoTestCase, override_settings
 from rest_framework.test import APIClient
 
+from stylometry import engine
+from stylometry.api import serializers, views
+from stylometry.checks import nltk_data_is_installed
 from stylometry.models import Author, Document, Group
 
 PASSWORD = 'correct-horse-battery'
+
+
+@override_settings(SECURE_SSL_REDIRECT=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class TestCase(DjangoTestCase):
+    """Plain HTTP and fast hashing suit the test client, and rate limits must not carry over."""
+
+    def run(self, result=None):
+        cache.clear()
+        return super().run(result)
 
 
 def register(client, username='alice', password1=PASSWORD, password2=PASSWORD):
@@ -310,3 +327,359 @@ class ImportOwnershipTests(TestCase):
         alices = Author.objects.create(user=self.alice, name='jetbluefan')
         self.import_tweet('JetBlueFan')
         self.assertEqual(alices.documents.count(), 1)
+
+
+class EngineTests(SimpleTestCase):
+    SARAH = 'the cat sat on the mat and the dog ran to the house of the old man ' * 20
+    JOHN = 'a bird flew over a hill while a fox hid in a den by a river near a farm ' * 20
+
+    def test_finds_the_closer_author(self):
+        texts = {'sarah': self.SARAH, 'john': self.JOHN}
+        self.assertEqual(engine.find_author(texts, 'the cat and the dog ran to the old house'), 'sarah')
+        self.assertEqual(engine.find_author(texts, 'a fox and a bird hid by a farm near a hill'), 'john')
+
+    def test_both_functions_agree(self):
+        texts = {'sarah': self.SARAH, 'john': self.JOHN}
+        text = 'the cat and the dog ran to the old house'
+        self.assertEqual(engine.analyse(texts, text)['mostProbableAuthor'], engine.find_author(texts, text))
+
+    def test_text_without_words_is_a_clear_error(self):
+        texts = {'sarah': self.SARAH, 'john': self.JOHN}
+        for text in ['', '12345 678', '!!! ... ???']:
+            for run in (engine.find_author, engine.analyse):
+                with self.assertRaisesMessage(engine.EngineError, 'no words'):
+                    run(texts, text)
+
+    def test_identical_authors_are_a_clear_error(self):
+        with self.assertRaisesMessage(engine.EngineError, "can't be told apart"):
+            engine.find_author({'sarah': self.SARAH, 'john': self.SARAH}, 'the cat')
+
+    def test_a_word_shared_at_the_same_rate_is_ignored(self):
+        texts = {'sarah': 'shared red red blue', 'john': 'shared green green green'}
+        statistics, _ = engine.build_profile(texts)
+        self.assertNotIn('shared', statistics)
+        self.assertEqual(engine.find_author(texts, 'red blue red'), 'sarah')
+
+    def test_an_author_without_words_is_left_out(self):
+        texts = {'sarah': self.SARAH, 'john': self.JOHN, 'numbers': '123 456'}
+        self.assertNotEqual(engine.find_author(texts, 'the cat sat'), 'numbers')
+
+    def test_too_few_authors_with_words_is_a_clear_error(self):
+        for texts in [{}, {'sarah': self.SARAH}, {'sarah': self.SARAH, 'numbers': '123'}]:
+            with self.assertRaisesMessage(engine.EngineError, 'at least two authors'):
+                engine.find_author(texts, 'the cat')
+
+    def test_text_sharing_no_common_words_still_gets_an_answer(self):
+        result = engine.analyse({'sarah': self.SARAH, 'john': self.JOHN}, 'zebra quokka')
+        self.assertIn(result['mostProbableAuthor'], ['sarah', 'john'])
+        self.assertEqual(result['tokensSignificantToAttribution'], [])
+
+    def test_analysis_response_keeps_its_shape(self):
+        result = engine.analyse({'sarah': self.SARAH, 'john': self.JOHN}, 'The cat and the dog.')
+        self.assertEqual(set(result), {'mostProbableAuthor', 'corpusTokens', 'anonymousTextTokens',
+                                       'tokensSignificantToAttribution', 'rawUserText'})
+        self.assertEqual(result['anonymousTextTokens'][0]['token'], 'The')
+        self.assertEqual(set(result['tokensSignificantToAttribution'][0]), {'token', 'partOfSpeech', 'score'})
+        self.assertEqual(result['rawUserText'], 'The cat and the dog.')
+
+
+class AttributionApiTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('alice', password=PASSWORD)
+        self.other = User.objects.create_user('bob', password=PASSWORD)
+        self.group = Group.objects.create(user=self.user, name='books')
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+
+    def add_document(self, author_name, body, group=None, title='one'):
+        group = group or self.group
+        author, _ = Author.objects.get_or_create(user=group.user, name=author_name)
+        return Document.objects.create(author=author, group=group, title=title, body=body,
+                                       publication_date='2002-02-20')
+
+    def add_two_authors(self):
+        self.add_document('sarah', EngineTests.SARAH)
+        self.add_document('john', EngineTests.JOHN)
+
+    def post(self, url, **payload):
+        return self.client.post(url, payload, format='json')
+
+    def both(self, **payload):
+        return [self.post('/api/findauthor/', **payload), self.post('/api/analyse/', **payload)]
+
+    def test_returns_the_author_name(self):
+        self.add_two_authors()
+        find, analyse = self.both(group=self.group.id, body='the cat and the dog ran to the old house')
+        self.assertEqual(find.status_code, 200)
+        self.assertEqual(find.data, 'sarah')
+        self.assertEqual(analyse.data['mostProbableAuthor'], 'sarah')
+
+    def test_bad_input_gets_a_400_not_a_crash(self):
+        self.add_two_authors()
+        cases = [
+            {'group': self.group.id, 'body': ''},
+            {'group': self.group.id, 'body': '   '},
+            {'group': self.group.id, 'body': '12345'},
+            {'group': self.group.id, 'body': '!!! ???'},
+            {'group': self.group.id},
+            {'group': 'abc', 'body': 'the cat'},
+            {'body': 'the cat'},
+            {'group': self.group.id, 'body': ['a', 'list']},
+        ]
+        for payload in cases:
+            for response in self.both(**payload):
+                self.assertEqual(response.status_code, 400, payload)
+
+    def test_too_few_authors_explains_what_to_do(self):
+        self.add_document('sarah', EngineTests.SARAH)
+        for response in self.both(group=self.group.id, body='the cat'):
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('at least two authors', response.data['detail'])
+
+    def test_another_users_group_looks_empty(self):
+        foreign = Group.objects.create(user=self.other, name='secret')
+        self.add_document('x', EngineTests.SARAH, group=foreign)
+        self.add_document('y', EngineTests.JOHN, group=foreign)
+        for response in self.both(group=foreign.id, body='the cat'):
+            self.assertEqual(response.status_code, 400)
+            self.assertNotIn('x', response.data['detail'].split())
+
+    def test_text_over_the_limit_is_rejected(self):
+        self.add_two_authors()
+        for response in self.both(group=self.group.id, body='a' * (serializers.MAX_TEXT_LENGTH + 1)):
+            self.assertEqual(response.status_code, 400)
+
+    def test_a_category_over_the_limit_is_rejected_before_any_work(self):
+        self.add_two_authors()
+        with patch.object(views, 'MAX_CORPUS_LENGTH', 10), patch.object(engine, 'tokenize') as tokenize:
+            response = self.post('/api/findauthor/', group=self.group.id, body='the cat')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('too much text', response.data['detail'])
+        tokenize.assert_not_called()
+
+
+class LimitTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('alice', password=PASSWORD)
+        self.author = Author.objects.create(user=self.user, name='sarah')
+        self.group = Group.objects.create(user=self.user, name='books')
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+
+    def create(self, body):
+        return self.client.post('/api/documents/', {
+            'author': self.author.id, 'group': self.group.id, 'title': 'one', 'body': body,
+            'publication_date': '2002-02-20', 'active': True,
+        }, format='json')
+
+    def test_a_document_at_the_limit_is_accepted(self):
+        self.assertEqual(self.create('a' * serializers.MAX_DOCUMENT_LENGTH).status_code, 201)
+
+    def test_a_document_over_the_limit_is_rejected(self):
+        response = self.create('a' * (serializers.MAX_DOCUMENT_LENGTH + 1))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('body', response.data)
+
+    def test_an_oversized_request_is_refused_unread(self):
+        with self.settings(DATA_UPLOAD_MAX_MEMORY_SIZE=1000):
+            response = self.create('a' * 2000)
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(Document.objects.exists())
+
+    def test_only_json_is_accepted(self):
+        response = self.client.post('/api/groups/', {'name': 'x'}, format='multipart')
+        self.assertEqual(response.status_code, 415)
+
+    def test_a_huge_password_never_reaches_the_hasher(self):
+        client = APIClient()
+        with patch('stylometry.api.views.authenticate') as authenticate:
+            response = client.post('/api/auth/login/', {'username': 'alice', 'password': 'x' * 129}, format='json')
+        self.assertEqual(response.status_code, 400)
+        authenticate.assert_not_called()
+
+
+class ThrottleTests(TestCase):
+    def login(self, username='alice', address=None, forwarded=None):
+        extra = {}
+        if address:
+            extra['REMOTE_ADDR'] = address
+        if forwarded:
+            extra['HTTP_X_FORWARDED_FOR'] = forwarded
+        return APIClient().post('/api/auth/login/', {'username': username, 'password': 'wrong-password'},
+                                format='json', **extra)
+
+    def test_repeated_logins_from_one_address_are_stopped(self):
+        codes = [self.login(username=f'user{n}').status_code for n in range(11)]
+        self.assertEqual(codes[:10], [400] * 10)
+        self.assertEqual(codes[10], 429)
+
+    def test_faking_x_forwarded_for_does_not_escape_the_limit(self):
+        codes = [self.login(username=f'user{n}', forwarded=f'10.0.0.{n}').status_code for n in range(11)]
+        self.assertEqual(codes[10], 429)
+
+    def test_guesses_at_one_account_are_stopped_across_addresses(self):
+        codes = [self.login(address=f'10.0.0.{n}').status_code for n in range(21)]
+        self.assertEqual(codes[:20], [400] * 20)
+        self.assertEqual(codes[20], 429)
+
+    def test_account_limit_ignores_case(self):
+        for n in range(20):
+            self.login(username='alice' if n % 2 else 'ALICE', address=f'10.0.0.{n}')
+        self.assertEqual(self.login(username='Alice', address='10.0.1.1').status_code, 429)
+
+    def test_a_login_with_a_non_text_username_gets_a_400(self):
+        response = APIClient().post('/api/auth/login/', {'username': ['a'], 'password': 'x'}, format='json')
+        self.assertEqual(response.status_code, 400)
+
+    def test_registration_is_limited(self):
+        codes = [register(APIClient(), username=f'user{n}').status_code for n in range(11)]
+        self.assertEqual(codes[:10], [201] * 10)
+        self.assertEqual(codes[10], 429)
+
+    def test_attribution_is_limited_per_user(self):
+        user = User.objects.create_user('alice', password=PASSWORD)
+        group = Group.objects.create(user=user, name='books')
+        client = APIClient()
+        client.force_authenticate(user)
+        payload = {'group': group.id, 'body': 'the cat'}
+        codes = [client.post('/api/analyse/', payload, format='json').status_code for _ in range(61)]
+        self.assertEqual(codes[:60], [400] * 60)
+        self.assertEqual(codes[60], 429)
+
+        other = APIClient()
+        other.force_authenticate(User.objects.create_user('bob', password=PASSWORD))
+        self.assertEqual(other.post('/api/analyse/', payload, format='json').status_code, 400)
+
+
+class DocumentsByAuthorTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('alice', password=PASSWORD)
+        self.sarah = Author.objects.create(user=self.user, name='sarah')
+        self.john = Author.objects.create(user=self.user, name='john')
+        self.books = Group.objects.create(user=self.user, name='books')
+        self.posts = Group.objects.create(user=self.user, name='posts')
+        for author, group, title in [(self.sarah, self.books, 'a book'), (self.sarah, self.posts, 'a post'),
+                                     (self.john, self.posts, 'his post')]:
+            Document.objects.create(author=author, group=group, title=title, body='words',
+                                    publication_date='2002-02-20')
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+
+    def get(self, query=''):
+        return self.client.get('/api/docsbyauthor/' + query)
+
+    def titles(self, query=''):
+        return {author['name']: [d['title'] for d in author['documents']] for author in self.get(query).data}
+
+    def test_group_filter_applies_to_the_nested_documents(self):
+        self.assertEqual(self.titles(f'?group={self.books.id}'), {'sarah': ['a book']})
+        self.assertEqual(self.titles(f'?group={self.posts.id}'), {'sarah': ['a post'], 'john': ['his post']})
+
+    def test_author_filter_alone_works(self):
+        response = self.get(f'?author={self.john.id}')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.titles(f'?author={self.sarah.id}'), {'sarah': ['a book']})
+
+    def test_both_filters_together(self):
+        self.assertEqual(self.titles(f'?group={self.posts.id}&author={self.john.id}'), {'john': ['his post']})
+        self.assertEqual(self.titles(f'?group={self.posts.id}&author={self.sarah.id},{self.john.id}'),
+                         {'sarah': ['a post'], 'john': ['his post']})
+
+    def test_no_filter_uses_the_first_group(self):
+        self.assertEqual(self.titles(), {'sarah': ['a book']})
+
+    def test_bad_filters_get_a_clear_answer(self):
+        self.assertEqual(self.get('?group=abc').status_code, 404)
+        self.assertEqual(self.get('?group=99999').status_code, 404)
+        self.assertEqual(self.get('?author=abc').status_code, 400)
+
+    def test_another_users_group_looks_missing(self):
+        foreign = Group.objects.create(user=User.objects.create_user('bob', password=PASSWORD), name='x')
+        self.assertEqual(self.get(f'?group={foreign.id}').status_code, 404)
+
+    def test_another_users_author_returns_nothing(self):
+        bob = User.objects.create_user('bob', password=PASSWORD)
+        foreign = Author.objects.create(user=bob, name='secret')
+        self.assertEqual(self.titles(f'?group={self.books.id}&author={foreign.id}'), {})
+
+    def test_a_new_user_gets_an_empty_list(self):
+        client = APIClient()
+        client.force_authenticate(User.objects.create_user('new', password=PASSWORD))
+        response = client.get('/api/docsbyauthor/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_a_new_users_author_without_documents_is_not_listed(self):
+        Author.objects.create(user=self.user, name='empty')
+        self.assertNotIn('empty', self.titles(f'?group={self.books.id}'))
+
+
+class NameTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('alice', password=PASSWORD)
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+
+    def test_names_are_stored_in_lowercase_on_create_and_update(self):
+        for url in ['/api/authors/', '/api/groups/']:
+            created = self.client.post(url, {'name': 'MiXeD'}, format='json')
+            self.assertEqual(created.status_code, 201)
+            self.assertEqual(created.data['name'], 'mixed')
+            updated = self.client.put(f"{url}{created.data['id']}/", {'name': 'OtHeR'}, format='json')
+            self.assertEqual(updated.status_code, 200)
+            self.assertEqual(updated.data['name'], 'other')
+
+    def test_a_duplicate_name_gets_a_400_not_a_crash(self):
+        for url in ['/api/authors/', '/api/groups/']:
+            self.client.post(url, {'name': 'taken'}, format='json')
+            response = self.client.post(url, {'name': 'TAKEN'}, format='json')
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('name', response.data)
+
+    def test_saving_without_renaming_still_works(self):
+        created = self.client.post('/api/authors/', {'name': 'same'}, format='json')
+        response = self.client.put(f"/api/authors/{created.data['id']}/", {'name': 'same', 'description': 'x'}, format='json')
+        self.assertEqual(response.status_code, 200)
+
+    def test_two_users_can_use_the_same_name(self):
+        self.client.post('/api/authors/', {'name': 'shared'}, format='json')
+        other = APIClient()
+        other.force_authenticate(User.objects.create_user('bob', password=PASSWORD))
+        self.assertEqual(other.post('/api/authors/', {'name': 'shared'}, format='json').status_code, 201)
+
+    def test_a_name_that_is_not_text_gets_a_400(self):
+        for value in [None, ['a'], {'a': 1}]:
+            self.assertEqual(self.client.post('/api/authors/', {'name': value}, format='json').status_code, 400)
+
+
+class SecureDefaultsTests(TestCase):
+    def test_routes_are_private_unless_they_say_otherwise(self):
+        client = APIClient()
+        for url in ['/api/', '/api/authors/', '/api/groups/', '/api/documents/', '/api/docsbyauthor/']:
+            self.assertEqual(client.get(url).status_code, 401, url)
+        for url in ['/api/findauthor/', '/api/analyse/', '/api/auth/logout/']:
+            self.assertEqual(client.post(url, {}, format='json').status_code, 401, url)
+
+    def test_the_browsable_api_is_gone(self):
+        client = APIClient()
+        client.force_authenticate(User.objects.create_user('alice', password=PASSWORD))
+        response = client.get('/api/authors/', HTTP_ACCEPT='text/html')
+        self.assertEqual(response.status_code, 406)
+
+    def test_production_settings_pass_the_deploy_check(self):
+        env = {**os.environ, 'DJANGO_SECRET_KEY': 'k' * 30 + 'Zq7!xP2@vL9#mN4$bR6%tY8^', 'DJANGO_DEBUG': 'false',
+               'DJANGO_ALLOWED_HOSTS': 'example.com'}
+        result = subprocess.run([sys.executable, 'manage.py', 'check', '--deploy', '--fail-level', 'WARNING'],
+                                cwd=settings.BASE_DIR, env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+
+class NltkCheckTests(SimpleTestCase):
+    def test_passes_when_the_data_is_installed(self):
+        self.assertEqual(nltk_data_is_installed(None), [])
+
+    def test_missing_data_says_what_to_run(self):
+        with patch('stylometry.checks.nltk.data.find', side_effect=LookupError):
+            errors = nltk_data_is_installed(None)
+        self.assertEqual(len(errors), 1)
+        self.assertIn('python -m nltk.downloader punkt_tab averaged_perceptron_tagger_eng', errors[0].hint)

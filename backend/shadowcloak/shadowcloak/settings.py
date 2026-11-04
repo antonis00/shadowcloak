@@ -32,7 +32,12 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', '').lower() == 'true'
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+
+# Only set this behind a proxy you control, because it makes Django believe the proxy's headers.
+BEHIND_PROXY = os.environ.get('DJANGO_BEHIND_PROXY', '').lower() == 'true'
+if BEHIND_PROXY:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -120,8 +125,6 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
 
 
@@ -133,13 +136,39 @@ STATIC_URL = '/static/'
 MEDIA_URL = "/media/"
 MEDIA_ROOT = "uploads"
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+# Larger requests are refused unread. This leaves room for a document at its length limit,
+# in any language, once encoded.
+DATA_UPLOAD_MAX_MEMORY_SIZE = 8 * 1024 * 1024
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'stylometry.api.authentication.SessionAuth',
     ],
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
-    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '120/min',
+        'user': '600/min',
+        'login': '10/min',
+        'login_account': '20/hour',
+        'register': '10/hour',
+        'analysis': '60/min',
+    },
+    # Without this, DRF identifies a client by its X-Forwarded-For header, which anyone can fake.
+    'NUM_PROXIES': 1 if BEHIND_PROXY else 0,
 }
 
 # The session cookie is HttpOnly by default, so scripts can't read it. The CSRF cookie
@@ -147,3 +176,10 @@ REST_FRAMEWORK = {
 SESSION_COOKIE_AGE = 60 * 60 * 24
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+
+SECURE_SSL_REDIRECT = not DEBUG
+SECURE_HSTS_SECONDS = 0 if DEBUG else 60 * 60 * 24 * 365
+
+# Asking browsers to apply HTTPS to every subdomain, or to preload it, commits the whole
+# domain, so that stays a decision for whoever owns the domain.
+SILENCED_SYSTEM_CHECKS = ['security.W005', 'security.W021']

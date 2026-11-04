@@ -1,116 +1,118 @@
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Prefetch, Sum
+from django.db.models.functions import Length
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from rest_framework import generics
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import ParseError
+from rest_framework.permissions import AllowAny
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from rest_framework import viewsets
-from rest_framework import mixins
 from rest_framework import views
-from rest_framework import filters
 from rest_framework import status
 
+from stylometry import engine
 from stylometry.models import Author, Document, Group
-from stylometry.api.permissions import IsOwnerOrReadOnly
-from stylometry.api.serializers import AuthorSerializer, DocumentSerializer, GroupSerializer, FindAuthor, DocumentsByAuthorSerializer, LoginSerializer, RegisterSerializer
+from stylometry.api.serializers import AttributionSerializer, AuthorSerializer, DocumentSerializer, GroupSerializer, DocumentsByAuthorSerializer, LoginSerializer, RegisterSerializer
+from stylometry.api.throttles import LoginAccountThrottle
 
-from stylometry.api.services.retrieve_documents import create_dictionary
-from stylometry.api.services.analysis import analyse_with_burrows_delta
-from stylometry.api.services.attribution import find_author_with_burrows_delta
+# Attribution re-reads the whole category on each request, so this bounds the work one request does.
+MAX_CORPUS_LENGTH = 10_000_000
 
 
-class AuthorViewset(mixins.UpdateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class AuthorViewset(ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
-    permission_classes = [IsAuthenticated]
-    
 
     def perform_create(self, serializer):
-        user = self.request.user
-        name = self.request.data.get('name').lower()
-        serializer.save(user=user, name=name)
+        serializer.save(user=self.request.user)
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
 
-    
+
 class DocumentViewset(ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
-    permission_classes = [IsAuthenticated]
-
 
     def get_queryset(self):
-        author = self.request.query_params.get('author', None)
-        group = self.request.query_params.get('group', None)
-
-        if author is not None and group is not None:
-            return self.queryset.filter(author__user__username=self.request.user, author__name=author.lower(), group__name=group.lower()).order_by('author')
-        elif author is not None:
-            return self.queryset.filter(author__user__username=self.request.user, author__name=author.lower()).order_by('author')
-        elif group is not None:
-            return self.queryset.filter(author__user__username=self.request.user, group__name=group.lower()).order_by('author')
-
-        return self.queryset.filter(author__user__username=self.request.user).order_by('author')
-        
+        documents = self.queryset.filter(author__user=self.request.user).order_by('author')
+        author = self.request.query_params.get('author')
+        group = self.request.query_params.get('group')
+        if author is not None:
+            documents = documents.filter(author__name=author.lower())
+        if group is not None:
+            documents = documents.filter(group__name=group.lower())
+        return documents
 
 
 class DocumentsByAuthorView(views.APIView):
-    permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        user = self.request.user
-        authors = self.request.query_params.get('author', None)
-        authors = authors.split(',') if authors else None
-        group = self.request.query_params.get('group', None)
+        groups = Group.objects.filter(user=request.user)
+        group_id = request.query_params.get('group')
+        group = generics.get_object_or_404(groups, pk=group_id) if group_id else groups.first()
+        if group is None:
+            return Response([])
 
-        if authors is not None and group is not None:
-            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, id__in=authors, documents__group=group).distinct(), many=True).data)
-        elif authors is not None:
-            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, id__in=authors), many=True).distinct().data)
-        elif group is not None:
-            return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, documents__group=group).distinct(), many=True).data)
-        firstGroup = Group.objects.filter(user=self.request.user).first()
-        return Response(DocumentsByAuthorSerializer(Author.objects.filter(user=user, documents__group=firstGroup).distinct(), many=True).data)
+        # The prefetch is what keeps another category's documents out of the nested list.
+        documents = Document.objects.filter(group=group).select_related('author')
+        authors = (Author.objects.filter(user=request.user, documents__group=group)
+                   .distinct().order_by('id').prefetch_related(Prefetch('documents', queryset=documents)))
+
+        author_ids = request.query_params.get('author')
+        if author_ids:
+            try:
+                authors = authors.filter(id__in=[int(author_id) for author_id in author_ids.split(',')])
+            except ValueError:
+                raise ParseError('The author filter must be a list of author IDs.')
+        return Response(DocumentsByAuthorSerializer(authors, many=True).data)
 
 
-    
 class GroupViewset(ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        user = self.request.user
-        name = self.request.data.get('name').lower()
-        serializer.save(user=user, name=name)
+        serializer.save(user=self.request.user)
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
 
 
-class FindAuthorView(views.APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, request, format=None):
-        user = self.request.user
-        group = self.request.data.get('group')
-        body = self.request.data.get('body')
-        documents_dictionary = create_dictionary(user, group)
-        result = find_author_with_burrows_delta(documents_dictionary, body)
-        return Response(result)
+def texts_by_author(user, group_id):
+    documents = Document.objects.filter(group_id=group_id, group__user=user)
+    if (documents.aggregate(total=Sum(Length('body')))['total'] or 0) > MAX_CORPUS_LENGTH:
+        raise ParseError('This category holds too much text to analyse. Remove some documents or use another category.')
+    texts = {}
+    for name, body in documents.order_by('author_id', 'id').values_list('author__name', 'body'):
+        texts.setdefault(name, []).append(body)
+    return {name: ' '.join(bodies) for name, bodies in texts.items()}
 
-class AnalyseView(views.APIView):
-    permission_classes = [IsAuthenticated]
-    
+
+class AttributionView(views.APIView):
+    """Runs one engine function on the submitted text, against one of the user's categories."""
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'analysis'
+    run_engine = None
+
     def post(self, request, format=None):
-        user = self.request.user
-        group = self.request.data.get('group')
-        body = self.request.data.get('body')
-        documents_dictionary = create_dictionary(user, group)
-        result = analyse_with_burrows_delta(documents_dictionary, body)
-        return Response(result)
+        serializer = AttributionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        texts = texts_by_author(request.user, serializer.validated_data['group'])
+        try:
+            return Response(self.run_engine(texts, serializer.validated_data['body']))
+        except engine.EngineError as error:
+            raise ParseError(str(error))
+
+
+class FindAuthorView(AttributionView):
+    run_engine = staticmethod(engine.find_author)
+
+
+class AnalyseView(AttributionView):
+    run_engine = staticmethod(engine.analyse)
 
 
 # DRF exempts its views from CSRF and only re-checks it for logged-in users, so the
@@ -119,6 +121,8 @@ class AnalyseView(views.APIView):
 class RegisterView(generics.CreateAPIView):
     authentication_classes = []
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'register'
     serializer_class = RegisterSerializer
 
 
@@ -126,6 +130,8 @@ class RegisterView(generics.CreateAPIView):
 class LoginView(views.APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle, LoginAccountThrottle]
+    throttle_scope = 'login'
 
     def post(self, request, format=None):
         serializer = LoginSerializer(data=request.data)
@@ -138,7 +144,6 @@ class LoginView(views.APIView):
 
 
 class LogoutView(views.APIView):
-    permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
         logout(request._request)
