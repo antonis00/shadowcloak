@@ -1,4 +1,5 @@
 import csv
+import importlib
 import os
 import subprocess
 import sys
@@ -6,6 +7,7 @@ import tempfile
 from io import StringIO
 from unittest.mock import patch
 
+from django.apps import apps as django_apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
@@ -329,58 +331,73 @@ class ImportOwnershipTests(TestCase):
         self.assertEqual(alices.documents.count(), 1)
 
 
+def counts_of(texts):
+    return {author: engine.count_tokens(text) for author, text in texts.items()}
+
+
+def find_author(texts, text):
+    return engine.find_author(counts_of(texts), text)
+
+
+def analyse(texts, text):
+    return engine.analyse(counts_of(texts), text)
+
+
 class EngineTests(SimpleTestCase):
     SARAH = 'the cat sat on the mat and the dog ran to the house of the old man ' * 20
     JOHN = 'a bird flew over a hill while a fox hid in a den by a river near a farm ' * 20
 
     def test_finds_the_closer_author(self):
         texts = {'sarah': self.SARAH, 'john': self.JOHN}
-        self.assertEqual(engine.find_author(texts, 'the cat and the dog ran to the old house'), 'sarah')
-        self.assertEqual(engine.find_author(texts, 'a fox and a bird hid by a farm near a hill'), 'john')
+        self.assertEqual(find_author(texts, 'the cat and the dog ran to the old house'), 'sarah')
+        self.assertEqual(find_author(texts, 'a fox and a bird hid by a farm near a hill'), 'john')
 
     def test_both_functions_agree(self):
         texts = {'sarah': self.SARAH, 'john': self.JOHN}
         text = 'the cat and the dog ran to the old house'
-        self.assertEqual(engine.analyse(texts, text)['mostProbableAuthor'], engine.find_author(texts, text))
+        self.assertEqual(analyse(texts, text)['mostProbableAuthor'], find_author(texts, text))
 
     def test_text_without_words_is_a_clear_error(self):
         texts = {'sarah': self.SARAH, 'john': self.JOHN}
         for text in ['', '12345 678', '!!! ... ???']:
-            for run in (engine.find_author, engine.analyse):
+            for run in (find_author, analyse):
                 with self.assertRaisesMessage(engine.EngineError, 'no words'):
                     run(texts, text)
 
     def test_identical_authors_are_a_clear_error(self):
         with self.assertRaisesMessage(engine.EngineError, "can't be told apart"):
-            engine.find_author({'sarah': self.SARAH, 'john': self.SARAH}, 'the cat')
+            find_author({'sarah': self.SARAH, 'john': self.SARAH}, 'the cat')
 
     def test_a_word_shared_at_the_same_rate_is_ignored(self):
         texts = {'sarah': 'shared red red blue', 'john': 'shared green green green'}
-        statistics, _ = engine.build_profile(texts)
+        statistics, _ = engine.build_profile(counts_of(texts))
         self.assertNotIn('shared', statistics)
-        self.assertEqual(engine.find_author(texts, 'red blue red'), 'sarah')
+        self.assertEqual(find_author(texts, 'red blue red'), 'sarah')
 
     def test_an_author_without_words_is_left_out(self):
         texts = {'sarah': self.SARAH, 'john': self.JOHN, 'numbers': '123 456'}
-        self.assertNotEqual(engine.find_author(texts, 'the cat sat'), 'numbers')
+        self.assertNotEqual(find_author(texts, 'the cat sat'), 'numbers')
 
     def test_too_few_authors_with_words_is_a_clear_error(self):
         for texts in [{}, {'sarah': self.SARAH}, {'sarah': self.SARAH, 'numbers': '123'}]:
             with self.assertRaisesMessage(engine.EngineError, 'at least two authors'):
-                engine.find_author(texts, 'the cat')
+                find_author(texts, 'the cat')
 
     def test_text_sharing_no_common_words_still_gets_an_answer(self):
-        result = engine.analyse({'sarah': self.SARAH, 'john': self.JOHN}, 'zebra quokka')
+        result = analyse({'sarah': self.SARAH, 'john': self.JOHN}, 'zebra quokka')
         self.assertIn(result['mostProbableAuthor'], ['sarah', 'john'])
         self.assertEqual(result['tokensSignificantToAttribution'], [])
 
-    def test_analysis_response_keeps_its_shape(self):
-        result = engine.analyse({'sarah': self.SARAH, 'john': self.JOHN}, 'The cat and the dog.')
-        self.assertEqual(set(result), {'mostProbableAuthor', 'corpusTokens', 'anonymousTextTokens',
-                                       'tokensSignificantToAttribution', 'rawUserText'})
-        self.assertEqual(result['anonymousTextTokens'][0]['token'], 'The')
+    def test_analysis_response_has_what_the_page_uses(self):
+        result = analyse({'sarah': self.SARAH, 'john': self.JOHN}, 'The cat and the dog.')
+        self.assertEqual(set(result), {'mostProbableAuthor', 'tokensSignificantToAttribution'})
         self.assertEqual(set(result['tokensSignificantToAttribution'][0]), {'token', 'partOfSpeech', 'score'})
-        self.assertEqual(result['rawUserText'], 'The cat and the dog.')
+
+    def test_ties_between_words_do_not_depend_on_stored_order(self):
+        forwards = {'sarah': {'red': 2, 'blue': 2, 'pink': 1}, 'john': {'red': 1, 'blue': 1, 'pink': 3}}
+        backwards = {author: dict(reversed(list(count.items()))) for author, count in forwards.items()}
+        with patch.object(engine, 'FEATURE_COUNT', 2):
+            self.assertEqual(list(engine.build_profile(forwards)[0]), list(engine.build_profile(backwards)[0]))
 
 
 class AttributionApiTests(TestCase):
@@ -683,3 +700,88 @@ class NltkCheckTests(SimpleTestCase):
             errors = nltk_data_is_installed(None)
         self.assertEqual(len(errors), 1)
         self.assertIn('python -m nltk.downloader punkt_tab averaged_perceptron_tagger_eng', errors[0].hint)
+
+
+class TokenCountTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('alice', password=PASSWORD)
+        self.group = Group.objects.create(user=self.user, name='books')
+        self.sarah = Author.objects.create(user=self.user, name='sarah')
+        self.john = Author.objects.create(user=self.user, name='john')
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+
+    def document(self, author, body, title='one'):
+        return Document.objects.create(author=author, group=self.group, title=title, body=body,
+                                       publication_date='2002-02-20')
+
+    def test_saving_stores_the_counts(self):
+        document = self.document(self.sarah, 'The cat, the dog. 123')
+        document.refresh_from_db()
+        self.assertEqual(document.token_counts, {'the': 2, 'cat': 1, 'dog': 1})
+
+    def test_editing_through_the_api_updates_the_counts(self):
+        document = self.document(self.sarah, 'the cat')
+        response = self.client.patch(f'/api/documents/{document.id}/', {'body': 'a dog'}, format='json')
+        self.assertEqual(response.status_code, 200)
+        document.refresh_from_db()
+        self.assertEqual(document.token_counts, {'a': 1, 'dog': 1})
+
+    def test_attribution_does_not_read_the_documents_again(self):
+        self.document(self.sarah, EngineTests.SARAH)
+        self.document(self.john, EngineTests.JOHN)
+        with patch.object(engine, 'tokenize', wraps=engine.tokenize) as tokenize:
+            response = self.client.post('/api/findauthor/', {'group': self.group.id, 'body': 'the cat sat'}, format='json')
+        self.assertEqual(response.data, 'sarah')
+        tokenize.assert_called_once_with('the cat sat')
+
+    def test_an_authors_documents_are_added_together(self):
+        self.document(self.sarah, 'the the cat', title='one')
+        self.document(self.sarah, 'the dog', title='two')
+        self.assertEqual(views.counts_by_author(self.user, self.group.id)['sarah'], {'the': 3, 'cat': 1, 'dog': 1})
+
+    def test_only_the_chosen_categorys_counts_are_used(self):
+        other = Group.objects.create(user=self.user, name='posts')
+        Document.objects.create(author=self.sarah, group=other, title='post', body='zebra',
+                                publication_date='2002-02-20')
+        self.document(self.sarah, 'the cat')
+        self.assertEqual(views.counts_by_author(self.user, self.group.id)['sarah'], {'the': 1, 'cat': 1})
+
+    def test_counts_never_leave_the_server(self):
+        document = self.document(self.sarah, 'the cat')
+        for response in [self.client.get('/api/documents/'), self.client.get(f'/api/documents/{document.id}/')]:
+            self.assertNotIn('token_counts', str(response.data))
+        self.assertNotIn('token_counts', str(self.client.get('/api/docsbyauthor/').data))
+
+    def test_counts_cannot_be_set_from_outside(self):
+        document = self.document(self.sarah, 'the cat')
+        self.client.patch(f'/api/documents/{document.id}/', {'token_counts': {'forged': 99}}, format='json')
+        document.refresh_from_db()
+        self.assertNotIn('forged', document.token_counts)
+
+    def test_imports_store_the_counts(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'blogs.csv')
+            with open(path, 'w', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                writer.writerow(['id', 'gender', 'age', 'topic', 'sign', 'date', 'text'])
+                writer.writerow(['sarah', 'f', '20', 'x', 'y', '1,1,2004', 'the cat sat'])
+            call_command('import_blogs', path, group=self.group.id, stdout=StringIO())
+        self.assertEqual(Document.objects.get().token_counts, {'the': 1, 'cat': 1, 'sat': 1})
+
+    def test_the_migration_fills_in_existing_documents(self):
+        document = self.document(self.sarah, 'the cat')
+        Document.objects.filter(pk=document.pk).update(token_counts={})
+        migration = importlib.import_module('stylometry.migrations.0026_document_token_counts')
+        migration.fill_token_counts(django_apps, None)
+        document.refresh_from_db()
+        self.assertEqual(document.token_counts, {'the': 1, 'cat': 1})
+
+    def test_document_writes_are_limited(self):
+        payload = {'author': self.sarah.id, 'group': self.group.id, 'body': 'the cat',
+                   'publication_date': '2002-02-20', 'active': True}
+        codes = [self.client.post('/api/documents/', {**payload, 'title': f'd{n}'}, format='json').status_code
+                 for n in range(61)]
+        self.assertEqual(codes[:60], [201] * 60)
+        self.assertEqual(codes[60], 429)
+        self.assertEqual(self.client.get('/api/documents/').status_code, 200)

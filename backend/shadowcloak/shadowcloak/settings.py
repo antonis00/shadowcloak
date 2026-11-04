@@ -166,6 +166,7 @@ REST_FRAMEWORK = {
         'login_account': '20/hour',
         'register': '10/hour',
         'analysis': '60/min',
+        'document_write': '60/min',
     },
     # Without this, DRF identifies a client by its X-Forwarded-For header, which anyone can fake.
     'NUM_PROXIES': 1 if BEHIND_PROXY else 0,

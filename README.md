@@ -39,6 +39,7 @@ The API runs at `http://127.0.0.1:8000/api/`. The app won't start without the se
 | Login | 10 a minute from one address, 20 an hour for one account |
 | Registration | 10 an hour from one address |
 | Find Author and Analyse | 60 a minute per user |
+| Saving or deleting documents | 60 a minute per user |
 
 Rate limits are counted in each server process's memory, so they reset on restart, and running several worker processes multiplies them.
 

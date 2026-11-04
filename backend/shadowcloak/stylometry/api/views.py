@@ -1,3 +1,5 @@
+from collections import Counter
+
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Prefetch, Sum
 from django.db.models.functions import Length
@@ -5,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from rest_framework import generics
 from rest_framework.exceptions import ParseError
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import SAFE_METHODS, AllowAny
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
@@ -17,7 +19,7 @@ from stylometry.models import Author, Document, Group
 from stylometry.api.serializers import AttributionSerializer, AuthorSerializer, DocumentSerializer, GroupSerializer, DocumentsByAuthorSerializer, LoginSerializer, RegisterSerializer
 from stylometry.api.throttles import LoginAccountThrottle
 
-# Attribution re-reads the whole category on each request, so this bounds the work one request does.
+# Attribution loads the word counts of a whole category, so this bounds the work one request does.
 MAX_CORPUS_LENGTH = 10_000_000
 
 
@@ -35,6 +37,13 @@ class AuthorViewset(ModelViewSet):
 class DocumentViewset(ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
+
+    def get_throttles(self):
+        if self.request.method in SAFE_METHODS:
+            return super().get_throttles()
+        # Saving counts every word in the document, which is far more work than reading it.
+        self.throttle_scope = 'document_write'
+        return [ScopedRateThrottle()]
 
     def get_queryset(self):
         documents = self.queryset.filter(author__user=self.request.user).order_by('author')
@@ -81,14 +90,14 @@ class GroupViewset(ModelViewSet):
         return self.queryset.filter(user=self.request.user)
 
 
-def texts_by_author(user, group_id):
+def counts_by_author(user, group_id):
     documents = Document.objects.filter(group_id=group_id, group__user=user)
     if (documents.aggregate(total=Sum(Length('body')))['total'] or 0) > MAX_CORPUS_LENGTH:
         raise ParseError('This category holds too much text to analyse. Remove some documents or use another category.')
-    texts = {}
-    for name, body in documents.order_by('author_id', 'id').values_list('author__name', 'body'):
-        texts.setdefault(name, []).append(body)
-    return {name: ' '.join(bodies) for name, bodies in texts.items()}
+    counts = {}
+    for name, token_counts in documents.order_by('author_id', 'id').values_list('author__name', 'token_counts'):
+        counts.setdefault(name, Counter()).update(token_counts)
+    return counts
 
 
 class AttributionView(views.APIView):
@@ -100,9 +109,9 @@ class AttributionView(views.APIView):
     def post(self, request, format=None):
         serializer = AttributionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        texts = texts_by_author(request.user, serializer.validated_data['group'])
+        counts = counts_by_author(request.user, serializer.validated_data['group'])
         try:
-            return Response(self.run_engine(texts, serializer.validated_data['body']))
+            return Response(self.run_engine(counts, serializer.validated_data['body']))
         except engine.EngineError as error:
             raise ParseError(str(error))
 

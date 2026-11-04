@@ -2,6 +2,7 @@
 
 Each candidate's rate of the corpus's most common words is turned into z-scores. The
 candidate whose z-scores are closest on average to the text's is the most likely author.
+Candidates are described by their word counts, which come from count_tokens.
 """
 import math
 from collections import Counter
@@ -10,7 +11,6 @@ import nltk
 
 FEATURE_COUNT = 50
 SIGNIFICANT_TOKEN_COUNT = 30
-CORPUS_TOKEN_COUNT = 10
 
 
 class EngineError(ValueError):
@@ -21,9 +21,13 @@ def tokenize(text):
     return [token.lower() for token in nltk.word_tokenize(text) if any(c.isalpha() for c in token)]
 
 
-def build_profile(texts_by_author):
+def count_tokens(text):
+    return dict(Counter(tokenize(text)))
+
+
+def build_profile(counts_by_author):
     """Works out what the two public functions below share: the features and their z-scores."""
-    counts = {author: Counter(tokenize(text)) for author, text in texts_by_author.items()}
+    counts = {author: Counter(count) for author, count in counts_by_author.items()}
     totals = {author: sum(count.values()) for author, count in counts.items()}
     # An author with no words has no rates to compare against.
     authors = [author for author, total in totals.items() if total]
@@ -34,7 +38,8 @@ def build_profile(texts_by_author):
     corpus = Counter()
     for author in authors:
         corpus.update(counts[author])
-    common = [word for word, _ in corpus.most_common(FEATURE_COUNT)]
+    # Ties break alphabetically, so the features don't depend on the order counts were stored in.
+    common = sorted(corpus, key=lambda word: (-corpus[word], word))[:FEATURE_COUNT]
 
     rates = {author: {word: counts[author][word] / totals[author] for word in common} for author in authors}
     statistics = {}
@@ -69,13 +74,13 @@ def closest_author(text_zscores, author_zscores):
     return min(author_zscores, key=delta)
 
 
-def find_author(texts_by_author, text):
-    statistics, author_zscores = build_profile(texts_by_author)
+def find_author(counts_by_author, text):
+    statistics, author_zscores = build_profile(counts_by_author)
     return closest_author(score_text(tokenize(text), statistics), author_zscores)
 
 
-def analyse(texts_by_author, text):
-    statistics, author_zscores = build_profile(texts_by_author)
+def analyse(counts_by_author, text):
+    statistics, author_zscores = build_profile(counts_by_author)
     raw_tokens = nltk.word_tokenize(text)
     tokens = [token.lower() for token in raw_tokens if any(c.isalpha() for c in token)]
     text_zscores = score_text(tokens, statistics)
@@ -84,11 +89,8 @@ def analyse(texts_by_author, text):
     significant = [word for word in statistics if word in present]
     return {
         'mostProbableAuthor': closest_author(text_zscores, author_zscores),
-        'corpusTokens': nltk.pos_tag(list(statistics))[:CORPUS_TOKEN_COUNT],
-        'anonymousTextTokens': [{'token': token, 'tag': tag} for token, tag in nltk.pos_tag(raw_tokens)],
         'tokensSignificantToAttribution': [
             {'token': word, 'partOfSpeech': tag, 'score': text_zscores[word]}
             for word, tag in nltk.pos_tag(significant)
         ][:SIGNIFICANT_TOKEN_COUNT],
-        'rawUserText': text,
     }

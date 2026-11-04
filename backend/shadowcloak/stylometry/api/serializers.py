@@ -37,7 +37,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Document
-        fields = "__all__"
+        exclude = ['token_counts']
         extra_kwargs = {'body': {'max_length': MAX_DOCUMENT_LENGTH}}
 
     def get_fields(self):

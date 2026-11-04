@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from stylometry import engine
+
 
 class Author(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -31,6 +33,8 @@ class Document(models.Model):
     title = models.CharField(max_length=240)
     description = models.TextField(max_length=999, blank=True)
     body = models.TextField()
+    # Always follows body, so attribution never has to re-read the text.
+    token_counts = models.JSONField(default=dict, editable=False)
     active = models.BooleanField(default=True)
     publication_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -38,6 +42,10 @@ class Document(models.Model):
 
     class Meta:
         unique_together = ('title', 'author',)
+
+    def save(self, *args, **kwargs):
+        self.token_counts = engine.count_tokens(self.body)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} by {self.author}"
