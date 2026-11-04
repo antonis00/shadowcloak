@@ -928,6 +928,7 @@ class DocumentFieldTests(TestCase):
         self.assertEqual(str(real.publication_date), '1815-12-23')
 
 
+@override_settings(SECURE_SSL_REDIRECT=False)
 class FrontendPageTests(SimpleTestCase):
     def test_serves_the_built_app(self):
         with tempfile.TemporaryDirectory() as folder:
